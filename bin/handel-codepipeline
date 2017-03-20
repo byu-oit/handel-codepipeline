@@ -4,6 +4,8 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const AWS = require('aws-sdk');
 const codePipeline = new AWS.CodePipeline({apiVersion: '2015-07-09'});
+AWS.config.update({region: 'us-west-2'}); //TODO - Generalize this to all regions later
+const cloudFormation = new AWS.CloudFormation({apiVersion: '2010-05-15'});
 
 console.log("Welcome to the Handel CodePipeline setup wizard");
 
@@ -120,11 +122,64 @@ function createHandelActionIfNotExists(handelWorkerUrl) {
 
 
 function createHandelWorkerIfNotExists(accountConfig) {
+    let stackName = 'handel-codepipeline-worker';
     let workerImageName = `${accountConfig.account_id}.dkr.ecr.${accountConfig.region}.amazonaws.com/handel-codepipeline-worker:latest`;
 
-    
+    const describeParams = {
+        StackName: stackName
+    };
 
-    console.log(`TODO - CREATE HANDEL WORKER FOR ACCOUNT ${accountConfig.account_id}`);
+    return cloudFormation.describeStacks(describeParams).promise()
+        .then(describeResult => {
+            console.log("Handel worker already exists");
+            let stack = describeResult.Stacks[0];
+            return stack;
+        })
+        .catch(err => {
+            if(err.code !== "ValidationError") { //Other error
+                throw err;
+            }
+
+            //Stack doesnt exist, so create it
+            console.log("Creating Handel worker in account");
+
+            let stackParameters = {
+                NumInstances: "1",
+                InstanceType: "t2.micro",
+                KeyName: "aws-credential-detector", //TODO - Change this later
+                AmiImageId: "ami-f173cc91",
+                PrivateSubnets: accountConfig.private_subnets.join(","),
+                PublicSubnets: accountConfig.public_subnets.join(","),
+                VpcId: accountConfig.vpc,
+                DataSubnets: accountConfig.data_subnets.join(","),
+                CidrIngress: accountConfig.on_prem_cidr,
+                WorkerImage: workerImageName,
+                SshBastionSg: accountConfig.ssh_bastion_sg
+            }
+            let templateBody = fs.readFileSync(`${__dirname}/../templates/handel-worker/handel-worker.yml`);
+
+            let createParams = {
+                StackName: stackName,
+                OnFailure: 'DELETE',
+                Parameters: stackParameters,
+                Capabilities: ["CAPABILITY_IAM"],
+                TemplateBody: templateBody,
+                TimeoutInMinutes: 30
+            };
+
+
+            return cloudFormation.createStack(createParams).promise()
+                .then(createResult => {
+                    let waitParams = {
+                        StackName: stackName
+                    };
+                    return cloudFormation.waitFor('stackCreateComplete', waitParams).promise()
+                        .then(waitResponse => {
+                            console.log("Created Handel worker in account");
+                            return waitResponse.Stacks[0];
+                        });
+                });
+        });
 }
 
 function createHandelWorkers(accountConfigs) {

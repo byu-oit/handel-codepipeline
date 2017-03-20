@@ -2,12 +2,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Handel Worker Cluster
 Parameters:
-  MinInstances:
-    Description: Minimum number of instances in the cluster
-    Type: Number
-    Default: 1
-  MaxInstances:
-    Description: Maximum number of instances in the cluster
+  NumInstances:
+    Description: Number of instances in the cluster
     Type: Number
     Default: 1
   InstanceType:
@@ -34,17 +30,17 @@ Parameters:
   AmiImageId:
     Description: The AMI to use
     Type: String
-  AsgSubnetIds:
-    Description: The list of subnet ids to deploy the cluster in
+  PrivateSubnets:
+    Description: The list of private subnets in the VPC
     Type: CommaDelimitedList
-  ElbSubnets:
-    Description: The list of subnet ids to deploy the cluster in
+  PublicSubnets:
+    Description: The list of public subnets in the VPC
     Type: CommaDelimitedList
   VpcId:
     Description: The ID of the VPC in which you are running
     Type: String
-  EfsMountTargetSubnets:
-    Description: A comma delimited list of subnets for the EFS mount targets
+  DataSubnets:
+    Description: The list of data subnets in the VPC
     Type: CommaDelimitedList
   CidrIngress:
     Description: The CIDR to use for ingress access from public traffic
@@ -86,7 +82,7 @@ Resources:
         Ref: EfsFileSystem
       SecurityGroups:
       - Ref: EfsMountTargetSecurityGroup
-      SubnetId: !Select ["0", !Ref EfsMountTargetSubnets]
+      SubnetId: !Select ["0", !Ref DataSubnets]
   EfsMountAvailB:
     Type: AWS::EFS::MountTarget
     Properties:
@@ -94,7 +90,7 @@ Resources:
         Ref: EfsFileSystem
       SecurityGroups:
       - Ref: EfsMountTargetSecurityGroup
-      SubnetId: !Select ["1", !Ref EfsMountTargetSubnets]
+      SubnetId: !Select ["1", !Ref DataSubnets]
   Ec2IamRole:
     Type: AWS::IAM::Role
     Properties:
@@ -169,17 +165,17 @@ Resources:
     Properties:
       Cooldown: 300
       DesiredCapacity:
-        Ref: MinInstances
+        Ref: NumInstances
       HealthCheckGracePeriod: 300
       HealthCheckType: EC2
       LaunchConfigurationName:
         Ref: Ec2LaunchConfiguration
       MaxSize:
-        Ref: MaxInstances
+        Ref: NumInstances
       MinSize:
-        Ref: MinInstances
+        Ref: NumInstances
       VPCZoneIdentifier:
-        Ref: AsgSubnetIds
+        Ref: PrivateSubnets
       LoadBalancerNames:
       - Ref: Elb
   ElbSecurityGroup:
@@ -223,7 +219,7 @@ Resources:
       SecurityGroups:
       - Ref: ElbSecurityGroup
       Subnets:
-        Ref: ElbSubnets
+        Ref: PublicSubnets
       Tags:
       - Key: Name
         Value:
