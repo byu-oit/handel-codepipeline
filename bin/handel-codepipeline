@@ -120,7 +120,11 @@ function createHandelActionIfNotExists(handelWorkerUrl) {
 
 
 function createHandelWorkerIfNotExists(accountConfig) {
+    let workerImageName = `${accountConfig.account_id}.dkr.ecr.${accountConfig.region}.amazonaws.com/handel-codepipeline-worker:latest`;
+
     
+
+    console.log(`TODO - CREATE HANDEL WORKER FOR ACCOUNT ${accountConfig.account_id}`);
 }
 
 function createHandelWorkers(accountConfigs) {
@@ -175,28 +179,27 @@ getAccountsForEnvs()
     })
     .then(accountConfigs => {
         //Create the handel workers in the accounts if necessary
-        console.log(accountConfigs);
-        //return createHandelWorkers(accountConfigs);
+        return createHandelWorkers(accountConfigs);
 
-        //Create job worker
-
-        //Create codepipeline action type if not exists
-
-        //Create code pipeline
-
-        //Register code pipeline with job worker
+        return accountConfigs;
     })
-    // .then(accountConfigs => {
-    //     //Read the handel yml file to see which environments are getting deployed to which accounts
-    //     return getAccountToEnvMappingsFromHandelFile(accountConfigs, handelFile);
-    //     //TODO  
-    // })
-    // .then(accountConfigs => {
-    //     //Create the code pipeline 
-    //     console.log(accountConfigs);
-    // });
-
-
+    .then(accountConfigs => {
+        //Create codePipeline action type if not exists
+        // return createHandelActionIfNotExists("http://fakeurl")
+        //     .then(response => {
+        //         return accountConfigs;
+        //     });
+    })
+    .then(accountConfigs => {
+        //Create CodePipelines with custom action type
+    })
+    .then(accountConfigs => {
+        //Register code pipeline with job worker
+        return accountConfigs;
+    })
+    .then(accountConfigs => {
+        //Report on finished creation
+    });
 
 //Get account configuration for app
     //ask three times for prod, stage, and test accounts (can be same)

@@ -1,0 +1,27 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Handel Worker Security Group
+Parameters:
+  CidrIngress:
+    Description: Name of the cluster to be created
+    Type: String
+  VpcId:
+    Description: ID of the VPC
+    Type: String
+Resources:
+  Ec2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: The security group for the ec2 instances
+      VpcId:
+        Ref: VpcId
+      SecurityGroupIngress:
+      - CidrIp: 
+          Ref: CidrIngress
+        FromPort: 22
+        ToPort: 22
+        IpProtocol: tcp
+Outputs:
+  SgId:
+    Description: The ID of the security group
+    Value: !Ref Ec2SecurityGroup

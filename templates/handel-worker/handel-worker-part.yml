@@ -2,11 +2,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Handel Worker Cluster
 Parameters:
-  Name:
-    Description: Name of the worker cluster to be created
-    Type: String
-  NumInstances:
-    Description: Number of instances in the cluster
+  MinInstances:
+    Description: Minimum number of instances in the cluster
+    Type: Number
+    Default: 1
+  MaxInstances:
+    Description: Maximum number of instances in the cluster
     Type: Number
     Default: 1
   InstanceType:
@@ -30,66 +31,26 @@ Parameters:
   KeyName:
     Description: The ssh key to assign to the nodes in the cluster.
     Type: AWS::EC2::KeyPair::KeyName
-  IngressCidr:
-    Description: The CIDR block to allow for SSH ingress
-    Type: String
   AmiImageId:
-    Description: The Amazon ECS optimized AMI image id
-    Type: String
-    Default: ami-f173cc91
-  UserData:
-    Description: Base-64 encoded bash script to execute on startup as part of the
-      instance config
+    Description: The AMI to use
     Type: String
   AsgSubnetIds:
     Description: The list of subnet ids to deploy the cluster in
     Type: CommaDelimitedList
-  DesiredCount:
-    Description: The desired count of running tasks
-    Type: Number
-  TaskDefinitionArn:
-    Description: The Task definition to use for the service
-    Type: String
-  MinimumHealthyPercentDeployment:
-    Description: The minimum percent of tasks to keep running during a deployment
-    Type: Number
-    Default: 50
   AlbSubnets:
     Description: The list of subnet ids to deploy the cluster in
     Type: CommaDelimitedList
-  ContainerName:
-    Description: The name of the container from the task definition
-    Type: String
-  ContainerPort:
-    Description: The port of your application in the container
-    Type: Number
   VpcId:
     Description: The ID of the VPC in which you are running
     Type: String
+  UserData:
+    Description: The Base64 encoded user UserData
+    Type: String
+  Ec2SecurityGroup:
+    Description: The ID of the Ec2 security group
+    Type: String
 Resources:
-  SecurityGroup:
-    Type: "AWS::EC2::SecurityGroup"
-    Properties: 
-      GroupDescription: 
-        Ref: Name
-      SecurityGroupIngress:
-      - CidrIp: 
-          Ref: IngressCidr
-        FromPort: 22
-        ToPort: 22
-        IpProtocol: tcp
-      - FromPort: 5000
-        ToPort: 5000
-        IpProtocol: tcp
-        SourceSecurityGroupId:
-          Ref: AlbSecurityGroup
-      Tags:
-        - Key: Name
-          Value:
-            Ref: Name
-      VpcId:
-        Ref: VpcId
-  IamRole:
+  Ec2IamRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -103,51 +64,50 @@ Resources:
           - sts:AssumeRole
       ManagedPolicyArns:
       - arn:aws:iam::aws:policy/AdministratorAccess
-  InstanceProfile:
+  Ec2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: "/"
       Roles:
-      - Ref: IamRole
-  LaunchConfiguration:
+      - Ref: Ec2IamRole
+
+  Ec2LaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       AssociatePublicIpAddress: false
       IamInstanceProfile:
-        Ref: InstanceProfile
+        Ref: Ec2InstanceProfile
       ImageId:
         Ref: AmiImageId
       InstanceMonitoring: false
       InstanceType:
         Ref: InstanceType
       SecurityGroups:
-      - Ref: SecurityGroup
-      UserData:
-        Ref: UserData
+      - Ref: Ec2SecurityGroup
+      UserData: !Ref UserData
       KeyName:
         Ref: KeyName
-  EcsAutoScalingGroup:
+  Ec2AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       Cooldown: 300
       DesiredCapacity:
-        Ref: NumInstances
+        Ref: MinInstances
       HealthCheckGracePeriod: 300
       HealthCheckType: EC2
       LaunchConfigurationName:
-        Ref: EcsLaunchConfiguration
+        Ref: Ec2LaunchConfiguration
       MaxSize:
-        Ref: NumInstances
+        Ref: MaxInstances
       MinSize:
-        Ref: NumInstances
+        Ref: MinInstances
       VPCZoneIdentifier:
         Ref: AsgSubnetIds
   Alb:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn: AlbSecurityGroup
     Properties:
-      Name:
-        Ref: ClusterName
+      Name: handel-codepipeline-worker
       Scheme: internet-facing
       LoadBalancerAttributes:
       - Key: idle_timeout.timeout_seconds
@@ -166,7 +126,18 @@ Resources:
       - IpProtocol: tcp
         FromPort: '80'
         ToPort: '80'
-        CidrIp: IngressCidr
+        CidrIp: 0.0.0.0/0
+  Ec2IngressFromAlb:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: AlbSecurityGroup
+    Properties:
+      GroupId:
+        Ref: Ec2SecurityGroup
+      IpProtocol: tcp
+      FromPort: '0'
+      ToPort: '65535'
+      SourceSecurityGroupId:
+        Ref: AlbSecurityGroup
   AlbListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
@@ -206,14 +177,13 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
-      Name:
-        Ref: Name
+      Name: handel-codepipeline-worker
       Port: 5000
       Protocol: HTTP
       UnhealthyThresholdCount: 2
       VpcId:
         Ref: VpcId
 Outputs:
-  AlbDnsName:
-    Description: The DNS name of the ALb
+  AlbDns:
+    Description: The DNS name of the ALB
     Value: !GetAtt Alb.DNSName
