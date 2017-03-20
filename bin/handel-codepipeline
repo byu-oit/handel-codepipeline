@@ -1,0 +1,223 @@
+#!/usr/bin/env node
+const inquirer = require('inquirer');
+const fs = require('fs');
+const yaml = require('js-yaml');
+const AWS = require('aws-sdk');
+const codePipeline = new AWS.CodePipeline({apiVersion: '2015-07-09'});
+
+console.log("Welcome to the Handel CodePipeline setup wizard");
+
+function loadYamlFile(filePath) {
+    try {
+        return yaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
+    }
+    catch(e) {
+        return null;
+    }
+}
+
+
+function inquirerValidateAWSAccountID(value) {
+    if(value.match(/^\d{12}$/)) {
+        return true;
+    }
+    return 'Please enter a valid AWS Account ID';
+}
+
+function getAccountsForEnvs() {
+    let questions = [
+        {
+            type: 'input',
+            name: 'prod',
+            message: 'What is the AWS Account ID you will use for your prod systems?',
+            validate: inquirerValidateAWSAccountID
+        },
+        {
+            type: 'input',
+            name: 'stage',
+            message: 'What is the AWS Account ID you will use for your stage systems?',
+            validate: inquirerValidateAWSAccountID
+        },       
+        {
+            type: 'input',
+            name: 'dev',
+            message: 'What is the AWS Account ID you will use for your development systems?',
+            validate: inquirerValidateAWSAccountID
+        }
+    ];
+    return inquirer.prompt(questions).then(function (answers) {
+        return answers;
+    });
+}
+
+function getConfigForAccounts(environments) {
+    let accountIds = {};
+    for(let envType in environments) {
+        let accountId = environments[envType];
+        if(!accountIds[accountId]) {
+            accountIds[accountId] = [];
+        }
+        accountIds[accountId].push(envType);
+    }
+
+    let questions = [];
+    for(let accountId in accountIds) {
+        questions.push({
+            type: 'input',
+            name: accountId,
+            message: `Provide the path to the account config file for the account ${accountId} (${accountIds[accountId].join(', ')})`
+        });
+    }
+    return inquirer.prompt(questions).then(function (answers) {
+        let accountConfigs = {};
+        for(let accountId in answers) {
+            let accountConfigPath = answers[accountId]
+            let accountConfig = loadYamlFile(accountConfigPath);
+            if(!accountConfig) {
+                console.log(`ERROR: Invalid account config file provided: ${accountConfigPath}`);
+                process.exit(1);
+            }
+            accountConfigs[accountId] = accountConfig;
+        }
+        
+        return accountConfigs;
+    });
+}
+
+function createHandelActionIfNotExists(handelWorkerUrl) {
+    let actionParams = {
+        "category": "Deploy",
+        "provider": "Handel",
+        "version": "1",
+        "settings": {
+            "entityUrlTemplate": `${handelWorkerUrl}/{Config:ProjectName}/`,
+            "executionUrlTemplate": `${handelWorkerUrl}/{Config:ProjectName}/lastSuccessfulBuild/{ExternalExecutionId}/`
+        },
+        "configurationProperties": [{
+            "name": "ProjectName",
+            "required": true,
+            "key": true,
+            "secret": false,
+            "queryable": false,
+            "description": "The name of the build project must be provided when this action is added to the pipeline.",
+            "type": "String"
+        }],
+        "inputArtifactDetails": {
+            "maximumCount": 1,
+            "minimumCount": 1
+        },
+        "outputArtifactDetails": {
+            "maximumCount": 0,
+            "minimumCount": 0
+        }
+    }
+    return codePipeline.createCustomActionType(actionParams).promise()
+        .then(createActionResponse => {
+            console.log(createActionResponse);
+            return createActionResponse;
+        });
+}
+
+
+function createHandelWorkerIfNotExists(accountConfig) {
+    
+}
+
+function createHandelWorkers(accountConfigs) {
+    let workerCreatePromises = [];
+
+    for(let accountId in accountConfigs) {
+        let accountConfig = accountConfigs[accountId];
+        workerCreatePromises.push(createHandelWorkerIfNotExists(accountConfig));
+    }
+
+    return Promise.all(workerCreatePromises);
+}
+
+// function getAccountToEnvMappingsFromHandelFile(accountConfigs, handelFile) {
+//     let accountToEnvMappings = {}
+//     for(let accountId in accountConfigs) {
+//         accountToEnvMappings[accountId] = []
+//     }
+
+//     for(let envName in handelFile.environments) {
+//         if(envName.startsWith("prod")) {
+//             accountToEnvMappings[]
+//         }
+//         else if(envName.startsWith("stage")) {
+
+//         }
+//         else if(envName.startsWith("dev")) {
+
+//         }
+//         else {
+//             console.log(`ERROR: This CodePipeline script on top of Handel only allows environments that start with 'dev', 'stage', or 'prod'`);
+//             process.exit(1);
+//         }
+//     }
+// }
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Main Script
+//////////////////////////////////////////////////////////////////////////////
+let handelFilePath = 'handel.yml';
+let handelFile = loadYamlFile(handelFilePath);
+if(!handelFile) {
+    console.log(`ERROR: Could not find ${handelFilePath} file in current working directory`);
+    process.exit(1);
+}
+
+getAccountsForEnvs()
+    .then(envAccounts => {
+        //Load the account-level configuration required by Handel
+        return getConfigForAccounts(envAccounts);
+    })
+    .then(accountConfigs => {
+        //Create the handel workers in the accounts if necessary
+        console.log(accountConfigs);
+        //return createHandelWorkers(accountConfigs);
+
+        //Create job worker
+
+        //Create codepipeline action type if not exists
+
+        //Create code pipeline
+
+        //Register code pipeline with job worker
+    })
+    // .then(accountConfigs => {
+    //     //Read the handel yml file to see which environments are getting deployed to which accounts
+    //     return getAccountToEnvMappingsFromHandelFile(accountConfigs, handelFile);
+    //     //TODO  
+    // })
+    // .then(accountConfigs => {
+    //     //Create the code pipeline 
+    //     console.log(accountConfigs);
+    // });
+
+
+
+//Get account configuration for app
+    //ask three times for prod, stage, and test accounts (can be same)
+        //Ask if they want to configure runscope or ghost inspector tests for that pipeline
+
+//Read their deployspec file
+    //'prod*' is a special file name that goes in prod accounts
+    //'stage*' is a special env name that goes in stage accounts
+    //'dev*' is a special env name that goes in dev accounts
+    //Everything else gets ignored (for now)
+
+//Check to see if the Handel action template is there already
+    //If not, create it
+        //Will need to ask for account config
+
+//Check to see if their code pipeline is there already
+    //Error out if it already is
+
+//Create code pipeline
+    //Source phase
+    //Include code build action
+    //Include Handel worker action
+        //This will deploy to all relevant envs in parallel (prod, stage, dev, etc.)
+    //Acceptance tests phase (if requested)

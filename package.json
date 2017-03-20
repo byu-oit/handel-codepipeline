@@ -1,0 +1,30 @@
+{
+  "name": "handel-codepipeline",
+  "version": "0.0.1",
+  "description": "Creates CodePipelines running Handel as the deploy action",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha 'test/**/*.js'",
+    "test-debug": "./node_modules/mocha/bin/mocha --debug-brk 'test/**/*.js'",
+    "test-coverage": "./node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- -- -u exports -R spec 'test/**/*-test.js'"
+  },
+  "bin": {
+    "handel-codepipeline": "./bin/handel-codepipeline"
+  },
+  "author": "David Woodruff",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "express": "^4.15.2",
+    "aws-sdk": "^2.9.0",
+    "inquirer": "^3.0.6",
+    "js-yaml": "3.7.0"
+  },
+  "devDependencies": {
+    "aws-sdk-mock": "^1.6.1",
+    "chai": "^3.5.0",
+    "eslint": "^3.15.0",
+    "eslint-plugin-mocha": "^4.8.0",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.7"
+  }
+}
