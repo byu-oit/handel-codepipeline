@@ -1,62 +1,129 @@
-// function getAccountToEnvMappingsFromHandelFile(accountConfigs, handelFile) {
-//     let accountToEnvMappings = {}
-//     for(let accountId in accountConfigs) {
-//         accountToEnvMappings[accountId] = []
-//     }
+const AWS = require('aws-sdk')
+const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
 
-//     for(let envName in handelFile.environments) {
-//         if(envName.startsWith("prod")) {
-//             accountToEnvMappings[]
-//         }
-//         else if(envName.startsWith("stage")) {
-
-//         }
-//         else if(envName.startsWith("dev")) {
-
-//         }
-//         else {
-//             console.log(`ERROR: This CodePipeline script on top of Handel only allows environments that start with 'dev', 'stage', or 'prod'`);
-//             process.exit(1);
-//         }
-//     }
-// }
-
-exports.getPipelineConfigInfo = function() {
-    //Questions
-        //What is your GitHub info? (username, repo, branch, token)
-        //Do you want slack notifications (get webhook)
-        //For each env type:
-            //Do you want runscope tests?
-            //Do you want ghost inspector tests?
-        //
+function getSourcePhase(phaseSpec) {
+    //TODO - THIS ISNT DONE YET
+    return {
+        name: phaseSpec.phase_name,
+        actions: [
+            {
+                name: phaseSpec.phase_name,
+                actionTypeId: {
+                    version: "1",
+                    category: "Source",
+                    owner: "AWS",
+                    provider: "S3"
+                },
+                configuration: {
+                    "S3Bucket": "awscodepipeline-demo-bucket",
+                    "S3ObjectKey": "aws-codepipeline-s3-aws-codedeploy_linux.zip"
+                },
+                inputArtifacts: [
+                ],
+                outputArtifacts: [
+                    {
+                        name: "MyApp"
+                    }
+                ],
+                runOrder: 1
+            }
+        ]
+    }
 }
 
+function getBuildPhase(phaseSpec) {
 
-exports.createCodePipeline = function(accountConfigs, handelFile, workerStacks) {
-    //Create pipeline (one per account)
-        //Create phases
-            //source
-            //build
-            //dev deploy (if applicable)
-            //runscope tests for dev (if applicable)
-            //ghost inspector tests for dev (if applicable)
-            //stage deploy (if applicable)
-            //manual action confirmation (if applicable)
-            //prod (if applicable)
-            //notify
+}
+
+function getDeployPhase(phaseSpec) {
+    // return {
+    //     name: "Beta",
+    //     actions: [
+    //         {
+    //             name: "CodePipelineDemoFleet",
+    //             actionTypeId: {
+    //                 version: "1",
+    //                 category: "Deploy",
+    //                 owner: "AWS",
+    //                 provider: "CodeDeploy"
+    //             },
+    //             configuration: {
+    //                 "ApplicationName": "CodePipelineDemoApplication",
+    //                 "DeploymentGroupName": "CodePipelineDemoFleet"
+    //             },
+    //             inputArtifacts: [
+    //                 {
+    //                     name: "MyApp"
+    //                 }
+    //             ],
+    //             outputArtifacts: [
+    //             ],
+    //             runOrder: 1
+    //         }
+    //     ]
+    // }
+}
+
+function getPhase(phaseSpec) {
+    let phaseType = phaseSpec.phase_type;
+    switch(phaseType) {
+        case "source":
+            return getSourcePhase(phaseSpec);
+        case "build":
+            return getBuildPhase(phaseSpec);
+        case "deploy":
+            return getDeployPhase(phaseSpec);
+        default:
+            throw new Error(`Unsupported phase type specified: ${phaseType}`);
+    }
     
-
 }
 
-//Read their deployspec file
-    //'prod*' is a special file name that goes in prod accounts
-    //'stage*' is a special env name that goes in stage accounts
-    //'dev*' is a special env name that goes in dev accounts
-    //Everything else gets ignored (for now)
+function createPipeline(accountId, pipelineDefinition, handelFile, workerStack) {
+    let pipelineName = `${handelFile.appName}`;
 
-//Create code pipeline
-    //Source phase
-    //Include code build action
-    //Include Handel worker action
-        //This will deploy to all relevant envs in parallel (prod, stage, dev, etc.)
-    //Acceptance tests phase (if requested)
+    let createParams = {
+        pipeline: {
+            version: 1,
+            name: pipelineName,
+            artifactStore: {
+                type: "S3",
+                location: `codepipeline-us-west-2-${accountId}`
+            },
+            roleArn: `arn:aws:iam::${accountId}:role/AWS-CodePipeline-Service`,
+            stages: []
+        }
+    };
+
+    let phasesSpec = pipelineDefinition.pipelines[accountId].phases;
+    for(let phaseSpec in phasesSpec) {
+        createParams.pipeline.stages.push(getPhase(phaseSpec));
+    }
+
+    return codePipeline.createPipeline(createParams).promise()
+        .then(result => {
+            console.log(result);
+            return result;
+        });
+}
+
+
+exports.createPipelines = function (handelCodePipelineFile, handelFile, workerStacks) {
+    let createPipelinePromises = [];
+    let returnPipelines = {};
+
+    for (let accountId in handelCodePipelineFile.pipelines) {
+        let pipelineDefinition = handelCodePipelineFile.pipelines[accountId];
+        let workerStack = workerStacks[accountId];
+        let createPipelinePromise = createPipeline(accountId, pipelineDefinition, handelFile, workerStack)
+            .then(pipeline => {
+                returnPipelines[accountId] = pipeline;
+            });
+        createPipelinePromises.push(createPipelinePromise);
+    }
+
+    return Promise.all(createPipelinePromises)
+        .then(createResult => {
+            return returnPipelines; //This is built-up dynamically above
+        });
+}
