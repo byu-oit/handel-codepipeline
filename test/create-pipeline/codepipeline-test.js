@@ -1,1 +1,0 @@
-const createCodePipeline = require('../../create-pipeline/codepipeline');

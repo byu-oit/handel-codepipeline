@@ -1,1 +1,0 @@
-const input = require('../../create-pipeline/input');

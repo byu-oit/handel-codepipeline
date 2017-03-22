@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 const AWS = require('aws-sdk');
 AWS.config.update({region: 'us-west-2'}); //TODO - Generalize this to all regions later
-const util = require('../create-pipeline/util');
-const createWorkers = require('../create-pipeline/create-workers');
-const createActions = require('../create-pipeline/create-actions');
-const createPipeline = require('../create-pipeline/create-codepipeline');
+const util = require('../create-pipeline/util/util');
+const workers = require('../create-pipeline/workers');
+const actions = require('../create-pipeline/actions');
+const codepipeline = require('../create-pipeline/codepipeline');
 const input = require('../create-pipeline/input');
 
 console.log("Welcome to the Handel CodePipeline setup wizard");
@@ -22,10 +22,10 @@ input.getAccountsForEnvs()
     })
     .then(accountConfigs => {
         //Create the handel workers in the accounts if necessary
-        return createWorkers.createHandelWorkers(accountConfigs)
+        return workers.createHandelWorkers(accountConfigs)
             .then(stacks => {
                 //Create code pipeline action type if not exists
-                return createActions.createHandelActions(accountConfigs, stacks)
+                return actions.createHandelActions(accountConfigs, stacks)
                     .then(createdActions => {
                         //Create code pipelines with custom action type  
                     })

@@ -1,1 +1,0 @@
-const createWorkers = require('../../create-pipeline/workers');

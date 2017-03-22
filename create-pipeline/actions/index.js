@@ -1,7 +1,6 @@
 const AWS = require('aws-sdk');
-const codePipeline = new AWS.CodePipeline({apiVersion: '2015-07-09'});
 
-function createHandelActionIfNotExists(handelWorkerUrl) {
+function createHandelActionIfNotExists(codePipeline, handelWorkerUrl) {
     let actionParams = {
         "category": "Deploy",
         "provider": "Handel",
@@ -35,6 +34,7 @@ function createHandelActionIfNotExists(handelWorkerUrl) {
 }
 
 exports.createHandelActions = function(accountConfigs, handelWorkerStacks) {
+    const codePipeline = new AWS.CodePipeline({apiVersion: '2015-07-09'});
     let actionCreatePromises = [];
 
     let returnCreatedActions = {};
@@ -42,7 +42,7 @@ exports.createHandelActions = function(accountConfigs, handelWorkerStacks) {
     for(let accountId in accountConfigs) {
         let handelWorkerDnsName = handelWorkerStacks[accountId].Outputs[0].OutputValue;
         let handelWorkerBaseUrl = `http://${handelWorkerDnsName}`;
-        let actionCreatePromise = createHandelActionIfNotExists(handelWorkerBaseUrl)
+        let actionCreatePromise = createHandelActionIfNotExists(codePipeline, handelWorkerBaseUrl)
             .then(createdAction => {
                 returnCreatedActions[accountId] = createdAction;
             })

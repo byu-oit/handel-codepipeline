@@ -1,0 +1,15 @@
+account_id: 555555555555
+region: us-west-2
+vpc: vpc-33333333
+public_subnets:
+- subnet-22222222
+- subnet-cccccccc
+private_subnets:
+- subnet-ffffffff
+- subnet-77777777
+data_subnets:
+- subnet-ffffffff
+- subnet-44444444
+ecs_ami: ami-00000000
+ssh_bastion_sg: sg-11111111
+on_prem_cidr: 0.0.0.0/16

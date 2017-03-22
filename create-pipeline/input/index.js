@@ -1,5 +1,5 @@
 const inquirer = require('inquirer');
-const util = require('./util');
+const util = require('../util/util');
 
 function inquirerValidateAWSAccountID(value) {
     if(value.match(/^\d{12}$/)) {
@@ -29,9 +29,7 @@ exports.getAccountsForEnvs = function() {
             validate: inquirerValidateAWSAccountID
         }
     ];
-    return inquirer.prompt(questions).then(function (answers) {
-        return answers;
-    });
+    return inquirer.prompt(questions);
 }
 
 exports.getConfigForAccounts = function(environments) {
@@ -52,18 +50,19 @@ exports.getConfigForAccounts = function(environments) {
             message: `Provide the path to the account config file for the account ${accountId} (${accountIds[accountId].join(', ')})`
         });
     }
-    return inquirer.prompt(questions).then(function (answers) {
-        let accountConfigs = {};
-        for(let accountId in answers) {
-            let accountConfigPath = answers[accountId]
-            let accountConfig = util.loadYamlFile(accountConfigPath);
-            if(!accountConfig) {
-                console.log(`ERROR: Invalid account config file provided: ${accountConfigPath}`);
-                process.exit(1);
+    return inquirer.prompt(questions)
+        .then(answers => {
+            let accountConfigs = {};
+            for(let accountId in answers) {
+                let accountConfigPath = answers[accountId]
+                let accountConfig = util.loadYamlFile(accountConfigPath);
+                if(!accountConfig) {
+                    console.log(`ERROR: Invalid account config file provided: ${accountConfigPath}`);
+                    process.exit(1);
+                }
+                accountConfigs[accountId] = accountConfig;
             }
-            accountConfigs[accountId] = accountConfig;
-        }
-        
-        return accountConfigs;
-    });
+            
+            return accountConfigs;
+        });
 }
