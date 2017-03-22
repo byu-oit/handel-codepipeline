@@ -21,6 +21,32 @@
 //     }
 // }
 
+exports.getPipelineConfigInfo = function() {
+    //Questions
+        //What is your GitHub info? (username, repo, branch, token)
+        //Do you want slack notifications (get webhook)
+        //For each env type:
+            //Do you want runscope tests?
+            //Do you want ghost inspector tests?
+        //
+}
+
+
+exports.createCodePipeline = function(accountConfigs, handelFile, workerStacks) {
+    //Create pipeline (one per account)
+        //Create phases
+            //source
+            //build
+            //dev deploy (if applicable)
+            //runscope tests for dev (if applicable)
+            //ghost inspector tests for dev (if applicable)
+            //stage deploy (if applicable)
+            //manual action confirmation (if applicable)
+            //prod (if applicable)
+            //notify
+    
+
+}
 
 //Read their deployspec file
     //'prod*' is a special file name that goes in prod accounts

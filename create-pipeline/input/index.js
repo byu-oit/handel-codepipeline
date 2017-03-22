@@ -1,68 +1,52 @@
 const inquirer = require('inquirer');
 const util = require('../util/util');
+const fs = require('fs');
+const os = require('os');
 
-function inquirerValidateAWSAccountID(value) {
-    if(value.match(/^\d{12}$/)) {
-        return true;
+function inquirerValidateFilePath(filePath) {
+    if(!fs.existsSync(filePath)) {
+        return `File path doesn't exist: ${filePath}`
     }
-    return 'Please enter a valid AWS Account ID';
+    return true;
 }
 
-exports.getAccountsForEnvs = function() {
+exports.getConfigFiles = function() {
     let questions = [
         {
             type: 'input',
-            name: 'prod',
-            message: 'What is the AWS Account ID you will use for your prod systems?',
-            validate: inquirerValidateAWSAccountID
+            name: 'handel',
+            message: "Please enter the path to the application's Handel config file", 
+            validate: inquirerValidateFilePath
         },
         {
             type: 'input',
-            name: 'stage',
-            message: 'What is the AWS Account ID you will use for your stage systems?',
-            validate: inquirerValidateAWSAccountID
-        },       
-        {
-            type: 'input',
-            name: 'dev',
-            message: 'What is the AWS Account ID you will use for your development systems?',
-            validate: inquirerValidateAWSAccountID
+            name: 'handelCodePipeline',
+            message: 'Please enter the path to the Handel-CodePipeline config file',
+            validate: inquirerValidateFilePath
         }
     ];
-    return inquirer.prompt(questions);
-}
-
-exports.getConfigForAccounts = function(environments) {
-    let accountIds = {};
-    for(let envType in environments) {
-        let accountId = environments[envType];
-        if(!accountIds[accountId]) {
-            accountIds[accountId] = [];
-        }
-        accountIds[accountId].push(envType);
-    }
-
-    let questions = [];
-    for(let accountId in accountIds) {
-        questions.push({
-            type: 'input',
-            name: accountId,
-            message: `Provide the path to the account config file for the account ${accountId} (${accountIds[accountId].join(', ')})`
-        });
-    }
     return inquirer.prompt(questions)
         .then(answers => {
-            let accountConfigs = {};
-            for(let accountId in answers) {
-                let accountConfigPath = answers[accountId]
-                let accountConfig = util.loadYamlFile(accountConfigPath);
-                if(!accountConfig) {
-                    console.log(`ERROR: Invalid account config file provided: ${accountConfigPath}`);
-                    process.exit(1);
-                }
-                accountConfigs[accountId] = accountConfig;
-            }
-            
-            return accountConfigs;
+            let configFiles = {};
+            configFiles.handel = util.loadYamlFile(answers.handel);
+            configFiles.handelCodePipeline = util.loadYamlFile(answers.handelCodePipeline);
+            return configFiles;
         });
+}
+
+exports.getAccountConfigs = function(handelCodePipelineFile) {
+    let accountConfigs = {};
+
+    for(let accountId in handelCodePipelineFile.pipelines) {
+        let accountConfigFilePath = `${os.homedir()}/.handel-codepipeline/${accountId}.yml`
+        if(fs.existsSync(accountConfigFilePath)) {
+            let accountConfig = util.loadYamlFile(accountConfigFilePath);
+            accountConfigs[accountId] = accountConfig;
+        }
+        else {
+            throw new Error(`Expected account config file at ${accountConfigFilePath} for ${accountId}`);
+        }
+    }
+
+    return accountConfigs;
 }

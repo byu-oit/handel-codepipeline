@@ -8,28 +8,20 @@ const codepipeline = require('../create-pipeline/codepipeline');
 const input = require('../create-pipeline/input');
 
 console.log("Welcome to the Handel CodePipeline setup wizard");
-let handelFilePath = 'handel.yml';
-let handelFile = util.loadYamlFile(handelFilePath);
-if(!handelFile) {
-    console.log(`ERROR: Could not find ${handelFilePath} file in current working directory`);
-    process.exit(1);
-}
-
-input.getAccountsForEnvs()
-    .then(envAccounts => {
-        //Load the account-level configuration required by Handel
-        return input.getConfigForAccounts(envAccounts);
-    })
-    .then(accountConfigs => {
-        //Create the handel workers in the accounts if necessary
+input.getConfigFiles()
+    .then(handelConfigs => {
+        let handelFile = handelConfigs.handel;
+        let handelCodePipelineFile = handelConfigs.handelCodePipeline;
+        let accountConfigs = input.getAccountConfigs(handelCodePipelineFile)
         return workers.createHandelWorkers(accountConfigs)
-            .then(stacks => {
+            .then(handelWorkerStacks => {
                 //Create code pipeline action type if not exists
-                return actions.createHandelActions(accountConfigs, stacks)
+                return actions.createHandelActions(accountConfigs, handelWorkerStacks)
                     .then(createdActions => {
                         //Create code pipelines with custom action type  
                     })
-                    .then(response => {
+                    .then(createdPipelines => {
+                        console.log(createdPipelines);
                         //Register code pipeline with job worker
                     });
             });
