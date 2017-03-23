@@ -1,121 +1,156 @@
-const AWS = require('aws-sdk')
-const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
+const AWS = require('aws-sdk');
+const s3Calls = require('../aws/s3-calls');
 
-function getSourcePhase(phaseSpec) {
-    //TODO - THIS ISNT DONE YET
+function getSourcePhase(prevPhaseSpec, phaseSpec) {
     return {
         name: phaseSpec.phase_name,
         actions: [
             {
+                inputArtifacts: [],
                 name: phaseSpec.phase_name,
                 actionTypeId: {
-                    version: "1",
                     category: "Source",
-                    owner: "AWS",
-                    provider: "S3"
+                    owner: "ThirdParty",
+                    version: "1",
+                    provider: "GitHub"
                 },
-                configuration: {
-                    "S3Bucket": "awscodepipeline-demo-bucket",
-                    "S3ObjectKey": "aws-codepipeline-s3-aws-codedeploy_linux.zip"
-                },
-                inputArtifacts: [
-                ],
                 outputArtifacts: [
                     {
-                        name: "MyApp"
+                        name: `Output_${phaseSpec.phase_name}`
                     }
                 ],
+                configuration: {
+                    Owner: phaseSpec.owner,
+                    Repo: phaseSpec.repo,
+                    Branch: phaseSpec.branch,
+                    OAuthToken: phaseSpec.access_token
+                },
                 runOrder: 1
             }
         ]
     }
 }
 
-function getBuildPhase(phaseSpec) {
+function getBuildPhase(prevPhaseSpec, phaseSpec, handelFile) {
+    if (!prevPhaseSpec) {
+        throw new Error("Build phase has no previous phase from which to consume artifacts");
+    }
 
+    return {
+        name: phaseSpec.phase_name,
+        actions: [
+            {
+                inputArtifacts: [
+                    {
+                        name: `Output_${prevPhaseSpec.phase_name}`
+                    }
+                ],
+                name: phaseSpec.phase_name,
+                actionTypeId: {
+                    category: "Build",
+                    owner: "AWS",
+                    version: "1",
+                    provider: "CodeBuild"
+                },
+                outputArtifacts: [
+                    {
+                        name: `Output_${phaseSpec.phase_name}`
+                    }
+                ],
+                configuration: {
+                    ProjectName: handelFile.name
+                },
+                runOrder: 1
+            }
+        ]
+    }
 }
 
-function getDeployPhase(phaseSpec) {
-    // return {
-    //     name: "Beta",
-    //     actions: [
-    //         {
-    //             name: "CodePipelineDemoFleet",
-    //             actionTypeId: {
-    //                 version: "1",
-    //                 category: "Deploy",
-    //                 owner: "AWS",
-    //                 provider: "CodeDeploy"
-    //             },
-    //             configuration: {
-    //                 "ApplicationName": "CodePipelineDemoApplication",
-    //                 "DeploymentGroupName": "CodePipelineDemoFleet"
-    //             },
-    //             inputArtifacts: [
-    //                 {
-    //                     name: "MyApp"
-    //                 }
-    //             ],
-    //             outputArtifacts: [
-    //             ],
-    //             runOrder: 1
-    //         }
-    //     ]
-    // }
-}
+// function getDeployPhase(prevPhaseSpec, phaseSpec, handelFile) {
+//     return {
+//         "name": phaseSpec.phase_name,
+//         "actions": [
+//             {
+//                 "name": phaseSpec.phase_name,
+//                 "actionTypeId": {
+//                     "category": "Deploy",
+//                     "owner": "Custom",
+//                     "version": "1",
+//                     "provider": "Handel"
+//                 },
+//                 "inputArtifacts": [
+//                     {
+//                         "name": `Output_${prevPhaseSpec.phase_name}`
+//                     }
+//                 ],
+//                 "configuration": {
+//                     "ProjectName": handelFile.name
+//                 },
+//                 "runOrder": 1
+//             }
+//         ]
+//     }
+// }
 
-function getPhase(phaseSpec) {
+function getPhase(prevPhaseSpec, phaseSpec, handelFile) {
     let phaseType = phaseSpec.phase_type;
-    switch(phaseType) {
+    switch (phaseType) {
         case "source":
-            return getSourcePhase(phaseSpec);
+            return getSourcePhase(prevPhaseSpec, phaseSpec);
         case "build":
-            return getBuildPhase(phaseSpec);
-        case "deploy":
-            return getDeployPhase(phaseSpec);
+            return getBuildPhase(prevPhaseSpec, phaseSpec, handelFile);
+        // case "deploy":
+        //     return getDeployPhase(prevPhaseSpec, phaseSpec, handelFile);
         default:
             throw new Error(`Unsupported phase type specified: ${phaseType}`);
     }
-    
+
 }
 
-function createPipeline(accountId, pipelineDefinition, handelFile, workerStack) {
-    let pipelineName = `${handelFile.appName}`;
+function createPipeline(codePipeline, accountId, pipelineDefinition, handelFile, workerStack) {
+    let codePipelineBucketName = `codepipeline-us-west-2-${accountId}`
+    return s3Calls.createBucketIfNotExists(codePipelineBucketName)
+        .then(bucket => {
+            let createParams = {
+                pipeline: {
+                    version: 1,
+                    name: handelFile.name,
+                    artifactStore: {
+                        type: "S3",
+                        location: codePipelineBucketName
+                    },
+                    roleArn: `arn:aws:iam::${accountId}:role/AWS-CodePipeline-Service`,
+                    stages: []
+                }
+            };
 
-    let createParams = {
-        pipeline: {
-            version: 1,
-            name: pipelineName,
-            artifactStore: {
-                type: "S3",
-                location: `codepipeline-us-west-2-${accountId}`
-            },
-            roleArn: `arn:aws:iam::${accountId}:role/AWS-CodePipeline-Service`,
-            stages: []
-        }
-    };
-
-    let phasesSpec = pipelineDefinition.pipelines[accountId].phases;
-    for(let phaseSpec in phasesSpec) {
-        createParams.pipeline.stages.push(getPhase(phaseSpec));
-    }
-
-    return codePipeline.createPipeline(createParams).promise()
-        .then(result => {
-            console.log(result);
-            return result;
+            let phasesSpec = pipelineDefinition.phases;
+            for (let i = 0; i < phasesSpec.length; i++) {
+                let prevPhaseSpec = null;
+                if (phasesSpec[i - 1]) {
+                    prevPhaseSpec = phasesSpec[i - 1];
+                }
+                let phaseSpec = phasesSpec[i];
+                createParams.pipeline.stages.push(getPhase(prevPhaseSpec, phaseSpec, handelFile));
+            }
+            
+            return codePipeline.createPipeline(createParams).promise()
+                .then(createResult => {
+                    return createResult.pipeline;
+                });
         });
 }
 
 
 exports.createPipelines = function (handelCodePipelineFile, handelFile, workerStacks) {
+    const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
     let createPipelinePromises = [];
     let returnPipelines = {};
 
     for (let accountId in handelCodePipelineFile.pipelines) {
         let pipelineDefinition = handelCodePipelineFile.pipelines[accountId];
         let workerStack = workerStacks[accountId];
-        let createPipelinePromise = createPipeline(accountId, pipelineDefinition, handelFile, workerStack)
+        let createPipelinePromise = createPipeline(codePipeline, accountId, pipelineDefinition, handelFile, workerStack)
             .then(pipeline => {
                 returnPipelines[accountId] = pipeline;
             });
