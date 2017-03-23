@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const s3Calls = require('../aws/s3-calls');
+const codeBuildCalls = require('../aws/codebuild-calls');
 
 function getSourcePhase(prevPhaseSpec, phaseSpec) {
     return {
@@ -107,37 +108,61 @@ function getPhase(prevPhaseSpec, phaseSpec, handelFile) {
 
 }
 
+function createCodeBuildProject(accountId, projectName, pipelineDefinition) {
+    let buildPhase = null;
+    for(let phaseSpec of pipelineDefinition.phases) {
+        if(phaseSpec.phase_type === 'build') {
+            buildPhase = phaseSpec;
+            break;
+        }
+    }
+
+    if(!buildPhase) {
+        throw new Error("No build phase found in pipeline definition file");
+    }
+
+    return codeBuildCalls.createProject(projectName, buildPhase.build_image, buildPhase.environment_variables, accountId);
+}
+
+function createCodePipelineProject(codePipeline, accountId, projectName, codePipelineBucketName, pipelineDefinition, handelFile) {
+    let createParams = {
+        pipeline: {
+            version: 1,
+            name: projectName,
+            artifactStore: {
+                type: "S3",
+                location: codePipelineBucketName
+            },
+            roleArn: `arn:aws:iam::${accountId}:role/AWS-CodePipeline-Service`,
+            stages: []
+        }
+    };
+
+    let phasesSpec = pipelineDefinition.phases;
+    for (let i = 0; i < phasesSpec.length; i++) {
+        let prevPhaseSpec = null;
+        if (phasesSpec[i - 1]) {
+            prevPhaseSpec = phasesSpec[i - 1];
+        }
+        let phaseSpec = phasesSpec[i];
+        createParams.pipeline.stages.push(getPhase(prevPhaseSpec, phaseSpec, handelFile));
+    }
+    
+    return codePipeline.createPipeline(createParams).promise()
+        .then(createResult => {
+            return createResult.pipeline;
+        });
+}
+
 function createPipeline(codePipeline, accountId, pipelineDefinition, handelFile, workerStack) {
     let codePipelineBucketName = `codepipeline-us-west-2-${accountId}`
+    let projectName = handelFile.name;
     return s3Calls.createBucketIfNotExists(codePipelineBucketName)
         .then(bucket => {
-            let createParams = {
-                pipeline: {
-                    version: 1,
-                    name: handelFile.name,
-                    artifactStore: {
-                        type: "S3",
-                        location: codePipelineBucketName
-                    },
-                    roleArn: `arn:aws:iam::${accountId}:role/AWS-CodePipeline-Service`,
-                    stages: []
-                }
-            };
-
-            let phasesSpec = pipelineDefinition.phases;
-            for (let i = 0; i < phasesSpec.length; i++) {
-                let prevPhaseSpec = null;
-                if (phasesSpec[i - 1]) {
-                    prevPhaseSpec = phasesSpec[i - 1];
-                }
-                let phaseSpec = phasesSpec[i];
-                createParams.pipeline.stages.push(getPhase(prevPhaseSpec, phaseSpec, handelFile));
-            }
-            
-            return codePipeline.createPipeline(createParams).promise()
-                .then(createResult => {
-                    return createResult.pipeline;
-                });
+            return createCodeBuildProject(accountId, projectName, pipelineDefinition);
+        })
+        .then(codeBuildProjecct => {
+            return createCodePipelineProject(codePipeline, accountId, projectName, codePipelineBucketName, pipelineDefinition, handelFile);
         });
 }
 

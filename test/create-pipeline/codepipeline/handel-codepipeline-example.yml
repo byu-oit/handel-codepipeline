@@ -13,3 +13,6 @@ pipelines:
     - phase_type: build
       action_type: codebuild
       phase_name: Build
+      build_image: aws/codebuild/python:3.5.2
+      environment_variables:
+        ENV_NAME: env_value

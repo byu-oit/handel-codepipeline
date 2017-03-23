@@ -1,10 +1,11 @@
 const yaml = require('js-yaml');
 const fs = require('fs');
+const sinon = require('sinon');
 const codepipeline = require('../../../create-pipeline/codepipeline');
 const s3Calls = require('../../../create-pipeline/aws/s3-calls');
+const codeBuildCalls = require('../../../create-pipeline/aws/codebuild-calls');
 const expect = require('chai').expect;
 const AWS = require('aws-sdk-mock');
-const sinon = require('sinon');
 
 function loadYamlFile(filePath) {
     try {
@@ -38,6 +39,7 @@ describe('codepipeline module', function() {
             };
 
             let createBucketStub = sandbox.stub(s3Calls, 'createBucketIfNotExists').returns(Promise.resolve({}))
+            let createProjectStub = sandbox.stub(codeBuildCalls, 'createProject').returns(Promise.resolve({}));
             AWS.mock('CodePipeline', 'createPipeline', Promise.resolve({
                 pipeline: {}
             }));
@@ -45,6 +47,7 @@ describe('codepipeline module', function() {
             return codepipeline.createPipelines(handelCodePipelineFile, handelFile, workerStacks)
                 .then(createdPipelines => {
                     expect(createBucketStub.calledOnce).to.be.true;
+                    expect(createProjectStub.calledOnce).to.be.true;
                     expect(createdPipelines[accountId]).to.deep.equal({});
                 });
         });
