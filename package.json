@@ -14,8 +14,9 @@
   "author": "David Woodruff",
   "license": "Apache-2.0",
   "dependencies": {
-    "express": "^4.15.2",
     "aws-sdk": "^2.9.0",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
     "inquirer": "^3.0.6",
     "js-yaml": "3.7.0"
   },

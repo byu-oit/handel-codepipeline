@@ -25,20 +25,31 @@ function createHandelActionIfNotExists(codePipeline, handelWorkerUrl) {
                 let actionParams = {
                     "category": "Deploy",
                     "provider": "Handel",
-                    "version": "1",
+                    "version": "v2",
                     "settings": {
-                        "entityUrlTemplate": `${handelWorkerUrl}/{Config:ProjectName}/`,
-                        "executionUrlTemplate": `${handelWorkerUrl}/{Config:ProjectName}/lastSuccessfulBuild/{ExternalExecutionId}/`
+                        "entityUrlTemplate": `${handelWorkerUrl}/project/{Config:ProjectName}`,
+                        "executionUrlTemplate": `${handelWorkerUrl}/project/{Config:ProjectName}/log/{ExternalExecutionId}`
                     },
-                    "configurationProperties": [{
-                        "name": "ProjectName",
-                        "required": true,
-                        "key": true,
-                        "secret": false,
-                        "queryable": false,
-                        "description": "The name of the build project must be provided when this action is added to the pipeline.",
-                        "type": "String"
-                    }],
+                    "configurationProperties": [
+                        {
+                            "name": "ProjectName",
+                            "required": true,
+                            "key": true,
+                            "secret": false,
+                            "queryable": false,
+                            "description": "The name of the build project must be provided when this action is added to the pipeline.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "EnvironmentsToDeploy",
+                            "required": true,
+                            "key": false,
+                            "secret": false,
+                            "queryable": false,
+                            "description": "The comma-separated list of environments from the Handel file to be deployed in this phase.",
+                            "type": "String"
+                        }
+                    ],
                     "inputArtifactDetails": {
                         "maximumCount": 1,
                         "minimumCount": 1

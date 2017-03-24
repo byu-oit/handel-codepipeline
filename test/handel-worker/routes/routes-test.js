@@ -1,5 +1,5 @@
 const expect = require('chai').expect;
-const routes = require('../../../handel-worker/routes/routes');
+const routes = require('../../../handel-worker/routes');
 
 describe('routes', function() {
     describe('index', function() {

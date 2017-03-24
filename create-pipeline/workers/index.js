@@ -55,7 +55,7 @@ function createStack(cloudFormation, stackName, stackParameters, templateBody) {
 }
 
 function createHandelWorkerStack(cloudFormation, stackName, accountConfig) {
-    let workerImageName = `${accountConfig.account_id}.dkr.ecr.${accountConfig.region}.amazonaws.com/handel-codepipeline-worker:latest`;
+    let workerImageName = `${accountConfig.account_id}.dkr.ecr.${accountConfig.region}.amazonaws.com/handel-codepipeline-worker`;
     let stackParameters = [
         getCloudFormationParameter("NumInstances", "1"),
         getCloudFormationParameter("InstanceType", "t2.micro"),

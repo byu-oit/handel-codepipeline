@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const s3Calls = require('../aws/s3-calls');
 const codeBuildCalls = require('../aws/codebuild-calls');
 
-function getSourcePhase(prevPhaseSpec, phaseSpec) {
+function getSourcePhase(phaseSpec) {
     return {
         name: phaseSpec.phase_name,
         actions: [
@@ -32,9 +32,9 @@ function getSourcePhase(prevPhaseSpec, phaseSpec) {
     }
 }
 
-function getBuildPhase(prevPhaseSpec, phaseSpec, handelFile) {
-    if (!prevPhaseSpec) {
-        throw new Error("Build phase has no previous phase from which to consume artifacts");
+function getBuildPhase(sourcePhaseSpec, phaseSpec, handelFile) {
+    if (!sourcePhaseSpec) {
+        throw new Error("Build phase has no Source phase from which to consume artifacts");
     }
 
     return {
@@ -43,7 +43,7 @@ function getBuildPhase(prevPhaseSpec, phaseSpec, handelFile) {
             {
                 inputArtifacts: [
                     {
-                        name: `Output_${prevPhaseSpec.phase_name}`
+                        name: `Output_${sourcePhaseSpec.phase_name}`
                     }
                 ],
                 name: phaseSpec.phase_name,
@@ -67,41 +67,44 @@ function getBuildPhase(prevPhaseSpec, phaseSpec, handelFile) {
     }
 }
 
-// function getDeployPhase(prevPhaseSpec, phaseSpec, handelFile) {
-//     return {
-//         "name": phaseSpec.phase_name,
-//         "actions": [
-//             {
-//                 "name": phaseSpec.phase_name,
-//                 "actionTypeId": {
-//                     "category": "Deploy",
-//                     "owner": "Custom",
-//                     "version": "1",
-//                     "provider": "Handel"
-//                 },
-//                 "inputArtifacts": [
-//                     {
-//                         "name": `Output_${prevPhaseSpec.phase_name}`
-//                     }
-//                 ],
-//                 "configuration": {
-//                     "ProjectName": handelFile.name
-//                 },
-//                 "runOrder": 1
-//             }
-//         ]
-//     }
-// }
+function getDeployPhase(buildPhaseSpec, phaseSpec, handelFile) {
+    //TODO - Validate the envs are in the handel file
 
-function getPhase(prevPhaseSpec, phaseSpec, handelFile) {
+    return {
+        "name": phaseSpec.phase_name,
+        "actions": [
+            {
+                "name": phaseSpec.phase_name,
+                "actionTypeId": {
+                    "category": "Deploy",
+                    "owner": "Custom",
+                    "version": "v2",
+                    "provider": "Handel"
+                },
+                "inputArtifacts": [
+                    {
+                        "name": `Output_${buildPhaseSpec.phase_name}`
+                    }
+                ],
+                "configuration": {
+                    "ProjectName": handelFile.name,
+                    "EnvironmentsToDeploy": phaseSpec.envs.join(",")
+                },
+                "runOrder": 1
+            }
+        ]
+    }
+}
+
+function getPhase(sourcePhaseSpec, buildPhaseSpec, phaseSpec, handelFile) {
     let phaseType = phaseSpec.phase_type;
     switch (phaseType) {
         case "source":
-            return getSourcePhase(prevPhaseSpec, phaseSpec);
+            return getSourcePhase(phaseSpec);
         case "build":
-            return getBuildPhase(prevPhaseSpec, phaseSpec, handelFile);
-        // case "deploy":
-        //     return getDeployPhase(prevPhaseSpec, phaseSpec, handelFile);
+            return getBuildPhase(sourcePhaseSpec, phaseSpec, handelFile);
+        case "deploy":
+            return getDeployPhase(buildPhaseSpec, phaseSpec, handelFile);
         default:
             throw new Error(`Unsupported phase type specified: ${phaseType}`);
     }
@@ -139,13 +142,23 @@ function createCodePipelineProject(codePipeline, accountId, projectName, codePip
     };
 
     let phasesSpec = pipelineDefinition.phases;
-    for (let i = 0; i < phasesSpec.length; i++) {
-        let prevPhaseSpec = null;
-        if (phasesSpec[i - 1]) {
-            prevPhaseSpec = phasesSpec[i - 1];
-        }
+    //Add source phase (required)
+    let sourcePhaseSpec = phasesSpec[0];
+    if(!sourcePhaseSpec || sourcePhaseSpec.phase_type !== 'source') {
+        throw new Error("Source phase is required and must be the first phase of the pipeline");
+    }
+    createParams.pipeline.stages.push(getPhase(null, null, sourcePhaseSpec, handelFile));
+    //Add build phase (required)
+    let buildPhaseSpec = phasesSpec[1];
+    if(!buildPhaseSpec || buildPhaseSpec.phase_type !== 'build') {
+        throw new Error("Build phase is required and must be the second phase of the pipeline");
+    }
+    createParams.pipeline.stages.push(getPhase(sourcePhaseSpec, null, buildPhaseSpec, handelFile));
+
+    //Add remaining phases (if any)
+    for (let i = 2; i < phasesSpec.length; i++) {
         let phaseSpec = phasesSpec[i];
-        createParams.pipeline.stages.push(getPhase(prevPhaseSpec, phaseSpec, handelFile));
+        createParams.pipeline.stages.push(getPhase(sourcePhaseSpec, buildPhaseSpec, phaseSpec, handelFile));
     }
     
     return codePipeline.createPipeline(createParams).promise()

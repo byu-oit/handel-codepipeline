@@ -7,13 +7,12 @@ exports.healthcheck = function (req, res) {
 }
 
 /**
- * Register this worker to perform deploys for a new CodePipeline
+ * List the executions for a project
  * 
  * @param req - Express request object
  * @param res - Express response object
  */
-exports.register = function(req, res) {
-    //TODO - Require AWS keypair to validate that the user is authorized to register (this will be a public endpoint)
+exports.projectView = function(req, res) {
     res.send('NOT IMPLEMENTED');
 }
 
@@ -25,5 +24,8 @@ exports.register = function(req, res) {
  */
 exports.streamLogFile = function (req, res) {
     //TODO Should this be open to anyone (no secure logs, only accessible from BYU CIDR, no auth initially?)
+    
+    //Stream out log file 
+    
     res.send('NOT IMPLEMENTED');
 }
