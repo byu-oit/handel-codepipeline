@@ -18,7 +18,8 @@
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
     "inquirer": "^3.0.6",
-    "js-yaml": "3.7.0"
+    "js-yaml": "3.7.0",
+    "handel": "git://github.com/byu-oit-appdev/handel.git#master"
   },
   "devDependencies": {
     "aws-sdk-mock": "^1.6.1",

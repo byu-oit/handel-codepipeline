@@ -27,20 +27,7 @@ describe('routes', function() {
             routes.healthcheck(req, res);
         });
     });
-
-    describe('register', function() {
-        it('should allow you to register a CodePipeline to this worker', function(done) {
-            let req = {}
-            let res = {
-                send: function(body) {
-                    expect(body).to.equal('NOT IMPLEMENTED');
-                    done();
-                }
-            }
-            routes.register(req, res);
-        });
-    });
-
+    
     describe('streamLogFile', function() {
         it('should allow you to view log files for a deploy', function(done) {
             let req = {}
