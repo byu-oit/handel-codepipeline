@@ -1,4 +1,4 @@
-const util = require('../../../create-pipeline/util/util');
+const util = require('../../../lib/util/util');
 const expect = require('chai').expect;
 
 describe('util module', function() {

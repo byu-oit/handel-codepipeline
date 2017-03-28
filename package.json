@@ -14,14 +14,9 @@
   "author": "David Woodruff",
   "license": "Apache-2.0",
   "dependencies": {
-    "adm-zip": "^0.4.7",
     "aws-sdk": "^2.9.0",
-    "body-parser": "^1.17.1",
-    "express": "^4.15.2",
-    "handel": "git://github.com/byu-oit-appdev/handel.git#master",
     "inquirer": "^3.0.6",
     "js-yaml": "3.7.0",
-    "s3": "^4.4.0",
     "winston": "^2.3.1"
   },
   "devDependencies": {

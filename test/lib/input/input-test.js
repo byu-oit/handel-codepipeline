@@ -1,9 +1,9 @@
-const input = require('../../../create-pipeline/input');
+const input = require('../../../lib/input');
 const sinon = require('sinon');
 const inquirer = require('inquirer');
 const expect = require('chai').expect;
 const fs = require('fs');
-const util = require('../../../create-pipeline/util/util');
+const util = require('../../../lib/util/util');
 
 describe('input module', function() {
     let sandbox;
