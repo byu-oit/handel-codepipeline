@@ -1,8 +1,10 @@
 const AWS = require('aws-sdk');
 const handel = require('handel');
+const winston = require('winston');
+const fs = require('fs');
+const util = require('../util/util');
 
 function pollForJobs(codePipeline) {
-    console.log("Polling for jobs");
     var createParams = {
         actionTypeId: {
             version: "v2", 
@@ -14,24 +16,24 @@ function pollForJobs(codePipeline) {
     };
     return codePipeline.pollForJobs(createParams).promise()
         .then(pollResults => {
-            console.log(pollResults.jobs[0].data);
             return pollResults.jobs;
         });
 }
 
 function reportJobStart(codePipeline, job) {
+    winston.info(`Reserving job ${job.id}`);
     var reportParams = {
         jobId: job.id,
         nonce: job.nonce
     };
     return codePipeline.acknowledgeJob(reportParams).promise()
         .then(reportResult => {
-            console.log(`Reserved job ${job.id}`);
-            return reportResult;
+            winston.info(`Reserved job ${job.id}`);
+            return job;
         })
         .catch(err => {
             if(err.code === 'InvalidNonceException') {
-                console.log(`Job ${job.id} was already reserved`);
+                winston.warn(`Job ${job.id} was already reserved`);
                 return null;
             }
             throw err;
@@ -50,56 +52,100 @@ function acknowledgeJobs(codePipeline, jobs) {
             let reservedJobs = [];
             for(let job of jobs) {
                 if(job) {
-                    reservedJobs.push[jobs];
+                    reservedJobs.push(job);
                 }
             }
             return reservedJobs;
         });
 }
 
-
-
-function reportJobProgress(codePipeline, jobs) {
-
-}
-
 function reportJobSuccess(codePipeline, job) {
-    var params = {
-        jobId: job.id,
-        currentRevision: {
-            changeIdentifier: 'STRING_VALUE', /* required */
-            revision: 'STRING_VALUE', /* required */
-            created: new Date || 'Wed Dec 31 1969 16:00:00 GMT-0800 (PST)' || 123456789,
-            revisionSummary: 'STRING_VALUE'
-        },
-        executionDetails: {
-            externalExecutionId: 'STRING_VALUE',
-            percentComplete: 0,
-            summary: `Successfully deployed the environments ${job.data.actionConfiguration.configuration.EnvironmentsToDeploy}`
-        }
+    var reportParams = {
+        jobId: job.id
     };
-    return codePipeline.putJobSuccessResult(params).promise()
+    winston.info(`Reporting success for job ${job.id}`);
+    return codePipeline.putJobSuccessResult(reportParams).promise()
         .then(reportSuccess => {
-
+            winston.info(`Reported success for job ${job.id}`);
+            return reportSuccess;
         });
 }
 
-function reportJobFailure(codePipeline, job) {
-    
+function reportJobFailure(codePipeline, job, message) {
+    var reportParams = {
+        failureDetails: {
+            message: message,
+            type: 'JobFailed'
+        },
+        jobId: job.id
+    };
+    winston.info(`Reporting failure for job ${job.id}`);
+    return codePipeline.putJobFailureResult(reportParams).promise()
+        .then(reportFailure => {
+            winston.info(`Reported failure for job ${job.id}`);
+            return reportFailure;
+        });
 }
 
-// function executeHandelJob(codePipeline, job) {
 
-//     return reportJobCompletion(codePipeline, job)
+function getDeployableArtifact(job, downloadPath) {
+    return new Promise((resolve, reject) => {
+        winston.info(`Downloading deployable artifact for ${job.id}`);
+        let inputArtifact = job.data.inputArtifacts[0].location.s3Location;
+        let artifactCredentials = job.data.artifactCredentials;
+        let zipFilePath = `/tmp/${job.id}.zip`;
+        util.downloadFileFromS3(zipFilePath, inputArtifact.bucketName, inputArtifact.objectKey, artifactCredentials.accessKeyId, artifactCredentials.secretAccessKey, artifactCredentials.sessionToken)
+            .then(() => {
+                util.unzipFileToDirectory(zipFilePath, downloadPath);
+                fs.unlinkSync(zipFilePath);
+                resolve();
+            });
+    });
+}
 
-//     // return handel.deploy(accountConfigFileName, deploySpecFileName, environmentToDeploy, deployVersion)
-//     //     .then(result => {
+function executeJob(codePipeline, job) {
+    let handelCodePipelineBaseDir = `/mnt/share/handel-worker`;
+    let jobDir = `${handelCodePipelineBaseDir}/jobs/${job.data.pipelineContext.pipelineName}/${job.id}/`;
+    return getDeployableArtifact(job, jobDir)
+        .then(() => {
+            let accountConfigFilePath = `${handelCodePipelineBaseDir}/account-config.yml`;
+            let handelFilePath = `${jobDir}/handel.yml`;
+            let environmentsToDeploy = job.data.actionConfiguration.configuration.EnvironmentsToDeploy.split(",");
+            winston.info(`Executing Handel to deploy the environments ${environmentsToDeploy}`)
+            return handel.deploy(accountConfigFilePath, handelFilePath, environmentsToDeploy, job.id)
+                .then(envDeployResults => {
+                    let failureMessages = [];
+                    for(let envDeployResult of envDeployResults) {
+                        if(envDeployResult.status !== 'success') {
+                            failureMessages.push(envDeployResult.message);
+                        }
+                    }
 
-//     //     })
-//     //     .catch(err => {
+                    if(failureMessages.length > 0) { //Failure
+                        winston.warn("One or more environments failed to deploy");
+                        return reportJobFailure(codePipeline, job, failureMessages.join("\n"));
+                    }
+                    else { //Success
+                        winston.info("Handel job succeeded");
+                        return reportJobSuccess(codePipeline, job);
+                    }
+                })
+                .catch(err => {
+                    winston.warn("Handel job failed");
+                    return reportJobFailure(codePipeline, job, err.message);
+                });
+        });
+}
 
-//     //     });
-// }
+function executeJobs(codePipeline, jobs) {
+    let executePromises = [];
+
+    for(let job of jobs) {
+        executePromises.push(executeJob(codePipeline, job));   
+    }
+
+    return Promise.all(executePromises);
+}
 
 /** 
  * Polls for CodePipeline jobs to execute
@@ -109,13 +155,16 @@ exports.executeHandelJobs = function() {
     
     //Execute jobs asynchronously
     pollForJobs(codePipeline)
-        .then(jobs => { //Request jobs
-            return acknowledgeJobs(codePipeline, jobs);
-        })
-        .then(jobs => { //Execute jobs that were able to be requested
-            console.log("Executing handel jobs");
-        })
         .then(jobs => {
-
+            if(jobs.length !== 0) {
+                return acknowledgeJobs(codePipeline, jobs) //Reserve jobs
+                    .then(acknowledgedJobs => {  //Execute jobs that were able to be requested
+                        return executeJobs(codePipeline, acknowledgedJobs);
+                    });
+            }
+        })
+        .catch(err => {
+            winston.warn(`Error during job execution ${err}`);
+            winston.warn(err);
         });
 }

@@ -25,4 +25,4 @@ app.listen(5000, function () {
 //Start worker to execute jobs from CodePipeline
 setInterval(function() {
     worker.executeHandelJobs();
-}, 3000);
+}, 10000);

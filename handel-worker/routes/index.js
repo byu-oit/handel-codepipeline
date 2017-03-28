@@ -29,3 +29,9 @@ exports.streamLogFile = function (req, res) {
     
     res.send('NOT IMPLEMENTED');
 }
+
+//Batch processing
+    //Call for jobs
+    //For each job
+        //Start job
+        //

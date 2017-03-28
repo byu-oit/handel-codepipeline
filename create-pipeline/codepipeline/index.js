@@ -108,7 +108,7 @@ function getPhase(sourcePhaseSpec, buildPhaseSpec, phaseSpec, handelFile) {
         default:
             throw new Error(`Unsupported phase type specified: ${phaseType}`);
     }
-
+    
 }
 
 function createCodeBuildProject(accountId, projectName, pipelineDefinition) {
