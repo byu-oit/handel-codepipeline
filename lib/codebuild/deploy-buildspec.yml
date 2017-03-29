@@ -1,0 +1,9 @@
+version: 0.1
+
+phases:
+  pre_build:
+    commands:
+    - npm install -g git://github.com/byu-oit-appdev/handel.git#master # TODO - Install from NPM later
+  build:
+    commands:
+    - handel --environments-to-deploy $ENVS_TO_DEPLOY --account-config $HANDEL_ACCOUNT_CONFIG --handel-file ./handel.yml --deploy-version $CODEBUILD_SOURCE_VERSION

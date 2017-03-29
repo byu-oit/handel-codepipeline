@@ -1,4 +1,4 @@
-const iamCalls = require('../../../create-pipeline/aws/iam-calls');
+const iamCalls = require('../../../lib/aws/iam-calls');
 const expect = require('chai').expect;
 const AWS = require('aws-sdk-mock');
 const sinon = require('sinon');

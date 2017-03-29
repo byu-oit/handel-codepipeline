@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 const AWS = require('aws-sdk');
 AWS.config.update({region: 'us-west-2'}); //TODO - Generalize this to all regions later
-const util = require('../create-pipeline/util/util');
-const workers = require('../create-pipeline/workers');
-const actions = require('../create-pipeline/actions');
-const codepipeline = require('../create-pipeline/codepipeline');
-const input = require('../create-pipeline/input');
+const codepipeline = require('../lib/codepipeline');
+const codebuild = require('../lib/codebuild');
+const input = require('../lib/input');
 
 console.log("Welcome to the Handel CodePipeline setup wizard");
 input.getConfigFiles()
@@ -13,18 +11,16 @@ input.getConfigFiles()
         let handelFile = handelConfigs.handel;
         let handelCodePipelineFile = handelConfigs.handelCodePipeline;
         let accountConfigs = input.getAccountConfigs(handelCodePipelineFile)
-        return workers.createHandelWorkers(accountConfigs)
-            .then(handelWorkerStacks => {
-                //Create code pipeline action type if not exists
-                return actions.createHandelActions(accountConfigs, handelWorkerStacks)
-                    .then(createdActions => {
-                        return codepipeline.createPipelines(handelCodePipelineFile, handelFile, handelWorkerStacks)
-                    })
-                    .then(createdPipelines => {
-                        console.log(createdPipelines);
-                        //Register code pipeline with job worker
-                    });
+        return codebuild.createCodeBuildProjects(handelCodePipelineFile, handelFile, accountConfigs)
+            .then(createdProjects => {
+                 return codepipeline.createPipelines(handelCodePipelineFile, handelFile, accountConfigs)
+            })
+            .then(createdPipelines => {
+                for(let accountId in createdPipelines) {
+                    console.log(`Created pipeline in ${accountId}`);
+                }
             });
+       
     })
     .catch(err => {
         console.log(`Error setting up Handel CodePipeline: ${err}`);

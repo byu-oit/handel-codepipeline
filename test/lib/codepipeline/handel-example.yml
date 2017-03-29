@@ -1,0 +1,11 @@
+version: 1
+
+name: handel-codepipeline-fake-app
+
+environments:
+  prod:
+    storage:
+      type: efs
+  dev:
+    storage:
+      type: efs
