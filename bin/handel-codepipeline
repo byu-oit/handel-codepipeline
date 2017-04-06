@@ -5,22 +5,34 @@ const codepipeline = require('../lib/codepipeline');
 const codebuild = require('../lib/codebuild');
 const input = require('../lib/input');
 
+function getPipelineNamesFromHandelCodePipelineFile(handelCodePipelineFile) {
+    let pipelineNames = [];
+    for(let pipelineName in handelCodePipelineFile.pipelines) {
+        pipelineNames.push(pipelineName);
+    }
+    return pipelineNames;
+}
+
 console.log("Welcome to the Handel CodePipeline setup wizard");
 input.getConfigFiles()
     .then(handelConfigs => {
         let handelFile = handelConfigs.handel;
         let handelCodePipelineFile = handelConfigs.handelCodePipeline;
-        let accountConfigs = input.getAccountConfigs(handelCodePipelineFile)
-        return codebuild.createCodeBuildProjects(handelCodePipelineFile, handelFile, accountConfigs)
-            .then(createdProjects => {
-                 return codepipeline.createPipelines(handelCodePipelineFile, handelFile, accountConfigs)
-            })
-            .then(createdPipelines => {
-                for(let accountId in createdPipelines) {
-                    console.log(`Created pipeline in ${accountId}`);
-                }
+        let githubAccessToken = handelConfigs.githubAccessToken;
+        let pipelineNames = getPipelineNamesFromHandelCodePipelineFile(handelCodePipelineFile);
+        return input.getAccountIdsFromPipelineNames(pipelineNames)
+            .then(pipelinesToAccountsMapping => {
+                let accountConfigs = input.getAccountConfigs(handelConfigs.accountConfigsPath, pipelinesToAccountsMapping);
+                return codebuild.createCodeBuildProjects(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs)
+                    .then(createdProjects => {
+                        return codepipeline.createPipelines(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs, githubAccessToken)
+                    })
+                    .then(createdPipelines => {
+                        for(let accountId in createdPipelines) {
+                            console.log(`Created pipeline in ${accountId}`);
+                        }
+                    });
             });
-       
     })
     .catch(err => {
         console.log(`Error setting up Handel CodePipeline: ${err}`);

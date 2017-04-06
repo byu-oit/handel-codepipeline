@@ -36,20 +36,23 @@ describe('codebuild module', function() {
             let accountConfigs = {
                 '777777777777': {}
             };
+            let pipelinesToAccountsMapping = {
+                dev: accountId
+            };
 
             //Mock
             let fakeArn = "FakeArn";
-            let createRoleStub = sinon.stub(iamCalls, 'createRoleIfNotExists').returns(Promise.resolve({}));
-            let createPolicyStub = sinon.stub(iamCalls, 'createPolicyIfNotExists').returns(Promise.resolve({
+            let createRoleStub = sandbox.stub(iamCalls, 'createRoleIfNotExists').returns(Promise.resolve({}));
+            let createPolicyStub = sandbox.stub(iamCalls, 'createPolicyIfNotExists').returns(Promise.resolve({
                 Arn: fakeArn
             }))
-            let attachPolicyStub = sinon.stub(iamCalls, 'attachPolicyToRole').returns(Promise.resolve({}));
-            let getRoleStub = sinon.stub(iamCalls, 'getRole').returns(Promise.resolve({
+            let attachPolicyStub = sandbox.stub(iamCalls, 'attachPolicyToRole').returns(Promise.resolve({}));
+            let getRoleStub = sandbox.stub(iamCalls, 'getRole').returns(Promise.resolve({
                 Arn: fakeArn
             }))
-            let createProjectStub = sinon.stub(codebuildCalls, 'createProject').returns(Promise.resolve({}))
+            let createProjectStub = sandbox.stub(codebuildCalls, 'createProject').returns(Promise.resolve({}))
 
-            return codebuild.createCodeBuildProjects(handelCodePipelineFile, handelFile, accountConfigs)
+            return codebuild.createCodeBuildProjects(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs)
                 .then(createdProjects => {
                     console.log(createdProjects);
                     expect(createdProjects[accountId]).to.deep.equal([{}, {}]);

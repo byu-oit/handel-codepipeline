@@ -1,12 +1,11 @@
 version: 1
 
 pipelines:
-  777777777777:
+  dev:
     phases:
     - phase_type: source
       action_type: github
       phase_name: Source
-      access_token: FakeToken
       owner: dsw88
       repo: FakeRepo
       branch: master
