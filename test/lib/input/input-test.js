@@ -20,7 +20,9 @@ describe('input module', function() {
         it('should prompt for config file paths for the application spec and the pipeline spec', function() {
             let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
                 handel: {},
-                handelCodePipeline: {}
+                handelCodePipeline: {}, 
+                accountConfigsPath: 'FakePath',
+                githubAccessToken: 'FakeToken'
             }));
             let loadYamlFileStub = sandbox.stub(util, 'loadYamlFile').returns({})
 
@@ -30,26 +32,23 @@ describe('input module', function() {
                     expect(loadYamlFileStub.calledTwice).to.be.true;
                     expect(configs.handel).to.deep.equal({});
                     expect(configs.handelCodePipeline).to.deep.equal({});
+                    expect(configs.accountConfigsPath).to.equal('FakePath');
+                    expect(configs.githubAccessToken).to.equal('FakeToken');
                 })
         });
     });
 
-    describe('getConfigForAccounts', function() {
+    describe('getAccountConfigs', function() {
         it('should attempt to load account config files for each account', function() {
             let accountId = 555555555555;
-            let handelCodePipelineFile = {
-                pipelines: {}
-            }
-            handelCodePipelineFile.pipelines[accountId] = {};
+            let pipelinesToAccountsMapping = {
+                dev: accountId
+            };
+            let accountConfigsPath = __dirname;
 
-            let existsSyncStub = sandbox.stub(fs, 'existsSync').returns(true);
-            let loadYamlFileStub = sandbox.stub(util, 'loadYamlFile').returns({});
-
-            let accountConfigs = input.getAccountConfigs(handelCodePipelineFile);
-            expect(existsSyncStub.calledOnce).to.be.true;
-            expect(loadYamlFileStub.calledOnce).to.be.true;
+            let accountConfigs = input.getAccountConfigs(accountConfigsPath, pipelinesToAccountsMapping);
             expect(accountConfigs[accountId]).to.not.be.undefined;
-            expect(accountConfigs[accountId]).to.deep.equal({});
+            expect(accountConfigs[accountId].account_id).to.equal(accountId);
         });
     });
 });
