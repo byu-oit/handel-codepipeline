@@ -25,7 +25,7 @@ describe('codebuild calls module', function() {
                 }
             }));
 
-            return codeBuildCalls.createProject(projectName, projectName, "FakeImage", { SOME_KEY: "some_value" }, "777777777777", "FakeArn")
+            return codeBuildCalls.createProject(projectName, projectName, "FakeImage", { SOME_KEY: "some_value" }, "777777777777", "FakeArn", "us-west-2")
                 .then(project => {
                     expect(project.Name).to.equal(projectName);
                 });

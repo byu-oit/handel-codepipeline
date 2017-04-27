@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const AWS = require('aws-sdk');
-AWS.config.update({region: 'us-west-2'}); //TODO - Generalize this to all regions later
+
 const codepipeline = require('../lib/codepipeline');
 const codebuild = require('../lib/codebuild');
 const input = require('../lib/input');
@@ -15,23 +15,27 @@ function getPipelineNamesFromHandelCodePipelineFile(handelCodePipelineFile) {
 }
 
 winston.info("Welcome to the Handel CodePipeline setup wizard");
-input.getConfigFiles()
-    .then(handelConfigs => {
-        let handelFile = handelConfigs.handel;
-        let handelCodePipelineFile = handelConfigs.handelCodePipeline;
-        let githubAccessToken = handelConfigs.githubAccessToken;
-        let pipelineNames = getPipelineNamesFromHandelCodePipelineFile(handelCodePipelineFile);
-        return input.getAccountIdsFromPipelineNames(pipelineNames)
-            .then(pipelinesToAccountsMapping => {
-                let accountConfigs = input.getAccountConfigs(handelConfigs.accountConfigsPath, pipelinesToAccountsMapping);
-                return codebuild.createCodeBuildProjects(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs)
-                    .then(createdProjects => {
-                        return codepipeline.createPipelines(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs, githubAccessToken)
-                    })
-                    .then(createdPipelines => {
-                        for(let accountId in createdPipelines) {
-                            winston.info(`Finished creating pipelines in ${accountId}`);
-                        }
+input.getRegion()
+    .then(region => {
+        AWS.config.update({region: region});
+        return input.getConfigFiles()
+            .then(handelConfigs => {
+                let handelFile = handelConfigs.handel;
+                let handelCodePipelineFile = handelConfigs.handelCodePipeline;
+                let githubAccessToken = handelConfigs.githubAccessToken;
+                let pipelineNames = getPipelineNamesFromHandelCodePipelineFile(handelCodePipelineFile);
+                return input.getAccountIdsFromPipelineNames(pipelineNames)
+                    .then(pipelinesToAccountsMapping => {
+                        let accountConfigs = input.getAccountConfigs(handelConfigs.accountConfigsPath, pipelinesToAccountsMapping);
+                        return codebuild.createCodeBuildProjects(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs, region)
+                            .then(createdProjects => {
+                                return codepipeline.createPipelines(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs, githubAccessToken, region)
+                            })
+                            .then(createdPipelines => {
+                                for(let accountId in createdPipelines) {
+                                    winston.info(`Finished creating pipelines in ${accountId}`);
+                                }
+                            });
                     });
             });
     })

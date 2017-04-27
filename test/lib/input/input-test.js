@@ -16,8 +16,48 @@ describe('input module', function() {
         sandbox.restore();
     });
 
+    describe('getRegion', function() {
+        it('should prompt for the region if not cached', function() {
+            let region = 'us-east-1';
+            let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
+                region: region
+            }));
+            let fileExistsStub = sandbox.stub(fs, 'existsSync').returns(false);
+            let loadYamlFileStub = sandbox.stub(util, 'loadYamlFile').returns({});
+            let saveYamlFileStub = sandbox.stub(util, 'saveYamlFile');
+
+            return input.getRegion()
+                .then(returnRegion => {
+                    expect(promptStub.calledOnce).to.be.true;
+                    expect(fileExistsStub.calledTwice).to.be.true;
+                    expect(loadYamlFileStub.notCalled).to.be.true;
+                    expect(saveYamlFileStub.calledOnce).to.be.true;
+                    expect(returnRegion).to.equal(region);
+                });
+        });
+
+        it('should not prompt for the region if already cached', function() {
+            let region = 'us-east-1';
+            let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
+                region: region
+            }));
+            let fileExistsStub = sandbox.stub(fs, 'existsSync').returns(true);
+            let loadYamlFileStub = sandbox.stub(util, 'loadYamlFile').returns({region: region});
+            let saveYamlFileStub = sandbox.stub(util, 'saveYamlFile');
+
+            return input.getRegion()
+                .then(returnRegion => {
+                    expect(promptStub.notCalled).to.be.true;
+                    expect(fileExistsStub.calledOnce).to.be.true;
+                    expect(loadYamlFileStub.calledOnce).to.be.true;
+                    expect(saveYamlFileStub.notCalled).to.be.true;
+                    expect(returnRegion).to.equal(region);
+                });
+        })
+    });
+
     describe('getConfigFiles', function() {
-        it('should prompt for config file paths for the application spec and the pipeline spec', function() {
+        it('should prompt for config information', function() {
             let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
                 accountConfigsPath: 'FakePath',
                 githubAccessToken: 'FakeToken'
@@ -40,7 +80,7 @@ describe('input module', function() {
                     expect(configs.handelCodePipeline).to.deep.equal({});
                     expect(configs.accountConfigsPath).to.equal('FakePath');
                     expect(configs.githubAccessToken).to.equal('FakeToken');
-                })
+                });
         });
     });
 
