@@ -22,6 +22,7 @@ describe('input module', function() {
                 accountConfigsPath: 'FakePath',
                 githubAccessToken: 'FakeToken'
             }));
+            let fileExistsStub = sandbox.stub(fs, 'existsSync').returns(false);
             let loadYamlFileStub = sandbox.stub(util, 'loadYamlFile');
             loadYamlFileStub.onCall(0).returns({});
             loadYamlFileStub.onCall(1).returns({});
@@ -32,7 +33,8 @@ describe('input module', function() {
             return input.getConfigFiles()
                 .then(configs => {
                     expect(promptStub.calledOnce).to.be.true;
-                    expect(loadYamlFileStub.callCount).to.equal(4);
+                    expect(fileExistsStub.callCount).to.equal(2);
+                    expect(loadYamlFileStub.callCount).to.equal(2);
                     expect(saveYamlFileStub.callCount).to.equal(1);
                     expect(configs.handel).to.deep.equal({});
                     expect(configs.handelCodePipeline).to.deep.equal({});
