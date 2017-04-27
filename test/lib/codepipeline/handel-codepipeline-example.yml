@@ -3,20 +3,17 @@ version: 1
 pipelines:
   dev:
     phases:
-    - phase_type: source
-      action_type: github
-      phase_name: Source
+    - type: github
+      name: Source
       owner: dsw88
       repo: FakeRepo
       branch: master
-    - phase_type: build
-      action_type: codebuild
-      phase_name: Build
+    - type: codebuild
+      name: Build
       build_image: aws/codebuild/python:3.5.2
       environment_variables:
         ENV_NAME: env_value
-    - phase_type: deploy
-      action_type: handel
-      phase_name: Deploy
-      envs:
+    - type: handel
+      name: DevDeploy
+      environments_to_deploy:
       - dev
