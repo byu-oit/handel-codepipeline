@@ -19,17 +19,21 @@ describe('input module', function() {
     describe('getConfigFiles', function() {
         it('should prompt for config file paths for the application spec and the pipeline spec', function() {
             let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
-                handel: {},
-                handelCodePipeline: {}, 
                 accountConfigsPath: 'FakePath',
                 githubAccessToken: 'FakeToken'
             }));
-            let loadYamlFileStub = sandbox.stub(util, 'loadYamlFile').returns({})
+            let loadYamlFileStub = sandbox.stub(util, 'loadYamlFile');
+            loadYamlFileStub.onCall(0).returns({});
+            loadYamlFileStub.onCall(1).returns({});
+            loadYamlFileStub.onCall(2).returns({});
+            loadYamlFileStub.onCall(3).returns({});
+            let saveYamlFileStub = sandbox.stub(util, 'saveYamlFile');
 
             return input.getConfigFiles()
                 .then(configs => {
                     expect(promptStub.calledOnce).to.be.true;
-                    expect(loadYamlFileStub.calledTwice).to.be.true;
+                    expect(loadYamlFileStub.callCount).to.equal(4);
+                    expect(saveYamlFileStub.callCount).to.equal(1);
                     expect(configs.handel).to.deep.equal({});
                     expect(configs.handelCodePipeline).to.deep.equal({});
                     expect(configs.accountConfigsPath).to.equal('FakePath');
