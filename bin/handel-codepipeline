@@ -4,6 +4,7 @@ AWS.config.update({region: 'us-west-2'}); //TODO - Generalize this to all region
 const codepipeline = require('../lib/codepipeline');
 const codebuild = require('../lib/codebuild');
 const input = require('../lib/input');
+const winston = require('winston');
 
 function getPipelineNamesFromHandelCodePipelineFile(handelCodePipelineFile) {
     let pipelineNames = [];
@@ -13,7 +14,7 @@ function getPipelineNamesFromHandelCodePipelineFile(handelCodePipelineFile) {
     return pipelineNames;
 }
 
-console.log("Welcome to the Handel CodePipeline setup wizard");
+winston.info("Welcome to the Handel CodePipeline setup wizard");
 input.getConfigFiles()
     .then(handelConfigs => {
         let handelFile = handelConfigs.handel;
@@ -29,12 +30,12 @@ input.getConfigFiles()
                     })
                     .then(createdPipelines => {
                         for(let accountId in createdPipelines) {
-                            console.log(`Created pipeline in ${accountId}`);
+                            winston.info(`Finished creating pipelines in ${accountId}`);
                         }
                     });
             });
     })
     .catch(err => {
-        console.log(`Error setting up Handel CodePipeline: ${err}`);
-        console.log(err); 
+        winston.error(`Error setting up Handel CodePipeline: ${err}`);
+        winston.error(err); 
     });
