@@ -39,6 +39,7 @@ describe('codebuild module', function() {
             let pipelinesToAccountsMapping = {
                 dev: accountId
             };
+            let region = "us-west-1";
 
             //Mock
             let fakeArn = "FakeArn";
@@ -52,7 +53,7 @@ describe('codebuild module', function() {
             }))
             let createProjectStub = sandbox.stub(codebuildCalls, 'createProject').returns(Promise.resolve({}))
 
-            return codebuild.createCodeBuildProjects(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs)
+            return codebuild.createCodeBuildProjects(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs, region)
                 .then(createdProjects => {
                     console.log(createdProjects);
                     expect(createdProjects[accountId]).to.deep.equal([{}, {}]);

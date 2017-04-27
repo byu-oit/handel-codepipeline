@@ -39,6 +39,8 @@ describe('codepipeline module', function() {
             let pipelinesToAccountsMapping = {
                 dev: accountId
             };
+            let region = "us-west-2";
+            let accessToken = "FakeAccessToken";
 
             let role = {
                 Arn: "FakeArn"
@@ -52,7 +54,7 @@ describe('codepipeline module', function() {
                 pipeline: {}
             }));
 
-            return codepipeline.createPipelines(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs)
+            return codepipeline.createPipelines(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs, accessToken, region)
                 .then(createdPipelines => {
                     expect(createBucketStub.calledOnce).to.be.true;
                     expect(createdPipelines[accountId]).to.deep.equal({});
