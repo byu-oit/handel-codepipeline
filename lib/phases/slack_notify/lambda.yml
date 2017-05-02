@@ -1,0 +1,57 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Handel-created Lambda function
+
+Parameters:
+  S3Bucket:
+    Description: The bucket where the function code is located
+    Type: String
+  S3Key:
+    Description: The key where the function code is located in the bucket
+    Type: String
+  Description:
+    Description: The description of the function
+    Type: String
+  FunctionName:
+    Description: The name of the function
+    Type: String
+  Handler:
+    Description: The function handler method
+    Type: String
+  MemorySize:
+    Description: The amount of memory to allocate for the function
+    Type: Number
+  RoleArn:
+    Description: The ARN of the execution role to use
+    Type: String
+  Runtime:
+    Description: The lambda runtime to use
+    Type: String
+  Timeout:
+    Description: The timeout for the function in seconds
+    Type: Number
+
+Resources:
+  Function:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Code:
+        S3Bucket: !Ref S3Bucket
+        S3Key: !Ref S3Key
+      Description: !Ref Description
+      FunctionName: !Ref FunctionName
+      Handler: !Ref Handler
+      MemorySize: !Ref MemorySize
+      Role: !Ref RoleArn
+      Runtime: !Ref Runtime
+      Timeout: !Ref Timeout
+Outputs:
+  FunctionName:
+    Description: The name of the function
+    Value: !Ref Function
+  FunctionArn:
+    Description: The ARN of the function
+    Value: 
+      Fn::GetAtt: 
+        - "Function"
+        - "Arn"

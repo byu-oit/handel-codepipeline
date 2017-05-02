@@ -1,42 +1,34 @@
 #!/usr/bin/env node
 const AWS = require('aws-sdk');
-
-const codepipeline = require('../lib/codepipeline');
-const codebuild = require('../lib/codebuild');
 const input = require('../lib/input');
 const winston = require('winston');
-
-function getPipelineNamesFromHandelCodePipelineFile(handelCodePipelineFile) {
-    let pipelineNames = [];
-    for(let pipelineName in handelCodePipelineFile.pipelines) {
-        pipelineNames.push(pipelineName);
-    }
-    return pipelineNames;
-}
+const util = require('../lib/util/util');
+const lifecycle = require('../lib/lifecycle');
 
 winston.info("Welcome to the Handel CodePipeline setup wizard");
-input.getRegion()
-    .then(region => {
-        AWS.config.update({region: region});
-        return input.getConfigFiles()
-            .then(handelConfigs => {
-                let handelFile = handelConfigs.handel;
-                let handelCodePipelineFile = handelConfigs.handelCodePipeline;
-                let githubAccessToken = handelConfigs.githubAccessToken;
-                let pipelineNames = getPipelineNamesFromHandelCodePipelineFile(handelCodePipelineFile);
-                return input.getAccountIdsFromPipelineNames(pipelineNames)
-                    .then(pipelinesToAccountsMapping => {
-                        let accountConfigs = input.getAccountConfigs(handelConfigs.accountConfigsPath, pipelinesToAccountsMapping);
-                        return codebuild.createCodeBuildProjects(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs, region)
-                            .then(createdProjects => {
-                                return codepipeline.createPipelines(pipelinesToAccountsMapping, handelCodePipelineFile, handelFile, accountConfigs, githubAccessToken, region)
-                            })
-                            .then(createdPipelines => {
-                                for(let accountId in createdPipelines) {
-                                    winston.info(`Finished creating pipelines in ${accountId}`);
-                                }
-                            });
-                    });
+
+input.getPipelineConfig()
+    .then(pipelineConfig => {
+        let accountName = pipelineConfig.accountName;
+        let accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
+        AWS.config.update({region: accountConfig.region});
+        let handelFile = pipelineConfig.handel;
+        let handelCodePipelineFile = pipelineConfig.handelCodePipeline;
+        let pipelineToCreate = pipelineConfig.pipelineToCreate;
+
+        lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
+
+        let phaseDeployers = util.getPhaseDeployers();
+
+        return lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineToCreate)
+            .then(phasesSecrets => {
+                return lifecycle.createPhases(phaseDeployers, handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, phasesSecrets)
+            })
+            .then(pipelinePhases => {
+                return lifecycle.createPipeline(handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, pipelinePhases);
+            })
+            .then(pipeline => {
+                winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
             });
     })
     .catch(err => {
