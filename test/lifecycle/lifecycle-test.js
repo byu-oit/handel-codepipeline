@@ -1,0 +1,1 @@
+const lifecycle = require('../../lib/lifecycle');
