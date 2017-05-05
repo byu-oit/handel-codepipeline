@@ -12,6 +12,7 @@ describe('iam calls', function() {
 
     afterEach(function() {
         sandbox.restore();
+        AWS.restore('IAM');
     });
 
     describe('createRole', function() {
@@ -37,7 +38,6 @@ describe('iam calls', function() {
             return iamCalls.getRole("FakeRole")
                 .then(role => {
                     expect(role).to.deep.equal({});
-                    AWS.restore('IAM');
                 });
         });
 
@@ -49,7 +49,6 @@ describe('iam calls', function() {
             return iamCalls.getRole("FakeRole")
                 .then(role => {
                     expect(role).to.be.null;
-                    AWS.restore('IAM');
                 });
         });
 
@@ -65,7 +64,6 @@ describe('iam calls', function() {
                 })
                 .catch(err => {
                     expect(err.code).to.equal(errorCode);
-                    AWS.restore('IAM');
                 })
         });
     });
@@ -98,7 +96,6 @@ describe('iam calls', function() {
             return iamCalls.attachPolicyToRole('FakeArn', 'FakeRole')
                 .then(response => {
                     expect(response).to.deep.equal({});
-                    AWS.restore('IAM');
                 });
         });
     });
@@ -112,7 +109,6 @@ describe('iam calls', function() {
             return iamCalls.getPolicy("FakeArn")
                 .then(policy => {
                     expect(policy).to.deep.equal({});
-                    AWS.restore('IAM');
                 });
         });
 
@@ -124,7 +120,6 @@ describe('iam calls', function() {
             return iamCalls.getPolicy("FakeArn")
                 .then(policy => {
                     expect(policy).to.be.null;
-                    AWS.restore('IAM');
                 });
         });
     });
@@ -138,7 +133,6 @@ describe('iam calls', function() {
             return iamCalls.createPolicy("PolicyName", {})
                 .then(policy => {
                     expect(policy).to.deep.equal({});
-                    AWS.restore('IAM');
                 });
         });
     });
