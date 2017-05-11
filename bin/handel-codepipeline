@@ -4,17 +4,17 @@ const input = require('../lib/input');
 const winston = require('winston');
 const util = require('../lib/util/util');
 const lifecycle = require('../lib/lifecycle');
-const os = require('os');
+const s3Calls = require('../lib/aws/s3-calls');
 
 winston.info("Welcome to the Handel CodePipeline setup wizard");
 
 let handelFile = util.loadYamlFile("./handel.yml");
-if(!handelFile) { throw new Error("Missing handel.yml file in the current directory"); }
+if (!handelFile) { throw new Error("Missing handel.yml file in the current directory"); }
 let handelCodePipelineFile = util.loadYamlFile("./handel-codepipeline.yml");
-if(!handelCodePipelineFile) { throw new Error("Missing handel-codepipeline.yml file in the current directory"); }
+if (!handelCodePipelineFile) { throw new Error("Missing handel-codepipeline.yml file in the current directory"); }
 
 let validateErrors = lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
-if(validateErrors.length > 0) {
+if (validateErrors.length > 0) {
     winston.error("Errors while validating handel-codepipeline.yml file:");
     console.log(validateErrors.join('\n'));
     process.exit(1);
@@ -24,25 +24,30 @@ input.getPipelineConfig()
     .then(pipelineConfig => {
         let accountName = pipelineConfig.accountName;
         let accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
-        AWS.config.update({region: accountConfig.region});
+        AWS.config.update({ region: accountConfig.region });
         let pipelineToCreate = pipelineConfig.pipelineToCreate;
 
         lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
 
         let phaseDeployers = util.getPhaseDeployers();
 
-        return lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineToCreate)
-            .then(phasesSecrets => {
-                return lifecycle.createPhases(phaseDeployers, handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, phasesSecrets)
+        let codePipelineBucketName = `codepipeline-${accountConfig.region}-${accountConfig.account_id}`
+        return s3Calls.createBucketIfNotExists(codePipelineBucketName, accountConfig.region)
+            .then(bucket => {
+                return lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineToCreate)
+                    .then(phasesSecrets => {
+                        return lifecycle.createPhases(phaseDeployers, handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, phasesSecrets, codePipelineBucketName)
+                    })
+                    .then(pipelinePhases => {
+                        return lifecycle.createPipeline(handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, pipelinePhases, codePipelineBucketName);
+                    })
+                    .then(pipeline => {
+                        winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
+                    });
+
             })
-            .then(pipelinePhases => {
-                return lifecycle.createPipeline(handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, pipelinePhases);
-            })
-            .then(pipeline => {
-                winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
-            });
     })
     .catch(err => {
         winston.error(`Error setting up Handel CodePipeline: ${err}`);
-        winston.error(err); 
+        winston.error(err);
     });

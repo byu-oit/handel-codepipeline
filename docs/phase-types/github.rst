@@ -29,6 +29,15 @@ Parameters
      - master
      - The name of the Git branch in the repository from which the pipeline will be invoked.
 
+Secrets
+-------
+In addition to the parameters specified in your handel-codepipeline.yml file, this phase will prompt you for the following secret information when creating your pipeline:
+
+* GitHub personal access token.
+
+This is not saved in your handel-codepipeline.yml file because by having the token others can interact with GitHub on your behalf.
+
+
 Example Phase Configuration
 ---------------------------
 This snippet of a handel-codepipeline.yml file shows the GitHub phase being configured:
