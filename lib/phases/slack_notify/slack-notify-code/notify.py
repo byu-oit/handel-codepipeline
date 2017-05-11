@@ -19,6 +19,7 @@
 
 import sys
 import os
+import urllib
 from urllib.request import Request, urlopen
 import json
 import boto3
@@ -35,10 +36,11 @@ def send_post(event, context):
   """
 
   jobId = event['CodePipeline.job']['id']
-  webhook = event['CodePipeline.job']['data']['actionConfiguration']['configuration']['UserParameters']['webhook']
-  username = event['CodePipeline.job']['data']['actionConfiguration']['configuration']['UserParameters']['username']
-  message = event['CodePipeline.job']['data']['actionConfiguration']['configuration']['UserParameters']['message']
-  channel = event['CodePipeline.job']['data']['actionConfiguration']['configuration']['UserParameters']['channel']
+  user_parameters = json.loads(event['CodePipeline.job']['data']['actionConfiguration']['configuration']['UserParameters'])
+  webhook = user_parameters['webhook']
+  username = user_parameters['username']
+  message = user_parameters['message']
+  channel = user_parameters['channel']
 
   #Slack webhook post
   try:
@@ -49,7 +51,7 @@ def send_post(event, context):
       "text": message
     })
     clen = len(data)
-    req = Request(webhook, data, {'Content-Type': 'application/json', 'Content-Length': clen})
+    req = Request(webhook, data.encode('utf-8'), {'Content-Type': 'application/json', 'Content-Length': clen})
     f = urlopen(req)
     response = f.read()
     f.close()
@@ -57,8 +59,14 @@ def send_post(event, context):
     
     code_pipeline.put_job_success_result(jobId=jobId)
   except urllib.error.HTTPError as e:
-  	code_pipeline.put_job_failure_result(jobId=jobId)
+  	code_pipeline.put_job_failure_result(jobId=jobId, failureDetails={
+        'type': 'JobFailed',
+        'message': str(e)
+    })
   except urllib.error.URLError as e:
-    code_pipeline.put_job_failure_result(jobId=jobId)
+    code_pipeline.put_job_failure_result(jobId=jobId, failureDetails={
+        'type': 'JobFailed',
+        'message': str(e)
+    })
 
     

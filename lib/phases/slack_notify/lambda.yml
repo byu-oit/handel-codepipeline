@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Handel-created Lambda function
+Description: Handel-CodePipeline-created Lambda function for Slack notify phase
 
 Parameters:
   S3Bucket:

@@ -19,3 +19,4 @@ Handel-CodePipeline is a library that creates AWS CodePipelines with Handel as t
    phase-types/github
    phase-types/codebuild
    phase-types/handel
+   phase-types/slack_notify

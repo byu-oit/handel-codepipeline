@@ -28,11 +28,11 @@ describe('codepipelineCalls module', function() {
                 region: 'us-west-2'
             };
             let pipelinePhases = [];
+            let codePipelineBucketName = "FakeBucket";
 
             let role = {
                 Arn: "FakeArn"
             }
-            let createBucketStub = sandbox.stub(s3Calls, 'createBucketIfNotExists').returns(Promise.resolve("MyBucket"))
             let createRoleStub = sandbox.stub(iamCalls, 'createRoleIfNotExists').returns(Promise.resolve(role));
             let createPolicyStub = sandbox.stub(iamCalls, 'createPolicyIfNotExists').returns(Promise.resolve(role));
             let attachPolicyStub = sandbox.stub(iamCalls, 'attachPolicyToRole').returns(Promise.resolve({}));
@@ -41,9 +41,8 @@ describe('codepipelineCalls module', function() {
                 pipeline: {}
             }));
 
-            return codepipelineCalls.createPipeline(pipelineName, handelFile, accountConfig, pipelinePhases)
+            return codepipelineCalls.createPipeline(pipelineName, handelFile, accountConfig, pipelinePhases, codePipelineBucketName)
                 .then(pipeline => {
-                    expect(createBucketStub.calledOnce).to.be.true;
                     expect(createRoleStub.calledOnce).to.be.true;
                     expect(createPolicyStub.calledOnce).to.be.true;
                     expect(attachPolicyStub.calledOnce).to.be.true;
