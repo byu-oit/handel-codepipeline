@@ -6,4 +6,4 @@ phases:
     - npm install -g handel
   build:
     commands:
-    - handel --environments-to-deploy $ENVS_TO_DEPLOY --account-config $HANDEL_ACCOUNT_CONFIG --handel-file ./handel.yml --deploy-version $CODEBUILD_SOURCE_VERSION
+    - handel deploy -e $ENVS_TO_DEPLOY -c $HANDEL_ACCOUNT_CONFIG -v $CODEBUILD_SOURCE_VERSION
