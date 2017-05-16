@@ -16,19 +16,19 @@ To create a new pipeline, do the following:
 2. Create a new :ref:`handel-codepipeline-file` in your repository. 
 3. Install Handel-CodePipeline:
 
-    .. code-block:: bash
+    .. code-block:: none
     
         npm install -g handel-codepipeline
 
 4. Run Handel-CodePipeline:
 
-    .. code-block:: bash
+    .. code-block:: none
 
         handel-codepipeline
 
 5. Handel-CodePipeline will walk you through a series of questions, asking you to provide further input:
 
-    .. code-block:: bash
+    .. code-block:: none
 
         Welcome to the Handel CodePipeline setup wizard
         ? Please enter the path to the application's Handel config file ./handel.yml
