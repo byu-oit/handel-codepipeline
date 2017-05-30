@@ -28,6 +28,10 @@ Parameters
      - {}
      - A set of key/value pairs that will be injected into the running CodeBuild jobs.
 
+Secrets
+-------
+This phase type doesn't prompt for any secrets when creating the pipeline.
+
 Example Phase Configuration
 ---------------------------
 This snippet of a handel-codepipeline.yml file shows the CodeBuild phase being configured:
