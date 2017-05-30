@@ -22,19 +22,12 @@
                 "ecr:ListImages",
                 "ecr:PutImage",
                 "ecr:UploadLayerPart",
-                "events:PutRule",
-                "events:RemoveTargets",
-                "iam:CreateRole",
                 "iam:GetRole",
                 "iam:GetInstanceProfile",
-                "iam:PassRole",
                 "iam:ListInstanceProfiles",
                 "logs:*",
-                "s3:CreateBucket",
                 "s3:GetBucketLocation",
-                "s3:GetObject",
-                "s3:List*",
-                "s3:PutObject"
+                "s3:List*"
             ],
             "Resource": "*",
             "Effect": "Allow"
@@ -45,20 +38,6 @@
             ],
             "Resource": "arn:aws:logs:*:*:log-group:/aws/codebuild/*:log-stream:*",
             "Effect": "Allow"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ssm:DescribeParameters"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ssm:GetParameters"
-            ],
-            "Resource": "arn:aws:ssm:{{region}}:{{accountId}}:parameter/{{appName}}*"
         }
     ]
 }
