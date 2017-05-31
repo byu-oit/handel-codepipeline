@@ -5,49 +5,75 @@ const winston = require('winston');
 const util = require('../lib/util/util');
 const lifecycle = require('../lib/lifecycle');
 const s3Calls = require('../lib/aws/s3-calls');
+const yaml = require('js-yaml');
+const fs = require('fs');
+const cli = require('../lib/cli');
 
-winston.info("Welcome to the Handel CodePipeline setup wizard");
-
-let handelFile = util.loadYamlFile("./handel.yml");
-if (!handelFile) { throw new Error("Missing handel.yml file in the current directory"); }
-let handelCodePipelineFile = util.loadYamlFile("./handel-codepipeline.yml");
-if (!handelCodePipelineFile) { throw new Error("Missing handel-codepipeline.yml file in the current directory"); }
-
-let validateErrors = lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
-if (validateErrors.length > 0) {
-    winston.error("Errors while validating handel-codepipeline.yml file:");
-    console.log(validateErrors.join('\n'));
+function printAndExit(msg) {
+    console.log(msg)
     process.exit(1);
 }
 
-input.getPipelineConfig()
-    .then(pipelineConfig => {
-        let accountName = pipelineConfig.accountName;
-        let accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
-        AWS.config.update({ region: accountConfig.region });
-        let pipelineToCreate = pipelineConfig.pipelineToCreate;
+function printGeneralUsage() {
+    let usageMsg = `Usage: handel-codepipeline <action>
 
-        lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
+Action:
+Check -- Checks the contents of your Handel file for errors.
+Create -- Creates the given pipeline from your Handel-Codepipeline file.
+Delete -- Deletes the given pipeline from your AWS account.`;
+    printAndExit(usageMsg);
+}
 
-        let phaseDeployers = util.getPhaseDeployers();
+function loadHandelFile() {
+    try {
+        var handelFile = yaml.safeLoad(fs.readFileSync('./handel.yml', 'utf8'));
+        return handelFile;
+    }
+    catch (e) {
+        if (e.code === 'ENOENT') {
+            printAndExit(`No 'handel.yml' file found in this directory. You must run Handel in the directory containing the Handel file.`);
+        }
+        else if (e.name === 'YAMLException') {
+            printAndExit(`Malformed 'handel.yml' file. Make sure your Handel file is a properly formatted YAML file. You're probably missing a space or two somewhere`);
+        }
+        else {
+            printAndExit(`Unexpected error while loading 'handel.yml' file: ${e}`);
+        }
+    }
+}
 
-        let codePipelineBucketName = `codepipeline-${accountConfig.region}-${accountConfig.account_id}`
-        return s3Calls.createBucketIfNotExists(codePipelineBucketName, accountConfig.region)
-            .then(bucket => {
-                return lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineToCreate)
-                    .then(phasesSecrets => {
-                        return lifecycle.createPhases(phaseDeployers, handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, phasesSecrets, codePipelineBucketName)
-                    })
-                    .then(pipelinePhases => {
-                        return lifecycle.createPipeline(handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, pipelinePhases, codePipelineBucketName);
-                    })
-                    .then(pipeline => {
-                        winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
-                    });
+function loadHandelCodePipelineFile() {
+    try {
+        var handelFile = yaml.safeLoad(fs.readFileSync('./handel-codepipeline.yml', 'utf8'));
+        return handelFile;
+    }
+    catch (e) {
+        if (e.code === 'ENOENT') {
+            printAndExit(`No 'handel-codepipeline.yml' file found in this directory. You must run Handel in the directory containing the Handel file.`);
+        }
+        else if (e.name === 'YAMLException') {
+            printAndExit(`Malformed 'handel-codepipeline.yml' file. Make sure your Handel file is a properly formatted YAML file. You're probably missing a space or two somewhere`);
+        }
+        else {
+            printAndExit(`Unexpected error while loading 'handel-codepipeline.yml' file: ${e}`);
+        }
+    }
+}
 
-            })
-    })
-    .catch(err => {
-        winston.error(`Error setting up Handel CodePipeline: ${err}`);
-        winston.error(err);
-    });
+let handelFile = loadHandelFile();
+let handelCodePipelineFile = loadHandelCodePipelineFile();
+let phase = process.argv[2];
+switch (phase) {
+    case "create":
+        cli.createAction(handelFile, handelCodePipelineFile);
+        break;
+    case "check":
+        cli.checkAction(handelFile, handelCodePipelineFile);
+        break;
+    case "delete":
+        cli.deleteAction(handelFile, handelCodePipelineFile);
+        break;
+    default:
+        printGeneralUsage();
+}
+

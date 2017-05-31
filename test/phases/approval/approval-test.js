@@ -14,6 +14,13 @@ describe('approval module', function() {
         sandbox.restore();
     });
 
+    describe('check', function() {
+        it('should return an empty array', function() {
+            let errors = approval.check({});
+            expect(errors).to.deep.equal([]);
+        })
+    });
+
     describe('getSecretsForPhase', function() {
         it('should not prompt for any secrets', function() {
             let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({}));
@@ -42,6 +49,15 @@ describe('approval module', function() {
                 .then(phaseSpec => {
                     expect(phaseSpec.name).to.equal(phaseContext.phaseName);
                 }); 
+        });
+    });
+
+    describe('deletePhase', function() {
+        it('should do nothing', function() {
+            return approval.deletePhase({}, {})
+                .then(result => {
+                    expect(result).to.deep.equal({});
+                })
         });
     });
 

@@ -94,6 +94,18 @@ describe('cloudformationCalls', function() {
         });
     });
 
+    describe('deleteStack', function () {
+        it('should delete the stack', function () {
+            AWS.mock('CloudFormation', 'deleteStack', Promise.resolve({}));
+            AWS.mock('CloudFormation', 'waitFor', Promise.resolve({}));
+
+            return cloudformationCalls.deleteStack("FakeStack")
+                .then(result => {
+                    expect(result).to.be.true;
+                });
+        });
+    });
+
     describe('getCfStyleStackParameters', function() {
         it('should take an object of key/value pairs and return them in CloudFormations param format', function() {
             let object = {

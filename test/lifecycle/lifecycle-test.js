@@ -15,6 +15,37 @@ describe('lifecycle module', function() {
         sandbox.restore();
     });
 
+    describe('checkPhases', function() {
+        it('should execute check on each phase', function() {
+            let handelCodePipelineFile = {
+                version: 1,
+                pipelines: {
+                    prd: {
+                        phases: [
+                            {
+                                type: 'github',
+                                name: 'Source'
+                            }
+                        ]
+                    }
+                }
+            }
+
+            let error = 'SomeError'
+            let phaseDeployers = {
+                github: {
+                    check: function(phaseConfig) {
+                        return [error]
+                    }
+                }
+            }
+
+            let pipelineErrors = lifecycle.checkPhases(handelCodePipelineFile, phaseDeployers);
+            expect(pipelineErrors.prd.length).to.equal(1);
+            expect(pipelineErrors.prd[0]).to.equal(error);
+        });
+    });
+
     describe('validatePipelineSpec', function() {
         it('should return an error if no pipelines are specified', function() {
             let handelFile = {};
@@ -248,8 +279,7 @@ describe('lifecycle module', function() {
         });
     });
 
-    describe('createPipelines', function() {
-
+    describe('createPipeline', function() {
         it('should create the pipeline', function() {
             let handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
             let handelFile = util.loadYamlFile(`${__dirname}/handel-example.yml`);
@@ -259,11 +289,50 @@ describe('lifecycle module', function() {
 
             let createPipelineStub = sandbox.stub(codepipelineCalls, 'createPipeline').returns(Promise.resolve({}));
 
-            return lifecycle.createPipeline(handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, pipelinePhases)
+            return lifecycle.createPipeline(handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
                 .then(pipeline => {
                     expect(pipeline).to.deep.equal({});
                     expect(createPipelineStub.calledOnce).to.be.true;
                 });
+        });
+    });
+
+    describe('deletePhases', function() {
+        it('should delete each phase in the pipeline', function() {
+            let phaseDeployers = {
+                github: {
+                    deletePhase: function() {
+                        return Promise.resolve({});
+                    }
+                },
+                codebuild: {
+                    deletePhase: function () {
+                        return Promise.resolve({});
+                    }
+                }
+            }
+            let handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
+            let handelFile = util.loadYamlFile(`${__dirname}/handel-example.yml`);
+            let pipelineToDelete = 'dev';
+            let accountConfig = {};
+
+            return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, handelFile, pipelineToDelete, accountConfig, "FakeBucket")
+                .then(results => {
+                    expect(results.length).to.equal(2);
+                    expect(results[0]).to.deep.equal({});
+                    expect(results[1]).to.deep.equal({});
+                });
+        })
+    });
+
+    describe('deletePipeline', function() {
+        it('should delete the pipeline', function() {
+            let deletePipelineStub = sandbox.stub(codepipelineCalls, 'deletePipeline').returns(Promise.resolve({}));
+            return lifecycle.deletePipeline("FakeName")
+                .then(result => {
+                    expect(result).to.deep.equal({});
+                    expect(deletePipelineStub.calledOnce).to.be.true;
+                })
         });
     });
 });

@@ -3,21 +3,63 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const inquirer = require('inquirer');
 
-describe('github phase module', function() {
+describe('github phase module', function () {
     let sandbox;
 
-    beforeEach(function() {
+    beforeEach(function () {
         sandbox = sinon.sandbox.create();
     });
 
-    afterEach(function() {
+    afterEach(function () {
         sandbox.restore();
     });
 
-    describe('getSecretsForPhase', function() {
-        it('should prompt for a github access token', function() {
+    describe('check', function () {
+        it('should require the owner parameter', function () {
+            let phaseConfig = {
+                repo: 'FakeRepo',
+                branch: 'FakeBranch'
+            };
+            let errors = github.check(phaseConfig);
+            expect(errors.length).to.equal(1);
+            expect(errors[0]).to.include(`The 'owner' parameter is required`);
+        });
+
+        it('should require the repo parameter', function() {
+            let phaseConfig = {
+                owner: 'FakeOwner',
+                branch: 'FakeBranch'
+            };
+            let errors = github.check(phaseConfig);
+            expect(errors.length).to.equal(1);
+            expect(errors[0]).to.include(`The 'repo' parameter is required`);
+        });
+
+        it('should require the branch parameter', function() {
+            let phaseConfig = {
+                owner: 'FakeOwner',
+                repo: 'FakeRepo'
+            };
+            let errors = github.check(phaseConfig);
+            expect(errors.length).to.equal(1);
+            expect(errors[0]).to.include(`The 'branch' parameter is required`);
+        });
+
+        it('should work when all required parameters are provided', function () {
+            let phaseConfig = {
+                owner: 'FakeOwner',
+                repo: 'FakeRepo',
+                branch: 'FakeBranch'
+            };
+            let errors = github.check(phaseConfig);
+            expect(errors.length).to.equal(0);
+        });
+    });
+
+    describe('getSecretsForPhase', function () {
+        it('should prompt for a github access token', function () {
             let token = "FakeToken";
-            let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({githubAccessToken: token}));
+            let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({ githubAccessToken: token }));
 
             return github.getSecretsForPhase()
                 .then(results => {
@@ -26,8 +68,8 @@ describe('github phase module', function() {
         });
     });
 
-    describe('createPhase', function() {
-        it('should create the codebuild project and return the phase config', function() {
+    describe('createPhase', function () {
+        it('should create the codebuild project and return the phase config', function () {
             let phaseContext = {
                 phaseName: 'myphase',
                 handelAppName: 'myApp',
@@ -42,6 +84,15 @@ describe('github phase module', function() {
                 .then(phase => {
                     expect(phase.name).to.equal(phaseContext.phaseName);
                 });
+        });
+    });
+
+    describe('deletePhase', function () {
+        it('should do nothing', function () {
+            return github.deletePhase({}, {})
+                .then(result => {
+                    expect(result).to.deep.equal({});
+                })
         });
     });
 });

@@ -5,19 +5,26 @@ const cloudFormationCalls = require('../../../lib/aws/cloudformation-calls');
 const sinon = require('sinon');
 const inquirer = require('inquirer');
 
-describe('runscope module', function() {
+describe('runscope module', function () {
     let sandbox;
 
-    beforeEach(function() {
+    beforeEach(function () {
         sandbox = sinon.sandbox.create();
     });
 
-    afterEach(function() {
+    afterEach(function () {
         sandbox.restore();
     });
 
-    describe('getSecretsForPhase', function() {
-        it('should prompt for the trigger URL and auth token', function() {
+    describe('check', function () {
+        it('should return an empty array', function () {
+            let errors = runscope.check({});
+            expect(errors).to.deep.equal([]);
+        })
+    });
+
+    describe('getSecretsForPhase', function () {
+        it('should prompt for the trigger URL and auth token', function () {
             let triggerUrl = "FakeUrl";
             let accessToken = "FakeToken";
 
@@ -35,7 +42,7 @@ describe('runscope module', function() {
         });
     });
 
-    describe('createPhase', function() {
+    describe('createPhase', function () {
         let phaseContext = {
             phaseName: 'MyPhase',
             params: {},
@@ -49,7 +56,7 @@ describe('runscope module', function() {
             region: 'us-west-2'
         }
 
-        it('should create the role, upload the file, and create the stack when it doesnt exist', function() {
+        it('should create the role, upload the file, and create the stack when it doesnt exist', function () {
             let functionName = "MyFunction";
             let getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve(null));
             let createLambdaRoleStub = sandbox.stub(deployersCommon, 'createLambdaCodePipelineRole').returns(Promise.resolve({
@@ -74,10 +81,10 @@ describe('runscope module', function() {
                     expect(createStackStub.calledOnce).to.be.true;
                     expect(phaseSpec.name).to.equal(phaseContext.phaseName);
                     expect(phaseSpec.actions[0].configuration.FunctionName).to.equal(functionName);
-                }); 
+                });
         });
 
-        it('should return the stack when it exists', function() {
+        it('should return the stack when it exists', function () {
             let functionName = "MyFunction";
             let getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve({
                 Outputs: [{
@@ -91,7 +98,35 @@ describe('runscope module', function() {
                     expect(getStackStub.calledOnce).to.be.true;
                     expect(phaseSpec.name).to.equal(phaseContext.phaseName);
                     expect(phaseSpec.actions[0].configuration.FunctionName).to.equal(functionName);
-                });       
+                });
+        });
+    });
+
+    describe('deletePhase', function () {
+        let phaseContext = {
+            phaseName: 'FakePhase'
+        }
+
+        it('should delete the cloudformation stack if present', function () {
+            let deleteStackStub = sandbox.stub(cloudFormationCalls, 'deleteStack').returns(Promise.resolve(true));
+            let getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve({}));
+            return runscope.deletePhase(phaseContext, {})
+                .then(result => {
+                    expect(result).to.equal(true);
+                    expect(getStackStub.calledOnce).to.be.true;
+                    expect(deleteStackStub.calledOnce).to.be.true;
+                });
+        });
+
+        it('should return true if the stack is already deleted', function () {
+            let deleteStackStub = sandbox.stub(cloudFormationCalls, 'deleteStack').returns(Promise.resolve(true));
+            let getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve(null));
+            return runscope.deletePhase(phaseContext, {})
+                .then(result => {
+                    expect(result).to.equal(true);
+                    expect(getStackStub.calledOnce).to.be.true;
+                    expect(deleteStackStub.notCalled).to.be.true;
+                });
         });
     });
 

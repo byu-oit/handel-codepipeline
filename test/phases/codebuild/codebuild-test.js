@@ -5,19 +5,36 @@ const util = require('../../../lib/util/util');
 const iamCalls = require('../../../lib/aws/iam-calls');
 const codebuildCalls = require('../../../lib/aws/codebuild-calls');
 
-describe('codebuild phase module', function() {
+describe('codebuild phase module', function () {
     let sandbox;
 
-    beforeEach(function() {
+    beforeEach(function () {
         sandbox = sinon.sandbox.create();
     });
 
-    afterEach(function() {
+    afterEach(function () {
         sandbox.restore();
     });
 
-    describe('getSecretsForPhase', function() {
-        it('should return an empty object', function() {
+    describe('check', function () {
+        it('should require the build_image parameter', function () {
+            let phaseConfig = {};
+            let errors = codebuild.check(phaseConfig);
+            expect(errors.length).to.equal(1);
+            expect(errors[0]).to.include(`The 'build_image' parameter is required`);
+        });
+
+        it('should work when all required parameters are provided', function () {
+            let phaseConfig = {
+                build_image: 'FakeImage'
+            };
+            let errors = codebuild.check(phaseConfig);
+            expect(errors.length).to.equal(0);
+        });
+    });
+
+    describe('getSecretsForPhase', function () {
+        it('should return an empty object', function () {
             return codebuild.getSecretsForPhase()
                 .then(results => {
                     expect(results).to.deep.equal({});
@@ -25,8 +42,8 @@ describe('codebuild phase module', function() {
         });
     });
 
-    describe('createPhase', function() {
-        it('should create the codebuild project and return the phase config', function() {
+    describe('createPhase', function () {
+        it('should create the codebuild project and return the phase config', function () {
             let phaseContext = {
                 handelAppName: 'myApp',
                 accountConfig: {
@@ -52,6 +69,21 @@ describe('codebuild phase module', function() {
                     expect(getRoleStub.calledOnce).to.be.true;
                     expect(createProjectStub.calledOnce).to.be.true;
 
+                });
+        });
+    });
+
+    describe('deletePhase', function() {
+        let phaseContext = {
+            phaseName: 'FakePhase',
+            handelAppName: 'FakeApp'
+        }
+        it('should delete the codebuild project', function() {
+            let deleteProjectStub = sandbox.stub(codebuildCalls, 'deleteProject').returns(Promise.resolve(true))
+            return codebuild.deletePhase(phaseContext, {})
+                .then(result => {
+                    expect(result).to.be.true;
+                    expect(deleteProjectStub.calledOnce).to.be.true;
                 });
         });
     });
