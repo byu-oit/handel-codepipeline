@@ -20,5 +20,6 @@ Handel-CodePipeline is a tool to easily create AWS CodePipelines, including supp
    phase-types/github
    phase-types/codebuild
    phase-types/handel
+   phase-types/handel_delete
    phase-types/runscope
    phase-types/slack_notify

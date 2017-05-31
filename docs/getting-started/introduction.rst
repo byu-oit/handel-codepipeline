@@ -6,6 +6,4 @@ How does this library work?
 ---------------------------
 You specify a file called *handel-codepipeline.yml* in your code repository. This file contains a YAML specification of how the library should configure your pipeline.
 
-In addition to this pipeline specification file, you'll also need to specify your `Handel file <https://handel.readthedocs.io>`_ that defines how your application should be deployed. Handel-CodePipeline needs to read this to get information about your environment file.
-
-Once you've defined your specification, you can run the library. It will prompt you for further pieces of information, after which it will create the pipeline.
+Once you've defined your *handel-codepipeline.yml* file, you can run the library. It will prompt you for further pieces of information, after which it will create the pipeline.

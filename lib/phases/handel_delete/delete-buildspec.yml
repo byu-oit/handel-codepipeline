@@ -1,0 +1,9 @@
+version: 0.1
+
+phases:
+  pre_build:
+    commands:
+    - npm install -g handel
+  build:
+    commands:
+    - handel delete -e $ENVS_TO_DELETE -c $HANDEL_ACCOUNT_CONFIG -d
