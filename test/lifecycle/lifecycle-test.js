@@ -117,7 +117,7 @@ describe('lifecycle module', function () {
             expect(errors[0]).to.contain("You must specify at least two phases");
         });
 
-        it('should return an error if the first phase is not a github phase', function () {
+        it('should return an error if the first phase is not a github or codecommit phase', function () {
             let handelCodePipelineFile = {
                 version: 1,
                 name: 'my-pipeline',
@@ -140,7 +140,7 @@ describe('lifecycle module', function () {
 
             let errors = lifecycle.validatePipelineSpec(handelCodePipelineFile);
             expect(errors.length).to.equal(1);
-            expect(errors[0]).to.contain("must be a github phase");
+            expect(errors[0]).to.contain("must be a 'github' or 'codecommit' phase");
         });
 
         it('should return an error if the second phase is not a codebuild phase', function () {
