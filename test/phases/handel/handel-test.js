@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const iamCalls = require('../../../lib/aws/iam-calls');
 const codebuildCalls = require('../../../lib/aws/codebuild-calls');
 
-describe('codebuild phase module', function () {
+describe('handel phase module', function () {
     let sandbox;
 
     beforeEach(function () {
@@ -42,24 +42,26 @@ describe('codebuild phase module', function () {
     });
 
     describe('createPhase', function () {
-        it('should create the codebuild project and return the phase config', function () {
-            let phaseContext = {
-                handelAppName: 'myApp',
-                accountConfig: {
-                    account_id: 111111111111
-                },
-                params: {
-                    environments_to_deploy: ['dev']
-                }
+        let phaseContext = {
+            handelAppName: 'myApp',
+            accountConfig: {
+                account_id: 111111111111
+            },
+            params: {
+                environments_to_deploy: ['dev']
             }
+        }
 
-            let role = {
-                Arn: "FakeArn"
-            }
+        let role = {
+            Arn: "FakeArn"
+        }
+
+        it('should create the codebuild project and return the phase config', function () {
             let createRoleStub = sandbox.stub(iamCalls, 'createRoleIfNotExists').returns(Promise.resolve(role));
             let createPolicyStub = sandbox.stub(iamCalls, 'createPolicyIfNotExists').returns(Promise.resolve(role));
             let attachPolicyStub = sandbox.stub(iamCalls, 'attachPolicyToRole').returns(Promise.resolve({}));
             let getRoleStub = sandbox.stub(iamCalls, 'getRole').returns(Promise.resolve(role));
+            let getProjectStub = sandbox.stub(codebuildCalls, 'getProject').returns(Promise.resolve(null));
             let createProjectStub = sandbox.stub(codebuildCalls, 'createProject').returns(Promise.resolve)
 
             return handel.createPhase(phaseContext, {})
@@ -68,10 +70,29 @@ describe('codebuild phase module', function () {
                     expect(createPolicyStub.calledOnce).to.be.true;
                     expect(attachPolicyStub.calledOnce).to.be.true;
                     expect(getRoleStub.calledOnce).to.be.true;
+                    expect(getProjectStub.calledOnce).to.be.true;
                     expect(createProjectStub.calledOnce).to.be.true;
-
                 });
         });
+
+        it('should update the project when it already exists', function () {
+            let createRoleStub = sandbox.stub(iamCalls, 'createRoleIfNotExists').returns(Promise.resolve(role));
+            let createPolicyStub = sandbox.stub(iamCalls, 'createPolicyIfNotExists').returns(Promise.resolve(role));
+            let attachPolicyStub = sandbox.stub(iamCalls, 'attachPolicyToRole').returns(Promise.resolve({}));
+            let getRoleStub = sandbox.stub(iamCalls, 'getRole').returns(Promise.resolve(role));
+            let getProjectStub = sandbox.stub(codebuildCalls, 'getProject').returns(Promise.resolve({}));
+            let updateProjectStub = sandbox.stub(codebuildCalls, 'updateProject').returns(Promise.resolve)
+
+            return handel.createPhase(phaseContext, {})
+                .then(phase => {
+                    expect(createRoleStub.calledOnce).to.be.true;
+                    expect(createPolicyStub.calledOnce).to.be.true;
+                    expect(attachPolicyStub.calledOnce).to.be.true;
+                    expect(getRoleStub.calledOnce).to.be.true;
+                    expect(getProjectStub.calledOnce).to.be.true;
+                    expect(updateProjectStub.calledOnce).to.be.true;
+                });
+        })
     });
 
     describe('deletePhase', function () {

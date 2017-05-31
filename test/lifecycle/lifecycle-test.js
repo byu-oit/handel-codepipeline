@@ -4,19 +4,19 @@ const codepipelineCalls = require('../../lib/aws/codepipeline-calls');
 const sinon = require('sinon');
 const util = require('../../lib/util/util');
 
-describe('lifecycle module', function() {
+describe('lifecycle module', function () {
     let sandbox;
 
-    beforeEach(function() {
+    beforeEach(function () {
         sandbox = sinon.sandbox.create();
     });
 
-    afterEach(function() {
+    afterEach(function () {
         sandbox.restore();
     });
 
-    describe('checkPhases', function() {
-        it('should execute check on each phase', function() {
+    describe('checkPhases', function () {
+        it('should execute check on each phase', function () {
             let handelCodePipelineFile = {
                 version: 1,
                 pipelines: {
@@ -34,7 +34,7 @@ describe('lifecycle module', function() {
             let error = 'SomeError'
             let phaseDeployers = {
                 github: {
-                    check: function(phaseConfig) {
+                    check: function (phaseConfig) {
                         return [error]
                     }
                 }
@@ -46,8 +46,8 @@ describe('lifecycle module', function() {
         });
     });
 
-    describe('validatePipelineSpec', function() {
-        it('should return an error if no pipelines are specified', function() {
+    describe('validatePipelineSpec', function () {
+        it('should return an error if no pipelines are specified', function () {
             let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
@@ -60,7 +60,7 @@ describe('lifecycle module', function() {
             expect(errors[0]).to.contain("You must specify at least one or more pipelines");
         });
 
-        it('should return an error if no phases are specified in a pipeline', function() {
+        it('should return an error if no phases are specified in a pipeline', function () {
             let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
@@ -75,7 +75,7 @@ describe('lifecycle module', function() {
             expect(errors[0]).to.contain("You must specify at least one or more phases");
         });
 
-        it('should return an error if there are fewer than 2 phases in the pipeline', function() {
+        it('should return an error if there are fewer than 2 phases in the pipeline', function () {
             let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
@@ -92,7 +92,7 @@ describe('lifecycle module', function() {
             expect(errors[0]).to.contain("You must specify at least two phases");
         });
 
-        it('should return an error if the first phase is not a github phase', function() {
+        it('should return an error if the first phase is not a github phase', function () {
             let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
@@ -118,7 +118,7 @@ describe('lifecycle module', function() {
             expect(errors[0]).to.contain("must be a github phase");
         });
 
-        it('should return an error if the second phase is not a codebuild phase', function() {
+        it('should return an error if the second phase is not a codebuild phase', function () {
             let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
@@ -144,7 +144,7 @@ describe('lifecycle module', function() {
             expect(errors[0]).to.contain("must be a codebuild phase");
         });
 
-        it('should return an error if any phase does not have a type field', function() {
+        it('should return an error if any phase does not have a type field', function () {
             let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
@@ -173,7 +173,7 @@ describe('lifecycle module', function() {
             expect(errors[0]).to.contain("must specify a type");
         });
 
-        it('should return an error if any phase does not have a name field', function() {
+        it('should return an error if any phase does not have a name field', function () {
             let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
@@ -198,7 +198,7 @@ describe('lifecycle module', function() {
             expect(errors[0]).to.contain("must specify a name");
         });
 
-        it('should work if there are no errors', function() {
+        it('should work if there are no errors', function () {
             let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
@@ -224,17 +224,17 @@ describe('lifecycle module', function() {
         });
     })
 
-    describe('getPhaseSecrets', function() {
-        it('should prompt for secrets from each phase', function() {
+    describe('getPhaseSecrets', function () {
+        it('should prompt for secrets from each phase', function () {
             let phaseDeployers = {
                 github: {
-                    getSecretsForPhase: function() {
-                        return Promise.resolve({githubSecret: 'mysecret'});
+                    getSecretsForPhase: function () {
+                        return Promise.resolve({ githubSecret: 'mysecret' });
                     }
                 },
                 codebuild: {
                     getSecretsForPhase: function () {
-                        return Promise.resolve({codeBuildSecret: 'mysecret'});
+                        return Promise.resolve({ codeBuildSecret: 'mysecret' });
                     }
                 }
             }
@@ -250,11 +250,11 @@ describe('lifecycle module', function() {
         });
     });
 
-    describe('createPhases', function() {
-        it('should create each phase in the pipeline', function() {
+    describe('createPhases', function () {
+        it('should create each phase in the pipeline', function () {
             let phaseDeployers = {
                 github: {
-                    createPhase: function() {
+                    createPhase: function () {
                         return Promise.resolve({});
                     }
                 },
@@ -279,29 +279,43 @@ describe('lifecycle module', function() {
         });
     });
 
-    describe('createPipeline', function() {
-        it('should create the pipeline', function() {
-            let handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
-            let handelFile = util.loadYamlFile(`${__dirname}/handel-example.yml`);
-            let pipelineToCreate = 'dev';
-            let accountConfig = {};
-            let pipelinePhases = [];
+    describe('createPipeline', function () {
+        let handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
+        let handelFile = util.loadYamlFile(`${__dirname}/handel-example.yml`);
+        let pipelineToCreate = 'dev';
+        let accountConfig = {};
+        let pipelinePhases = [];
 
+        it('should create the pipeline', function () {
+            let getPipelineStub = sandbox.stub(codepipelineCalls, 'getPipeline').returns(Promise.resolve(null));
             let createPipelineStub = sandbox.stub(codepipelineCalls, 'createPipeline').returns(Promise.resolve({}));
 
             return lifecycle.createPipeline(handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
                 .then(pipeline => {
                     expect(pipeline).to.deep.equal({});
+                    expect(getPipelineStub.calledOnce).to.be.true;
                     expect(createPipelineStub.calledOnce).to.be.true;
+                });
+        });
+
+        it('should update the pipeline when it already exists', function () {
+            let getPipelineStub = sandbox.stub(codepipelineCalls, 'getPipeline').returns(Promise.resolve({}));
+            let updatePipelineStub = sandbox.stub(codepipelineCalls, 'updatePipeline').returns(Promise.resolve({}));
+
+            return lifecycle.createPipeline(handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
+                .then(pipeline => {
+                    expect(pipeline).to.deep.equal({});
+                    expect(getPipelineStub.calledOnce).to.be.true;
+                    expect(updatePipelineStub.calledOnce).to.be.true;
                 });
         });
     });
 
-    describe('deletePhases', function() {
-        it('should delete each phase in the pipeline', function() {
+    describe('deletePhases', function () {
+        it('should delete each phase in the pipeline', function () {
             let phaseDeployers = {
                 github: {
-                    deletePhase: function() {
+                    deletePhase: function () {
                         return Promise.resolve({});
                     }
                 },
@@ -325,8 +339,8 @@ describe('lifecycle module', function() {
         })
     });
 
-    describe('deletePipeline', function() {
-        it('should delete the pipeline', function() {
+    describe('deletePipeline', function () {
+        it('should delete the pipeline', function () {
             let deletePipelineStub = sandbox.stub(codepipelineCalls, 'deletePipeline').returns(Promise.resolve({}));
             return lifecycle.deletePipeline("FakeName")
                 .then(result => {
