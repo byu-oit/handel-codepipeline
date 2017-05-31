@@ -44,7 +44,7 @@ describe('codebuild phase module', function () {
 
     describe('createPhase', function () {
         let phaseContext = {
-            handelAppName: 'myApp',
+            appName: 'myApp',
             accountConfig: {
                 account_id: 111111111111
             },
@@ -97,7 +97,7 @@ describe('codebuild phase module', function () {
     describe('deletePhase', function () {
         let phaseContext = {
             phaseName: 'FakePhase',
-            handelAppName: 'FakeApp'
+            appName: 'FakeApp'
         }
         it('should delete the codebuild project', function () {
             let deleteProjectStub = sandbox.stub(codebuildCalls, 'deleteProject').returns(Promise.resolve(true))

@@ -72,7 +72,7 @@ describe('github phase module', function () {
         it('should create the codebuild project and return the phase config', function () {
             let phaseContext = {
                 phaseName: 'myphase',
-                handelAppName: 'myApp',
+                appName: 'myApp',
                 accountConfig: {
                     account_id: 111111111111
                 },

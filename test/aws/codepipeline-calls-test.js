@@ -19,9 +19,7 @@ describe('codepipelineCalls module', function () {
     describe('createPipeline', function () {
         it('should create the pipeline', function () {
             let pipelineName = "my-pipeline";
-            let handelFile = {
-                name: 'my-app'
-            };
+            let appName = 'my-app';
             let accountConfig = {
                 account_id: 111111111111,
                 region: 'us-west-2'
@@ -40,7 +38,7 @@ describe('codepipelineCalls module', function () {
                 pipeline: {}
             }));
 
-            return codepipelineCalls.createPipeline(pipelineName, handelFile, accountConfig, pipelinePhases, codePipelineBucketName)
+            return codepipelineCalls.createPipeline(appName, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName)
                 .then(pipeline => {
                     expect(createRoleStub.calledOnce).to.be.true;
                     expect(createPolicyStub.calledOnce).to.be.true;
@@ -75,9 +73,6 @@ describe('codepipelineCalls module', function () {
 
     describe('updatePipeline', function() {
         it('should update the pipeline', function() {
-            let handelFile = {
-                name: 'my-app'
-            };
             let accountConfig = {
                 account_id: 111111111111,
                 region: 'us-west-2'
@@ -91,7 +86,7 @@ describe('codepipelineCalls module', function () {
                 pipeline: {}
             }));
 
-            return codepipelineCalls.updatePipeline("my-pipeline", handelFile, accountConfig, pipelinePhases, "FakeBucket")
+            return codepipelineCalls.updatePipeline("my-app", "my-pipeline", accountConfig, pipelinePhases, "FakeBucket")
                 .then(pipeline => {
                     expect(getRoleStub.calledOnce).to.be.true;
                     expect(pipeline).to.deep.equal({});
