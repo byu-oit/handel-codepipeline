@@ -47,9 +47,35 @@ describe('lifecycle module', function () {
     });
 
     describe('validatePipelineSpec', function () {
+        it('should require the name field', function () {
+            let handelCodePipelineFile = {
+                version: 1,
+
+                pipelines: {
+                    dev: {
+                        phases: [
+                            {
+                                type: 'github',
+                                name: 'Source'
+                            },
+                            {
+                                type: 'codebuild',
+                                name: 'Build'
+                            }
+                        ]
+                    }
+                }
+            }
+
+            let errors = lifecycle.validatePipelineSpec(handelCodePipelineFile);
+            expect(errors.length).to.equal(1);
+            expect(errors[0]).to.contain("'name' field is required");
+        })
+
         it('should return an error if no pipelines are specified', function () {
             let handelCodePipelineFile = {
                 version: 1,
+                name: 'my-pipeline',
 
                 pipelines: {}
             }
@@ -62,6 +88,7 @@ describe('lifecycle module', function () {
         it('should return an error if no phases are specified in a pipeline', function () {
             let handelCodePipelineFile = {
                 version: 1,
+                name: 'my-pipeline',
 
                 pipelines: {
                     dev: {}
@@ -76,6 +103,7 @@ describe('lifecycle module', function () {
         it('should return an error if there are fewer than 2 phases in the pipeline', function () {
             let handelCodePipelineFile = {
                 version: 1,
+                name: 'my-pipeline',
 
                 pipelines: {
                     dev: {
@@ -92,6 +120,7 @@ describe('lifecycle module', function () {
         it('should return an error if the first phase is not a github phase', function () {
             let handelCodePipelineFile = {
                 version: 1,
+                name: 'my-pipeline',
 
                 pipelines: {
                     dev: {
@@ -117,6 +146,7 @@ describe('lifecycle module', function () {
         it('should return an error if the second phase is not a codebuild phase', function () {
             let handelCodePipelineFile = {
                 version: 1,
+                name: 'my-pipeline',
 
                 pipelines: {
                     dev: {
@@ -142,6 +172,7 @@ describe('lifecycle module', function () {
         it('should return an error if any phase does not have a type field', function () {
             let handelCodePipelineFile = {
                 version: 1,
+                name: 'my-pipeline',
 
                 pipelines: {
                     dev: {
@@ -170,6 +201,7 @@ describe('lifecycle module', function () {
         it('should return an error if any phase does not have a name field', function () {
             let handelCodePipelineFile = {
                 version: 1,
+                name: 'my-pipeline',
 
                 pipelines: {
                     dev: {
@@ -194,6 +226,7 @@ describe('lifecycle module', function () {
         it('should work if there are no errors', function () {
             let handelCodePipelineFile = {
                 version: 1,
+                name: 'my-pipeline',
 
                 pipelines: {
                     dev: {
