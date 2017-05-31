@@ -48,20 +48,18 @@ describe('lifecycle module', function () {
 
     describe('validatePipelineSpec', function () {
         it('should return an error if no pipelines are specified', function () {
-            let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
 
                 pipelines: {}
             }
 
-            let errors = lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
+            let errors = lifecycle.validatePipelineSpec(handelCodePipelineFile);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.contain("You must specify at least one or more pipelines");
         });
 
         it('should return an error if no phases are specified in a pipeline', function () {
-            let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
 
@@ -70,13 +68,12 @@ describe('lifecycle module', function () {
                 }
             }
 
-            let errors = lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
+            let errors = lifecycle.validatePipelineSpec(handelCodePipelineFile);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.contain("You must specify at least one or more phases");
         });
 
         it('should return an error if there are fewer than 2 phases in the pipeline', function () {
-            let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
 
@@ -87,13 +84,12 @@ describe('lifecycle module', function () {
                 }
             }
 
-            let errors = lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
+            let errors = lifecycle.validatePipelineSpec(handelCodePipelineFile);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.contain("You must specify at least two phases");
         });
 
         it('should return an error if the first phase is not a github phase', function () {
-            let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
 
@@ -113,13 +109,12 @@ describe('lifecycle module', function () {
                 }
             }
 
-            let errors = lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
+            let errors = lifecycle.validatePipelineSpec(handelCodePipelineFile);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.contain("must be a github phase");
         });
 
         it('should return an error if the second phase is not a codebuild phase', function () {
-            let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
 
@@ -139,13 +134,12 @@ describe('lifecycle module', function () {
                 }
             }
 
-            let errors = lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
+            let errors = lifecycle.validatePipelineSpec(handelCodePipelineFile);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.contain("must be a codebuild phase");
         });
 
         it('should return an error if any phase does not have a type field', function () {
-            let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
 
@@ -168,13 +162,12 @@ describe('lifecycle module', function () {
                 }
             }
 
-            let errors = lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
+            let errors = lifecycle.validatePipelineSpec(handelCodePipelineFile);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.contain("must specify a type");
         });
 
         it('should return an error if any phase does not have a name field', function () {
-            let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
 
@@ -193,13 +186,12 @@ describe('lifecycle module', function () {
                 }
             }
 
-            let errors = lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
+            let errors = lifecycle.validatePipelineSpec(handelCodePipelineFile);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.contain("must specify a name");
         });
 
         it('should work if there are no errors', function () {
-            let handelFile = {};
             let handelCodePipelineFile = {
                 version: 1,
 
@@ -219,7 +211,7 @@ describe('lifecycle module', function () {
                 }
             }
 
-            let errors = lifecycle.validatePipelineSpec(handelFile, handelCodePipelineFile);
+            let errors = lifecycle.validatePipelineSpec(handelCodePipelineFile);
             expect(errors.length).to.equal(0);
         });
     })
@@ -265,12 +257,11 @@ describe('lifecycle module', function () {
                 }
             }
             let handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
-            let handelFile = util.loadYamlFile(`${__dirname}/handel-example.yml`);
             let pipelineToCreate = 'dev';
             let accountConfig = {};
             let phaseSecrets = {};
 
-            return lifecycle.createPhases(phaseDeployers, handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, phaseSecrets)
+            return lifecycle.createPhases(phaseDeployers, handelCodePipelineFile, pipelineToCreate, accountConfig, phaseSecrets)
                 .then(phases => {
                     expect(phases.length).to.equal(2);
                     expect(phases[0]).to.deep.equal({});
@@ -281,7 +272,6 @@ describe('lifecycle module', function () {
 
     describe('createPipeline', function () {
         let handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
-        let handelFile = util.loadYamlFile(`${__dirname}/handel-example.yml`);
         let pipelineToCreate = 'dev';
         let accountConfig = {};
         let pipelinePhases = [];
@@ -290,7 +280,7 @@ describe('lifecycle module', function () {
             let getPipelineStub = sandbox.stub(codepipelineCalls, 'getPipeline').returns(Promise.resolve(null));
             let createPipelineStub = sandbox.stub(codepipelineCalls, 'createPipeline').returns(Promise.resolve({}));
 
-            return lifecycle.createPipeline(handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
+            return lifecycle.createPipeline(handelCodePipelineFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
                 .then(pipeline => {
                     expect(pipeline).to.deep.equal({});
                     expect(getPipelineStub.calledOnce).to.be.true;
@@ -302,7 +292,7 @@ describe('lifecycle module', function () {
             let getPipelineStub = sandbox.stub(codepipelineCalls, 'getPipeline').returns(Promise.resolve({}));
             let updatePipelineStub = sandbox.stub(codepipelineCalls, 'updatePipeline').returns(Promise.resolve({}));
 
-            return lifecycle.createPipeline(handelCodePipelineFile, handelFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
+            return lifecycle.createPipeline(handelCodePipelineFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
                 .then(pipeline => {
                     expect(pipeline).to.deep.equal({});
                     expect(getPipelineStub.calledOnce).to.be.true;
@@ -326,11 +316,10 @@ describe('lifecycle module', function () {
                 }
             }
             let handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
-            let handelFile = util.loadYamlFile(`${__dirname}/handel-example.yml`);
             let pipelineToDelete = 'dev';
             let accountConfig = {};
 
-            return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, handelFile, pipelineToDelete, accountConfig, "FakeBucket")
+            return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, pipelineToDelete, accountConfig, "FakeBucket")
                 .then(results => {
                     expect(results.length).to.equal(2);
                     expect(results[0]).to.deep.equal({});

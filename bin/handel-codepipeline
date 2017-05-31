@@ -24,28 +24,10 @@ Delete -- Deletes the given pipeline from your AWS account.`;
     printAndExit(usageMsg);
 }
 
-function loadHandelFile() {
-    try {
-        var handelFile = yaml.safeLoad(fs.readFileSync('./handel.yml', 'utf8'));
-        return handelFile;
-    }
-    catch (e) {
-        if (e.code === 'ENOENT') {
-            printAndExit(`No 'handel.yml' file found in this directory. You must run Handel in the directory containing the Handel file.`);
-        }
-        else if (e.name === 'YAMLException') {
-            printAndExit(`Malformed 'handel.yml' file. Make sure your Handel file is a properly formatted YAML file. You're probably missing a space or two somewhere`);
-        }
-        else {
-            printAndExit(`Unexpected error while loading 'handel.yml' file: ${e}`);
-        }
-    }
-}
-
 function loadHandelCodePipelineFile() {
     try {
-        var handelFile = yaml.safeLoad(fs.readFileSync('./handel-codepipeline.yml', 'utf8'));
-        return handelFile;
+        var handelCodePipelineFile = yaml.safeLoad(fs.readFileSync('./handel-codepipeline.yml', 'utf8'));
+        return handelCodePipelineFile;
     }
     catch (e) {
         if (e.code === 'ENOENT') {
@@ -60,18 +42,17 @@ function loadHandelCodePipelineFile() {
     }
 }
 
-let handelFile = loadHandelFile();
 let handelCodePipelineFile = loadHandelCodePipelineFile();
 let phase = process.argv[2];
 switch (phase) {
     case "create":
-        cli.createAction(handelFile, handelCodePipelineFile);
+        cli.createAction(handelCodePipelineFile);
         break;
     case "check":
-        cli.checkAction(handelFile, handelCodePipelineFile);
+        cli.checkAction(handelCodePipelineFile);
         break;
     case "delete":
-        cli.deleteAction(handelFile, handelCodePipelineFile);
+        cli.deleteAction(handelCodePipelineFile);
         break;
     default:
         printGeneralUsage();

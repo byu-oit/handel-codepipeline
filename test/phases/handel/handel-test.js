@@ -43,7 +43,7 @@ describe('handel phase module', function () {
 
     describe('createPhase', function () {
         let phaseContext = {
-            handelAppName: 'myApp',
+            appName: 'myApp',
             accountConfig: {
                 account_id: 111111111111
             },
@@ -98,7 +98,7 @@ describe('handel phase module', function () {
     describe('deletePhase', function () {
         let phaseContext = {
             phaseName: 'FakePhase',
-            handelAppName: 'FakeApp',
+            appName: 'FakeApp',
             params: {
                 environments_to_deploy: ['dev']
             }
