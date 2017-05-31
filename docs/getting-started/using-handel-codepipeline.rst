@@ -12,29 +12,27 @@ Creating New Pipelines
 ----------------------
 To create a new pipeline, do the following:
 
-1. Make sure you have already created your `Handel file <https://handel.readthedocs.io/en/latest/handel-basics/handel-file.html>`_ that specifies how your application should be deployed.
-2. Create a new :ref:`handel-codepipeline-file` in your repository. 
-3. Install Handel-CodePipeline:
+1. Create a new :ref:`handel-codepipeline-file` in your repository. 
+2. Install Handel-CodePipeline:
 
     .. code-block:: none
     
         npm install -g handel-codepipeline
 
-4. Run Handel-CodePipeline:
+3. Run Handel-CodePipeline:
 
     .. code-block:: none
 
         handel-codepipeline
 
-5. Handel-CodePipeline will walk you through a series of questions, asking you to provide further input:
+4. Handel-CodePipeline will walk you through a series of questions, asking you to provide further input:
 
     .. code-block:: none
 
         Welcome to the Handel CodePipeline setup wizard
-        ? Please enter the path to the application's Handel config file ./handel.yml
-        ? Please enter the path to the Handel-CodePipeline config file ./handel-codepipeline.yml
+        ? Please enter the name of the pipeline from your handel-codepipeline.yml file that you would like to create prd
+        ? Please enter the name of the account where your pipeline will be created my-account
         ? Please enter the path to the directory containing the Handel account configuration files /path/to/account/config/files
         ? Please enter a valid GitHub access token (CodePipeline will use this to pull your repo) SOMEFAKETOKEN
-        ? What is the ID of the account you wish to use for your pipeline 'dev' 111111111111
 
 After you provide the appropriate input, Handel-CodePipeline will create the pipeline with the specified phases.
