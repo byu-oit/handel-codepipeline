@@ -98,10 +98,10 @@ describe('codepipelineCalls module', function () {
         it('should delete the pipeline', function() {
             AWS.mock('CodePipeline', 'deletePipeline', Promise.resolve(true));
 
-            return codepipelineCalls.deletePipeline("FakePipeline")
+            return codepipelineCalls.deletePipeline("FakeApp", "FakePipeline")
                 .then(success => {
                     expect(success).to.equal(true);
-                })
+                });
         });
     });
 });
