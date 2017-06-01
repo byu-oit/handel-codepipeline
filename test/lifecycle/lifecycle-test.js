@@ -364,7 +364,7 @@ describe('lifecycle module', function () {
     describe('deletePipeline', function () {
         it('should delete the pipeline', function () {
             let deletePipelineStub = sandbox.stub(codepipelineCalls, 'deletePipeline').returns(Promise.resolve({}));
-            return lifecycle.deletePipeline("FakeName")
+            return lifecycle.deletePipeline("FakeApp", "FakePipeline")
                 .then(result => {
                     expect(result).to.deep.equal({});
                     expect(deletePipelineStub.calledOnce).to.be.true;

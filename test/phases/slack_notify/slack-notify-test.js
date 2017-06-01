@@ -119,29 +119,10 @@ describe('slack_notify module', function () {
     });
 
     describe('deletePhase', function () {
-        let phaseContext = {
-            phaseName: 'FakePhase'
-        }
-
-        it('should delete the cloudformation stack if present', function () {
-            let deleteStackStub = sandbox.stub(cloudFormationCalls, 'deleteStack').returns(Promise.resolve(true));
-            let getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve({}));
-            return slackNotify.deletePhase(phaseContext, {})
+        it('should do nothing', function () {
+            return slackNotify.deletePhase({}, {})
                 .then(result => {
-                    expect(result).to.equal(true);
-                    expect(getStackStub.calledOnce).to.be.true;
-                    expect(deleteStackStub.calledOnce).to.be.true;
-                });
-        });
-
-        it('should return true if the stack is already deleted', function () {
-            let deleteStackStub = sandbox.stub(cloudFormationCalls, 'deleteStack').returns(Promise.resolve(true));
-            let getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve(null));
-            return slackNotify.deletePhase(phaseContext, {})
-                .then(result => {
-                    expect(result).to.equal(true);
-                    expect(getStackStub.calledOnce).to.be.true;
-                    expect(deleteStackStub.notCalled).to.be.true;
+                    expect(result).to.deep.equal({});
                 });
         });
     });

@@ -1,10 +1,4 @@
 #!/usr/bin/env node
-const AWS = require('aws-sdk');
-const input = require('../lib/input');
-const winston = require('winston');
-const util = require('../lib/util/util');
-const lifecycle = require('../lib/lifecycle');
-const s3Calls = require('../lib/aws/s3-calls');
 const yaml = require('js-yaml');
 const fs = require('fs');
 const cli = require('../lib/cli');
