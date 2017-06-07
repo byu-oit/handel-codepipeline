@@ -12,9 +12,9 @@ function printGeneralUsage() {
     let usageMsg = `Usage: handel-codepipeline <action>
 
 Action:
-Check -- Checks the contents of your Handel file for errors.
-Create -- Creates the given pipeline from your Handel-Codepipeline file.
-Delete -- Deletes the given pipeline from your AWS account.`;
+check -- Checks the contents of your Handel file for errors.
+create -- Creates the given pipeline from your Handel-Codepipeline file.
+delete -- Deletes the given pipeline from your AWS account.`;
     printAndExit(usageMsg);
 }
 

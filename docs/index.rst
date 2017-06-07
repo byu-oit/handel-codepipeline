@@ -1,6 +1,6 @@
 Welcome to Handel-CodePipeline's documentation!
 ===============================================
-Handel-CodePipeline is a tool to easily create AWS CodePipelines, including support for Handel deployments.
+Handel-CodePipeline is a tool to easily create AWS CodePipelines, including support for `Handel <http://handel.readthedocs.io/en/latest/>`_ deployments.
 
 .. toctree::
    :maxdepth: 1
