@@ -19,13 +19,26 @@ To create a new pipeline, do the following:
     
         npm install -g handel-codepipeline
 
-3. Run Handel-CodePipeline:
+3. Ensure you have your AWS credentials configured on the command line.
 
     .. code-block:: none
 
-        handel-codepipeline
+        # This command will prompt you for your AWS Access Key ID and Secret Access Keys
+        aws configure 
 
-4. Handel-CodePipeline will walk you through a series of questions, asking you to provide further input:
+    .. NOTE::
+
+        If you specified a profile when running *aws configure* above, you'll need to make Handel-CodePipeline aware of which profile to use by setting the AWS_PROFILE environment variable. 
+
+        For example, if you configured your credentials in a profile named *my-account*, you'll run ``export AWS_PROFILE=my-account`` on Mac/Linux to set the environment variable that tells Handel-CodePipeline which profile to use.
+
+4. Run Handel-CodePipeline:
+
+    .. code-block:: none
+
+        handel-codepipeline create
+
+5. Handel-CodePipeline will walk you through a series of questions, asking you to provide further input:
 
     .. code-block:: none
 

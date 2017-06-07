@@ -1,6 +1,8 @@
 Introduction
 ============
-Handel-CodePipeline is a command-line library that helps you create Continuous Delivery pipelines using the `Handel deployment library <https://handel.readthedocs.io>`_, running inside the AWS CodePipeline service. You can wire up these pipelines manually if you choose, but this library simplifies the process of setting up your pipeline.
+Handel-CodePipeline is a command-line library that helps you easily create Continuous Delivery pipelines in the AWS CodePipeline service.
+
+Included in this library is the support for doing deployments using the `Handel deployment library <https://handel.readthedocs.io>`_.
 
 How does this library work?
 ---------------------------
