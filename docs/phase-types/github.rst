@@ -13,6 +13,11 @@ Parameters
      - Required
      - Default
      - Description
+   * - type
+     - string
+     - Yes
+     - github
+     - This must always be *github* for the GitHub phase type.
    * - owner
      - string
      - Yes

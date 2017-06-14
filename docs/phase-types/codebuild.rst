@@ -17,6 +17,11 @@ Parameters
      - Required
      - Default
      - Description
+   * - type
+     - string
+     - Yes
+     - codebuild
+     - This must always be *codebuild* for the CodeBuild phase type.
    * - build_image
      - string
      - Yes

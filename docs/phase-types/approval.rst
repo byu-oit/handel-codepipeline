@@ -4,7 +4,19 @@ The *Approval* phase type configures a pipeline phase to require manual approval
 
 Parameters
 ----------
-This phase type doesn't take any parameters in the *handel-codepipeline.yml* file.
+.. list-table::
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Required
+     - Default
+     - Description
+   * - type
+     - string
+     - Yes
+     - approval
+     - This must always be *approval* for the Approval phase type.
 
 Secrets
 -------

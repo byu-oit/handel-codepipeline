@@ -4,7 +4,19 @@ The *Runscope* phase type configures a pipeline phase to execute tests from a Ru
 
 Parameters
 ----------
-This phase type doesn't take any parameters in the *handel-codepipeline.yml* file. It does, however, ask for some secrets when creating the pipeline.
+.. list-table::
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Required
+     - Default
+     - Description
+   * - type
+     - string
+     - Yes
+     - runscope
+     - This must always be *runscope* for the Runscope phase type.
 
 Secrets
 -------

@@ -13,6 +13,11 @@ Parameters
      - Required
      - Default
      - Description
+   * - type
+     - string
+     - Yes
+     - handel
+     - This must always be *handel* for the Handel phase type.
    * - environments_to_deploy
      - list<string>
      - Yes

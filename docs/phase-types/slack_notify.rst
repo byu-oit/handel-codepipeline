@@ -13,6 +13,11 @@ Parameters
      - Required
      - Default
      - Description
+   * - type
+     - string
+     - Yes
+     - slack_notify
+     - This must always be *slack_notify* for the Slack Notify phase type.
    * - message
      - string
      - Yes

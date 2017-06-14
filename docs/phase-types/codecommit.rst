@@ -13,6 +13,11 @@ Parameters
      - Required
      - Default
      - Description
+   * - type
+     - string
+     - Yes
+     - codecommit
+     - This must always be *codecommit* for the CodeCommit phase type.
    * - repo 
      - string
      - Yes

@@ -21,6 +21,11 @@ Parameters
      - Required
      - Default
      - Description
+   * - type
+     - string
+     - Yes
+     - handel_delete
+     - This must always be *handel_delete* for the Handel Delete phase type.
    * - environments_to_delete
      - list<string>
      - Yes
