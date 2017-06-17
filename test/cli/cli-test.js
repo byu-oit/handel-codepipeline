@@ -18,3 +18,17 @@ const expect = require('chai').expect;
 const AWS = require('aws-sdk-mock');
 const cli = require('../../lib/cli');
 const sinon = require('sinon');
+
+describe('cli module', function() {
+    let sandbox;
+
+    beforeEach(function() {
+        sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(function() {
+        sandbox.restore();
+    });
+
+    //TODO - Add unit tests
+});

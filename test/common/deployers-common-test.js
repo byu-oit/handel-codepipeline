@@ -15,9 +15,9 @@
  *
  */
 const expect = require('chai').expect;
-const deployersCommon = require('../../lib/phases/deployers-common');
+const deployersCommon = require('../../lib/common/deployers-common');
 const sinon = require('sinon');
-const util = require('../../lib/util/util');
+const util = require('../../lib/common/util');
 const s3Calls = require('../../lib/aws/s3-calls');
 const iamCalls = require('../../lib/aws/iam-calls');
 const fs = require('fs');

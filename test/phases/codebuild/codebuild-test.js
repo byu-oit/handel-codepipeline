@@ -114,6 +114,7 @@ describe('codebuild phase module', function () {
             phaseName: 'FakePhase',
             appName: 'FakeApp'
         }
+        
         it('should delete the codebuild project', function () {
             let deleteProjectStub = sandbox.stub(codebuildCalls, 'deleteProject').returns(Promise.resolve(true))
             return codebuild.deletePhase(phaseContext, {})

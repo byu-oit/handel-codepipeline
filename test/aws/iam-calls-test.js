@@ -161,8 +161,8 @@ describe('iam calls', function() {
             return iamCalls.createPolicyIfNotExists('FakePolicy', 'FakeArn', {})
                 .then(policy => {
                     expect(policy).to.deep.equal({});
-                    expect(getPolicyStub.calledOnce).to.be.true;
-                    expect(createPolicyStub.calledOnce).to.be.true;
+                    expect(getPolicyStub.callCount).to.equal(1);
+                    expect(createPolicyStub.callCount).to.equal(1);
                 });
         });
 
@@ -173,8 +173,8 @@ describe('iam calls', function() {
             return iamCalls.createPolicyIfNotExists('FakePolicy', 'FakeArn', {})
                 .then(policy => {
                     expect(policy).to.deep.equal({});
-                    expect(getPolicyStub.calledOnce).to.be.true;
-                    expect(createPolicyStub.notCalled).to.be.true;
+                    expect(getPolicyStub.callCount).to.equal(1);
+                    expect(createPolicyStub.callCount).to.equal(0);
                 });
         });
     });

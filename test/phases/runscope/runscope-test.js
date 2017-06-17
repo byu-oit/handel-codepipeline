@@ -16,7 +16,7 @@
  */
 const expect = require('chai').expect;
 const runscope = require('../../../lib/phases/runscope');
-const deployersCommon = require('../../../lib/phases/deployers-common');
+const deployersCommon = require('../../../lib/common/deployers-common');
 const cloudFormationCalls = require('../../../lib/aws/cloudformation-calls');
 const sinon = require('sinon');
 const inquirer = require('inquirer');
@@ -53,7 +53,7 @@ describe('runscope module', function () {
                 .then(results => {
                     expect(results.runscopeTriggerUrl).to.equal(triggerUrl);
                     expect(results.runscopeAccessToken).to.equal(accessToken);
-                    expect(promptStub.calledOnce).to.be.true;
+                    expect(promptStub.callCount).to.equal(1);
                 });
         });
     });
@@ -91,10 +91,10 @@ describe('runscope module', function () {
 
             return runscope.createPhase(phaseContext, accountConfig)
                 .then(phaseSpec => {
-                    expect(getStackStub.calledOnce).to.be.true;
-                    expect(createLambdaRoleStub.calledOnce).to.be.true;
-                    expect(uploadDirectoryStub.calledOnce).to.be.true;
-                    expect(createStackStub.calledOnce).to.be.true;
+                    expect(getStackStub.callCount).to.equal(1);
+                    expect(createLambdaRoleStub.callCount).to.equal(1);
+                    expect(uploadDirectoryStub.callCount).to.equal(1);
+                    expect(createStackStub.callCount).to.equal(1);
                     expect(phaseSpec.name).to.equal(phaseContext.phaseName);
                     expect(phaseSpec.actions[0].configuration.FunctionName).to.equal(functionName);
                 });
@@ -111,7 +111,7 @@ describe('runscope module', function () {
 
             return runscope.createPhase(phaseContext, accountConfig)
                 .then(phaseSpec => {
-                    expect(getStackStub.calledOnce).to.be.true;
+                    expect(getStackStub.callCount).to.equal(1);
                     expect(phaseSpec.name).to.equal(phaseContext.phaseName);
                     expect(phaseSpec.actions[0].configuration.FunctionName).to.equal(functionName);
                 });

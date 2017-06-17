@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-const util = require('../../lib/util/util');
+const util = require('../../lib/common/util');
 const expect = require('chai').expect;
 const fs = require('fs');
 

@@ -14,3 +14,77 @@
  * limitations under the License.
  *
  */
+const expect = require('chai').expect;
+const input = require('../../lib/input');
+const util = require('../../lib/common/util');
+const sinon = require('sinon');
+const fs = require('fs');
+const inquirer = require('inquirer');
+
+describe('input module', function() {
+    let sandbox;
+
+    beforeEach(function() {
+        sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(function() {
+        sandbox.restore();
+    });
+
+    describe('getPipelineConfigForDelete', function() {
+        it('should ask questions required for the delete action', function() {
+            let accountConfigsPath = "FakePath";
+            let pipelineName = "FakePipeline";
+            let accountName = "FakeAccount";
+
+            let existsStub = sandbox.stub(fs, 'existsSync').returns(false);
+            let mkdirStub = sandbox.stub(fs, 'mkdirSync').returns(true);
+            let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
+                accountConfigsPath: accountConfigsPath,
+                pipelineToDelete: pipelineName,
+                accountName: accountName
+            }));
+            let saveYamlFileStub = sandbox.stub(util, 'saveYamlFile').returns(true);
+
+            return input.getPipelineConfigForDelete()
+                .then(config => {
+                    expect(config.accountConfigsPath).to.equal(accountConfigsPath);
+                    expect(config.pipelineToDelete).to.equal(pipelineName);
+                    expect(accountName).to.equal(accountName);
+                    expect(existsStub.callCount).to.equal(3);
+                    expect(mkdirStub.callCount).to.equal(1);
+                    expect(promptStub.callCount).to.equal(1);
+                    expect(saveYamlFileStub.callCount).to.equal(1);
+                });
+        });
+    });
+
+    describe('getPipelineConfigForCreate', function() {
+        it('should ask questions required for the create action', function() {
+            let accountConfigsPath = "FakePath";
+            let pipelineName = "FakePipeline";
+            let accountName = "FakeAccount";
+
+            let existsStub = sandbox.stub(fs, 'existsSync').returns(false);
+            let mkdirStub = sandbox.stub(fs, 'mkdirSync').returns(true);
+            let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
+                accountConfigsPath: accountConfigsPath,
+                pipelineToCreate: pipelineName,
+                accountName: accountName
+            }));
+            let saveYamlFileStub = sandbox.stub(util, 'saveYamlFile').returns(true);
+
+            return input.getPipelineConfigForCreate()
+                .then(config => {
+                    expect(config.accountConfigsPath).to.equal(accountConfigsPath);
+                    expect(config.pipelineToCreate).to.equal(pipelineName);
+                    expect(accountName).to.equal(accountName);
+                    expect(existsStub.callCount).to.equal(3);
+                    expect(mkdirStub.callCount).to.equal(1);
+                    expect(promptStub.callCount).to.equal(1);
+                    expect(saveYamlFileStub.callCount).to.equal(1);
+                });
+        });
+    });
+});

@@ -82,12 +82,12 @@ describe('handel phase module', function () {
 
             return handelDelete.createPhase(phaseContext, {})
                 .then(phase => {
-                    expect(createRoleStub.calledOnce).to.be.true;
-                    expect(createPolicyStub.calledOnce).to.be.true;
-                    expect(attachPolicyStub.calledOnce).to.be.true;
-                    expect(getRoleStub.calledOnce).to.be.true;
-                    expect(getProjectStub.calledOnce).to.be.true;
-                    expect(createProjectStub.calledOnce).to.be.true;
+                    expect(createRoleStub.callCount).to.equal(1);
+                    expect(createPolicyStub.callCount).to.equal(1);
+                    expect(attachPolicyStub.callCount).to.equal(1);
+                    expect(getRoleStub.callCount).to.equal(1);
+                    expect(getProjectStub.callCount).to.equal(1);
+                    expect(createProjectStub.callCount).to.equal(1);
                 });
         });
 
@@ -101,12 +101,12 @@ describe('handel phase module', function () {
 
             return handelDelete.createPhase(phaseContext, {})
                 .then(phase => {
-                    expect(createRoleStub.calledOnce).to.be.true;
-                    expect(createPolicyStub.calledOnce).to.be.true;
-                    expect(attachPolicyStub.calledOnce).to.be.true;
-                    expect(getRoleStub.calledOnce).to.be.true;
-                    expect(getProjectStub.calledOnce).to.be.true;
-                    expect(updateProjectStub.calledOnce).to.be.true;
+                    expect(createRoleStub.callCount).to.equal(1);
+                    expect(createPolicyStub.callCount).to.equal(1);
+                    expect(attachPolicyStub.callCount).to.equal(1);
+                    expect(getRoleStub.callCount).to.equal(1);
+                    expect(getProjectStub.callCount).to.equal(1);
+                    expect(updateProjectStub.callCount).to.equal(1);
                 });
         })
     });
@@ -124,7 +124,7 @@ describe('handel phase module', function () {
             return handelDelete.deletePhase(phaseContext, {})
                 .then(result => {
                     expect(result).to.be.true;
-                    expect(deleteProjectStub.calledOnce).to.be.true;
+                    expect(deleteProjectStub.callCount).to.equal(1);
                 });
         });
     });

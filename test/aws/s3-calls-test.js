@@ -74,7 +74,7 @@ describe('s3 calls module', function() {
                 .then(bucket => {
                     expect(bucket).to.not.be.null;
                     expect(bucket.Name).to.equal(bucketName);
-                    expect(getBucketStub.calledOnce).to.be.true;
+                    expect(getBucketStub.callCount).to.equal(1);
                 });
         });
     });
@@ -90,8 +90,8 @@ describe('s3 calls module', function() {
             return s3Calls.createBucketIfNotExists(bucketName)
                 .then(bucket => {
                     expect(bucket.Name).to.equal(bucketName);
-                    expect(getBucketStub.calledOnce).to.be.true;
-                    expect(createBucketStub.calledOnce).to.be.true;
+                    expect(getBucketStub.callCount).to.equal(1);
+                    expect(createBucketStub.callCount).to.equal(1);
                 });
         });
 
@@ -105,8 +105,8 @@ describe('s3 calls module', function() {
             return s3Calls.createBucketIfNotExists(bucketName)
                 .then(bucket => {
                     expect(bucket.Name).to.equal(bucketName);
-                    expect(getBucketStub.calledOnce).to.be.true;
-                    expect(createBucketStub.notCalled).to.be.true;
+                    expect(getBucketStub.callCount).to.equal(1);
+                    expect(createBucketStub.callCount).to.equal(0);
                 });
         });
     });

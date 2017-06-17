@@ -44,7 +44,7 @@ describe('approval module', function() {
             return approval.getSecretsForPhase()
                 .then(results => {
                     expect(results).to.deep.equal({});
-                    expect(promptStub.notCalled).to.be.true;
+                    expect(promptStub.callCount).to.equal(0);
                 });
         });
     });

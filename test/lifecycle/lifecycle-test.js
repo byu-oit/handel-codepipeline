@@ -18,7 +18,7 @@ const expect = require('chai').expect;
 const lifecycle = require('../../lib/lifecycle');
 const codepipelineCalls = require('../../lib/aws/codepipeline-calls');
 const sinon = require('sinon');
-const util = require('../../lib/util/util');
+const util = require('../../lib/common/util');
 
 describe('lifecycle module', function () {
     let sandbox;
@@ -332,8 +332,8 @@ describe('lifecycle module', function () {
             return lifecycle.createPipeline(handelCodePipelineFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
                 .then(pipeline => {
                     expect(pipeline).to.deep.equal({});
-                    expect(getPipelineStub.calledOnce).to.be.true;
-                    expect(createPipelineStub.calledOnce).to.be.true;
+                    expect(getPipelineStub.callCount).to.equal(1);
+                    expect(createPipelineStub.callCount).to.equal(1);
                 });
         });
 
@@ -344,8 +344,8 @@ describe('lifecycle module', function () {
             return lifecycle.createPipeline(handelCodePipelineFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
                 .then(pipeline => {
                     expect(pipeline).to.deep.equal({});
-                    expect(getPipelineStub.calledOnce).to.be.true;
-                    expect(updatePipelineStub.calledOnce).to.be.true;
+                    expect(getPipelineStub.callCount).to.equal(1);
+                    expect(updatePipelineStub.callCount).to.equal(1);
                 });
         });
     });
@@ -383,7 +383,7 @@ describe('lifecycle module', function () {
             return lifecycle.deletePipeline("FakeApp", "FakePipeline")
                 .then(result => {
                     expect(result).to.deep.equal({});
-                    expect(deletePipelineStub.calledOnce).to.be.true;
+                    expect(deletePipelineStub.callCount).to.equal(1);
                 })
         });
     });
