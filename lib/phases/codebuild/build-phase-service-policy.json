@@ -59,6 +59,20 @@
                 "ssm:GetParameters"
             ],
             "Resource": "arn:aws:ssm:{{region}}:{{accountId}}:parameter/{{appName}}*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:DescribeRepositories"
+            ],
+            "Resource" : "arn:aws:ecr:{{region}}:{{accountId}}:repository/{{appName}}*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:CreateRepository"
+            ],
+            "Resource" : "*"
         }
     ]
 }
