@@ -18,6 +18,11 @@ Parameters
      - Yes
      - handel
      - This must always be *handel* for the Handel phase type.
+   * - name
+     - string
+     - Yes
+     -
+     - The value you want to show up in the CodePipeline UI as your phase name.
    * - environments_to_deploy
      - list<string>
      - Yes

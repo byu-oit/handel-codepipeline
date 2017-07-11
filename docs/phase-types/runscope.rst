@@ -17,6 +17,11 @@ Parameters
      - Yes
      - runscope
      - This must always be *runscope* for the Runscope phase type.
+   * - name
+     - string
+     - Yes
+     -
+     - The value you want to show up in the CodePipeline UI as your phase name.
 
 Secrets
 -------

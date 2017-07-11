@@ -25,7 +25,7 @@ The above file schema shows that you can specify one or more pipelines, giving t
 
 In addition, you must specify a top-level *name* field, which is a string you choose for the overall name of your application.
 
-Each phase then has additional parameters that are specific to the phase type. See the [[Pipeline Phase Types]] section for information on each phase type.
+Each phase then has additional parameters that are specific to the phase type. See the :ref:`supported-phase-types` section for information on each phase type.
 
 .. IMPORTANT::
 
