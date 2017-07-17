@@ -65,7 +65,7 @@
             "Action": [
                 "ecr:DescribeRepositories"
             ],
-            "Resource" : "arn:aws:ecr:{{region}}:{{accountId}}:repository/{{appName}}*"
+            "Resource" : "*"
         },
         {
             "Effect": "Allow",
