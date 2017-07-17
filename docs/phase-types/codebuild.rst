@@ -25,6 +25,11 @@ Parameters
      - Yes
      - codebuild
      - This must always be *codebuild* for the CodeBuild phase type.
+   * - name
+     - string
+     - Yes
+     -
+     - The value you want to show up in the CodePipeline UI as your phase name.
    * - build_image
      - string
      - Yes

@@ -18,6 +18,11 @@ Parameters
      - Yes
      - slack_notify
      - This must always be *slack_notify* for the Slack Notify phase type.
+   * - name
+     - string
+     - Yes
+     -
+     - The value you want to show up in the CodePipeline UI as your phase name.
    * - message
      - string
      - Yes

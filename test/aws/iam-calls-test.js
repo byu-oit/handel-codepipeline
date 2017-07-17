@@ -89,7 +89,7 @@ describe('iam calls', function() {
             sandbox.stub(iamCalls, 'getRole').returns(Promise.resolve(null));
             sandbox.stub(iamCalls, 'createRole').returns(Promise.resolve({}));
 
-            return iamCalls.createRoleIfNotExists("FakeRole", "TrustedService")
+            return iamCalls.createRoleIfNotExists("FakeRole", ["TrustedService"])
                 .then(role => {
                     expect(role).to.deep.equal({});
                 });
@@ -98,7 +98,7 @@ describe('iam calls', function() {
         it('should just return the role when it already exists', function() {
             sandbox.stub(iamCalls, 'getRole').returns(Promise.resolve({}));
 
-            return iamCalls.createRoleIfNotExists("FakeRole", "TrustedService")
+            return iamCalls.createRoleIfNotExists("FakeRole", ["TrustedService"])
                 .then(role => {
                     expect(role).to.deep.equal({});
                 });

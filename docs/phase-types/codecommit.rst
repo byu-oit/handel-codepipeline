@@ -18,6 +18,11 @@ Parameters
      - Yes
      - codecommit
      - This must always be *codecommit* for the CodeCommit phase type.
+   * - name
+     - string
+     - Yes
+     -
+     - The value you want to show up in the CodePipeline UI as your phase name.
    * - repo 
      - string
      - Yes
