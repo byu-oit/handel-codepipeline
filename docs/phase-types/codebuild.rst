@@ -6,9 +6,6 @@ Build Configuration
 -------------------
 You can specify any arbitrary build process in this phase using the `buildspec.yml file <http://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html>`_. You must have this *buildspec.yml* file in the root of your repository or the CodeBuild phase will fail.
 
-You can use a custom build image in ECR by prefixing the build_image parameter with '<account>/'. Example: <account>/IMAGE:TAG. This resolves to AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/IMAGE:TAG . Please be aware that templating of this sort using <*> is only avaibale in the CodeBuild phase as part of the build_image parameter
-Using a custom build image also configures the Codebuild instance to run Docker in Docker. Using Docker in Docker in a custom build image requires specific configuration in buildspec.yml. See this `user guide <http://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker-custom-image.html>`_ for more details. 
-
 Parameters
 ----------
 
@@ -40,6 +37,13 @@ Parameters
      - No
      - {}
      - A set of key/value pairs that will be injected into the running CodeBuild jobs.
+
+.. NOTE::
+
+  You can use a custom build image in your account's EC2 Container Registry by prefixing the build_image parameter with *<account>/*. For example, *<account>/IMAGE:TAG* will resolve at run-time to AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/IMAGE:TAG.
+  
+  Using a custom build image also configures the CodeBuild image in privileged mode, which allows you to run Docker inside your image if needed.
+
 
 Secrets
 -------
