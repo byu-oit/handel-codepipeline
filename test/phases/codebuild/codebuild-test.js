@@ -124,4 +124,20 @@ describe('codebuild phase module', function () {
                 });
         });
     });
+
+    describe('extra_resources', function() {
+        let phaseContext = {
+            appName: 'myApp',
+            accountConfig: {
+                account_id: 111111111111
+            },
+            params: {}
+        }
+
+        let role = {
+            Arn: "FakeArn"
+        }
+
+        it('')
+    });
 });
