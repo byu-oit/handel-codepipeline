@@ -85,33 +85,7 @@ Environment Variable Prefix
 
 Your extra resources will be exposed to your build as environment variables.
 
-Every environment variable injected by Handel for service dependencies has a common prefix in the environment variable name.
-
-This environment variable prefix is defined with the following structure:
-
-.. code-block:: none
-
-   <SERVICE_TYPE>_<APP_NAME>_<PIPELINE_NAME>_<SERVICE_NAME>
-
-These values come from the resource declaration in your Handel-Codepipeline file. In the above example, the referencing build would need to use the following values in that prefix:
-
-.. code-block:: none
-
-    service_type = "s3"
-    app_name = "pipeline-example"
-    pipeline_name = "build"
-    service_name = "cache-bucket"
-
-.. NOTE::
-
-   All Handel injected environment variables will be all upper-cased, with dashes converted to underscores. In the above example, the build would need to use the following prefix for the S3 bucket:
-
-   .. code-block:: none
-
-      S3_PIPELINE_EXAMPLE_BUILD_CACHE_BUCKET
-
-   Note that everything in the above prefix is upper-cased, and the app name "beanstalk-example" has been converted to to use underscores instead of dashes
-
+The naming of these environment matches that used by `Handel <https://handel.readthedocs.io/en/latest/handel-basics/consuming-service-dependencies.html#environment-variable-prefix>`_, except that the pipeline name is used instead of the environment name.
 
 Secrets
 -------
