@@ -1,0 +1,10 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+    - npm_token=$(aws ssm get-parameters --names ${HANDEL_PIPELINE_NAME}.npmToken --with-decryption | grep 'Value' | awk '{print $2}' | tr -d '"')
+    - echo '//registry.npmjs.org/:_authToken=${npm_token}' > ~/.npmrc
+  build:
+    commands:
+    - npm publish
