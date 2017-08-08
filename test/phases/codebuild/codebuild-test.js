@@ -26,10 +26,6 @@ const cloudFormationCalls = require('handel/lib/aws/cloudformation-calls');
 
 const AWS = require('aws-sdk-mock');
 
-const PreDeployContext = require('handel/lib/datatypes/pre-deploy-context');
-const BindContext = require('handel/lib/datatypes/bind-context');
-const DeployContext = require('handel/lib/datatypes/deploy-context');
-
 const handelUtil = require('handel/lib/common/util');
 
 const deepEqual = require('deep-equal');
@@ -169,7 +165,27 @@ describe('codebuild phase module', function () {
                     account_id: 111111111111
                 },
                 params: phaseConfig
-            }
+            };
+            handelAccountConfig({
+                    account_id: 111111111111,
+                    region: 'us-west-2',
+                    vpc: 'vpc-aaaaaaaa',
+                    public_subnets: [
+                        'subnet-ffffffff',
+                        'subnet-44444444'
+                    ],
+                    private_subnets: [
+                        'subnet-00000000',
+                        'subnet-77777777'
+                    ],
+                    data_subnets: [
+                        'subnet-eeeeeeee',
+                        'subnet-99999999'
+                    ],
+                    ecs_ami: 'ami-66666666',
+                    ssh_bastion_sg: 'sg-44444444',
+                    on_prem_cidr: '10.10.10.10/0'
+                }).getAccountConfig();
         });
 
         describe('check', function () {
@@ -221,37 +237,7 @@ describe('codebuild phase module', function () {
         });
 
         describe('createPhase', function () {
-
-            let context = {
-                appName: 'test',
-                environmentName: 'env',
-                pipelineName: 'pipeline',
-                phaseName: 'phase',
-                serviceName: 'test-bucket',
-                serviceType: 's3'
-            };
-
             it('should create the extras and expose them to the codebuild project', function () {
-                handelAccountConfig({
-                    account_id: 111111111111,
-                    region: 'us-west-2',
-                    vpc: 'vpc-aaaaaaaa',
-                    public_subnets: [
-                        'subnet-ffffffff',
-                        'subnet-44444444'
-                    ],
-                    private_subnets: [
-                        'subnet-00000000',
-                        'subnet-77777777'
-                    ],
-                    data_subnets: [
-                        'subnet-eeeeeeee',
-                        'subnet-99999999'
-                    ],
-                    ecs_ami: 'ami-66666666',
-                    ssh_bastion_sg: 'sg-44444444',
-                    on_prem_cidr: '10.10.10.10/0'
-                }).getAccountConfig();
 
                 let s3BucketStatement = {
                     Effect: 'Allow',
@@ -335,6 +321,20 @@ describe('codebuild phase module', function () {
                     });
             });
 
+        });
+
+        describe('deletePhase', function() {
+            it('should delete the extra resources', function () {
+                let deleteProjectStub = sandbox.stub(codebuildCalls, 'deleteProject').resolves(true);
+                let deleteStackStub = sandbox.stub(cloudFormationCalls, 'deleteStack').resolves(true);
+                let getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').resolves({});
+
+                return codebuild.deletePhase(phaseContext, {})
+                    .then(result => {
+                        expect(result).to.be.true;
+                        expect(deleteStackStub).to.be.calledWith('myApp-pipeline-test_bucket-s3');
+                    });
+            });
         });
     });
 });
