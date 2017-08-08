@@ -32,6 +32,8 @@ const DeployContext = require('handel/lib/datatypes/deploy-context');
 
 const handelUtil = require('handel/lib/common/util');
 
+const deepEqual = require('deep-equal');
+
 chai.use(sinonChai);
 const expect = chai.expect;
 
@@ -251,6 +253,28 @@ describe('codebuild phase module', function () {
                     on_prem_cidr: '10.10.10.10/0'
                 }).getAccountConfig();
 
+                let s3BucketStatement = {
+                    Effect: 'Allow',
+                    Action: [
+                        "s3:ListBucket"
+                    ],
+                    Resource: [
+                        "arn:aws:s3:::test"
+                    ]
+                };
+
+                let s3ObjectStatement = {
+                    Effect: 'Allow',
+                    Action: [
+                        "s3:PutObject",
+                        "s3:GetObject",
+                        "s3:DeleteObject"
+                    ],
+                    Resource: [
+                        "arn:aws:s3:::test/*"
+                    ]
+                };
+
                 let createRoleStub = sandbox.stub(iamCalls, 'createRoleIfNotExists').returns(Promise.resolve(role));
                 let createPolicyStub = sandbox.stub(iamCalls, 'createPolicyIfNotExists').returns(Promise.resolve(role));
                 let attachPolicyStub = sandbox.stub(iamCalls, 'attachPolicyToRole').returns(Promise.resolve({}));
@@ -259,7 +283,7 @@ describe('codebuild phase module', function () {
                 let createProjectStub = sandbox.stub(codebuildCalls, 'createProject').returns(Promise.resolve);
 
                 let cfGetStub = sandbox.stub(cloudFormationCalls, 'getStack')
-                    //Checking for logging bucket
+                //Checking for logging bucket
                     .onFirstCall().resolves({
                         Outputs: [{
                             OutputKey: 'BucketName',
@@ -300,9 +324,29 @@ describe('codebuild phase module', function () {
                             sinon.match('FakeArn'),
                             sinon.match.any
                         );
+
+                        expect(createPolicyStub).to.have.been.calledWithMatch(
+                            sinon.match('myApp-HandelCodePipelineBuildPhase'),
+                            sinon.match.string,
+                            sinon.match(function (policy) {
+                                return policyHasStatements(policy, [s3BucketStatement, s3ObjectStatement])
+                            }, "S3 Policies")
+                        );
                     });
             });
 
         });
     });
 });
+
+function policyHasStatements(policy, statements) {
+    for (let statement of statements) {
+        let result = policy.Statement.some(actual => {
+            return deepEqual(actual, statement);
+        });
+        if (!result) {
+            return false;
+        }
+    }
+    return true;
+}

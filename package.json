@@ -26,6 +26,7 @@
   "devDependencies": {
     "aws-sdk-mock": "^1.6.1",
     "chai": "^3.5.0",
+    "deep-equal": "^1.0.1",
     "eslint": "^3.15.0",
     "eslint-plugin-mocha": "^4.8.0",
     "mocha": "^3.2.0",
