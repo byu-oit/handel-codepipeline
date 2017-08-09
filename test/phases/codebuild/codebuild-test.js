@@ -21,12 +21,7 @@ const sinonChai = require('sinon-chai');
 const iamCalls = require('../../../lib/aws/iam-calls');
 const codebuildCalls = require('../../../lib/aws/codebuild-calls');
 
-const handelAccountConfig = require('handel/lib/common/account-config');
-const cloudFormationCalls = require('handel/lib/aws/cloudformation-calls');
-
-const AWS = require('aws-sdk-mock');
-
-const handelUtil = require('handel/lib/common/util');
+const handel = require('../../../lib/common/handel');
 
 const deepEqual = require('deep-equal');
 
@@ -42,7 +37,6 @@ describe('codebuild phase module', function () {
 
     afterEach(function () {
         sandbox.restore();
-        AWS.restore();
     });
 
     describe('check', function () {
@@ -140,22 +134,26 @@ describe('codebuild phase module', function () {
     });
 
     describe('extra_resources', function () {
-        let phaseContext;
+        let resourcesConfig, phaseContext, phaseConfig, handelStub;
 
         let role = {
             Arn: "FakeArn"
-        }
-
-        let phaseConfig;
+        };
 
         beforeEach(function () {
+            handelStub = {
+                check: sandbox.stub(handel, 'check').returns([]),
+                deploy: sandbox.stub(handel, 'deploy'),
+                'delete': sandbox.stub(handel, 'delete')
+            };
+            resourcesConfig = {
+                test_bucket: {
+                    type: 's3'
+                }
+            };
             phaseConfig = {
                 build_image: 'FakeImage',
-                extra_resources: {
-                    test_bucket: {
-                        type: 's3'
-                    }
-                }
+                extra_resources: resourcesConfig
             };
             phaseContext = {
                 appName: 'myApp',
@@ -166,71 +164,21 @@ describe('codebuild phase module', function () {
                 },
                 params: phaseConfig
             };
-            handelAccountConfig({
-                    account_id: 111111111111,
-                    region: 'us-west-2',
-                    vpc: 'vpc-aaaaaaaa',
-                    public_subnets: [
-                        'subnet-ffffffff',
-                        'subnet-44444444'
-                    ],
-                    private_subnets: [
-                        'subnet-00000000',
-                        'subnet-77777777'
-                    ],
-                    data_subnets: [
-                        'subnet-eeeeeeee',
-                        'subnet-99999999'
-                    ],
-                    ecs_ami: 'ami-66666666',
-                    ssh_bastion_sg: 'sg-44444444',
-                    on_prem_cidr: '10.10.10.10/0'
-                }).getAccountConfig();
         });
 
         describe('check', function () {
-            let testDeployer;
-
-            beforeEach(function () {
-                testDeployer = {};
-
-                testDeployer.check = sandbox.stub().returns([]);
-                testDeployer.preDeploy = sandbox.stub();
-                testDeployer.bind = sandbox.stub();
-                testDeployer.deploy = sandbox.stub();
-
-                sandbox.stub(handelUtil, 'getServiceDeployers').callsFake(function () {
-                    return {
-                        s3: testDeployer
-                    };
-                });
-            });
-
 
             it('should check extra resource config', function () {
-                testDeployer.check.returns(['test error']);
+                handelStub.check.returns(['test error']);
 
                 let errors = codebuild.check(phaseConfig);
 
                 expect(errors).to.eql(['CodeBuild - extra_resources - test error']);
             });
 
-            it('should reject resources that aren\'t whitelisted', function () {
-                phaseConfig = {
-                    build_image: 'FakeImage',
-                    extra_resources: {
-                        test_bucket: {
-                            type: 'test'
-                        }
-                    }
-                };
-
-                let errors = codebuild.check(phaseConfig);
-
-                expect(errors).to.eql(['CodeBuild - extra_resources - service type \'test\' is not supported']);
-            });
-
             it('should work when all required parameters are provided', function () {
+                handelStub.check.returns([]);
+
                 let errors = codebuild.check(phaseConfig);
                 expect(errors).to.be.empty;
             });
@@ -239,26 +187,9 @@ describe('codebuild phase module', function () {
         describe('createPhase', function () {
             it('should create the extras and expose them to the codebuild project', function () {
 
-                let s3BucketStatement = {
-                    Effect: 'Allow',
-                    Action: [
-                        "s3:ListBucket"
-                    ],
-                    Resource: [
-                        "arn:aws:s3:::test"
-                    ]
-                };
-
-                let s3ObjectStatement = {
-                    Effect: 'Allow',
-                    Action: [
-                        "s3:PutObject",
-                        "s3:GetObject",
-                        "s3:DeleteObject"
-                    ],
-                    Resource: [
-                        "arn:aws:s3:::test/*"
-                    ]
+                let testPolicy = {
+                    //Man, I wish these policies were this simple.
+                    s3: 'read-write'
                 };
 
                 let createRoleStub = sandbox.stub(iamCalls, 'createRoleIfNotExists').returns(Promise.resolve(role));
@@ -268,44 +199,28 @@ describe('codebuild phase module', function () {
                 let getProjectStub = sandbox.stub(codebuildCalls, 'getProject').returns(Promise.resolve(null));
                 let createProjectStub = sandbox.stub(codebuildCalls, 'createProject').returns(Promise.resolve);
 
-                let cfGetStub = sandbox.stub(cloudFormationCalls, 'getStack')
-                //Checking for logging bucket
-                    .onFirstCall().resolves({
-                        Outputs: [{
-                            OutputKey: 'BucketName',
-                            OutputValue: 'logging'
-                        }]
-                    })
-                    //Checking for actual bucket
-                    .onSecondCall().resolves(null);
-                let cfCreateStub = sandbox.stub(cloudFormationCalls, 'createStack').resolves({
-                    Outputs: [{
-                        OutputKey: 'BucketName',
-                        OutputValue: 'test'
-                    }]
+                let envVars = {
+                    "FOO": 'bar'
+                };
+
+                handelStub.deploy.resolves({
+                    policies: [testPolicy],
+                    environmentVariables: envVars
                 });
 
                 return codebuild.createPhase(phaseContext, {})
                     .then(phase => {
-                        expect(cfCreateStub).to.have.been.calledWithMatch(
-                            sinon.match('myApp-pipeline-test_bucket-s3'),
-                            sinon.match.string,
-                            sinon.match.array.deepEquals([]),
-                            sinon.match({
-                                app: 'myApp',
-                                env: 'pipeline',
-                                'handel-phase': 'phase'
-                            })
+                        expect(handelStub.deploy).to.have.been.calledWithMatch(
+                            sinon.match(resourcesConfig),
+                            sinon.match(phaseContext),
+                            sinon.match.any
                         );
+
                         expect(createProjectStub).to.have.been.calledWithMatch(
                             sinon.match('myApp-pipeline-phase'),
                             sinon.match('myApp'),
                             sinon.match('FakeImage'),
-                            sinon.match({
-                                "S3_MYAPP_PIPELINE_TEST_BUCKET_BUCKET_NAME": 'test',
-                                "S3_MYAPP_PIPELINE_TEST_BUCKET_BUCKET_URL": 'https://test.s3.amazonaws.com/',
-                                "S3_MYAPP_PIPELINE_TEST_BUCKET_REGION_ENDPOINT": 's3-us-west-2.amazonaws.com',
-                            }),
+                            sinon.match(envVars),
                             sinon.match.any,
                             sinon.match('FakeArn'),
                             sinon.match.any
@@ -315,7 +230,7 @@ describe('codebuild phase module', function () {
                             sinon.match('myApp-HandelCodePipelineBuildPhase'),
                             sinon.match.string,
                             sinon.match(function (policy) {
-                                return policyHasStatements(policy, [s3BucketStatement, s3ObjectStatement])
+                                return policyHasStatements(policy, [testPolicy])
                             }, "S3 Policies")
                         );
                     });
@@ -323,16 +238,16 @@ describe('codebuild phase module', function () {
 
         });
 
-        describe('deletePhase', function() {
+        describe('deletePhase', function () {
             it('should delete the extra resources', function () {
                 let deleteProjectStub = sandbox.stub(codebuildCalls, 'deleteProject').resolves(true);
-                let deleteStackStub = sandbox.stub(cloudFormationCalls, 'deleteStack').resolves(true);
-                let getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').resolves({});
+
+                handelStub.delete.resolves(true);
 
                 return codebuild.deletePhase(phaseContext, {})
                     .then(result => {
                         expect(result).to.be.true;
-                        expect(deleteStackStub).to.be.calledWith('myApp-pipeline-test_bucket-s3');
+                        expect(handelStub.delete).to.have.been.calledOnce;
                     });
             });
         });
