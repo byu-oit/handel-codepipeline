@@ -20,7 +20,6 @@ const sinonChai = require('sinon-chai');
 
 const cloudFormationCalls = require('handel/lib/aws/cloudformation-calls');
 const handelUtil = require('handel/lib/common/util');
-const handelAccountConfig = require('handel/lib/common/account-config');
 
 const handel = require('../../lib/common/handel');
 
@@ -43,29 +42,30 @@ describe('handel interface', function () {
         }
     };
 
+    let accountConfig = {
+        account_id: 111111111111,
+        region: 'us-west-2',
+        vpc: 'vpc-aaaaaaaa',
+        public_subnets: [
+            'subnet-ffffffff',
+            'subnet-44444444'
+        ],
+        private_subnets: [
+            'subnet-00000000',
+            'subnet-77777777'
+        ],
+        data_subnets: [
+            'subnet-eeeeeeee',
+            'subnet-99999999'
+        ],
+        ecs_ami: 'ami-66666666',
+        ssh_bastion_sg: 'sg-44444444',
+        on_prem_cidr: '10.10.10.10/0'
+    };
+
 
     beforeEach(function () {
         sandbox = sinon.sandbox.create();
-        handelAccountConfig({
-            account_id: 111111111111,
-            region: 'us-west-2',
-            vpc: 'vpc-aaaaaaaa',
-            public_subnets: [
-                'subnet-ffffffff',
-                'subnet-44444444'
-            ],
-            private_subnets: [
-                'subnet-00000000',
-                'subnet-77777777'
-            ],
-            data_subnets: [
-                'subnet-eeeeeeee',
-                'subnet-99999999'
-            ],
-            ecs_ami: 'ami-66666666',
-            ssh_bastion_sg: 'sg-44444444',
-            on_prem_cidr: '10.10.10.10/0'
-        }).getAccountConfig();
         bucketConfig = {
             type: 's3'
         };
@@ -188,7 +188,7 @@ describe('handel interface', function () {
                 }]
             });
 
-            return handel.deploy({bucket: bucketConfig}, phaseContext, {})
+            return handel.deploy({bucket: bucketConfig}, phaseContext, accountConfig)
                 .then(result => {
                     expect(result).to.not.be.null;
                     expect(result).to.have.property('policies').which.deep.includes(
@@ -221,7 +221,7 @@ describe('handel interface', function () {
             let cfDeleteStackStub = sandbox.stub(cloudFormationCalls, 'deleteStack')
                 .resolves(true);
 
-            return handel.delete({bucket: bucketConfig}, phaseContext, {})
+            return handel.delete({bucket: bucketConfig}, phaseContext, accountConfig)
                 .then(result => {
                     expect(result).have.property('status', 'success');
                     expect(cfDeleteStackStub).to.have.been.calledWith('myApp-pipeline-bucket-s3');
@@ -231,7 +231,7 @@ describe('handel interface', function () {
             let cfGetStub = sandbox.stub(cloudFormationCalls, 'getStack')
                 .resolves(null);
 
-            return handel.delete({bucket: bucketConfig}, phaseContext, {})
+            return handel.delete({bucket: bucketConfig}, phaseContext, accountConfig)
                 .then(result => {
                     expect(result).have.property('status', 'success');
                 });
