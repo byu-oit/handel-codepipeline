@@ -37,6 +37,11 @@ Parameters
      - No
      - {}
      - A set of key/value pairs that will be injected into the running CodeBuild jobs.
+   * - extra_resources
+     - :ref:`codebuild-extras`
+     - No
+     -
+     - A list of extra resources that are necessary to build your code. For example, an S3 bucket in which to cache files.
 
 .. NOTE::
 
@@ -44,6 +49,43 @@ Parameters
   
   Using a custom build image also configures the CodeBuild image in privileged mode, which allows you to run Docker inside your image if needed.
 
+.. _codebuild-extras:
+
+Extra Resources
+~~~~~~~~~~~~~~~
+
+The `extra_resources` section is defined by the following schema:
+
+.. code-block:: yaml
+
+    extra_resources:
+      <resource_name>:
+        type: <service_type>
+        <service_param>: <param_value>
+
+Example S3 bucket:
+
+.. code-block:: yaml
+
+    extra_resources:
+      cache-bucket:
+        type: s3
+        bucket_name: my-cache-bucket
+
+The configuration for extra resources matches the configuration in `Handel <https://handel.readthedocs.io>`_, except that extra resources cannot declare their own dependencies in the `dependencies` block.
+
+The following services are currently supported in `extra_resources`:
+
+* `API Access <https://handel.readthedocs.io/en/latest/supported-services/apiaccess.html>`_
+* `DynamoDB <https://handel.readthedocs.io/en/latest/supported-services/dynamodb.html>`_
+* `S3 <https://handel.readthedocs.io/en/latest/supported-services/s3.html>`_
+
+Environment Variable Prefix
+***************************
+
+Your extra resources will be exposed to your build as environment variables.
+
+The naming of these environment matches that used by `Handel <https://handel.readthedocs.io/en/latest/handel-basics/consuming-service-dependencies.html#environment-variable-prefix>`_, except that the pipeline name is used instead of the environment name.
 
 Secrets
 -------
@@ -66,4 +108,25 @@ This snippet of a handel-codepipeline.yml file shows the CodeBuild phase being c
           build_image: aws/codebuild/docker:1.12.1
           environment_Variables:
             MY_CUSTOM_ENV: my_custom_value
+        ...
+
+This is a snippet of a handel-codepipeline.yml file which includes an S3 bucket as an extra resource:
+
+.. code-block:: yaml
+
+    version: 1
+
+    pipelines:
+      dev:
+        phases:
+        ...
+        - type: codebuild
+          name: Build
+          build_image: aws/codebuild/docker:1.12.1
+          environment_Variables:
+            MY_CUSTOM_ENV: my_custom_value
+          extra_resources:
+            cache_bucket:
+              type: s3
+              #Everything else, including the name, is optional
         ...
