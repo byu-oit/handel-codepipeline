@@ -113,8 +113,9 @@ def run_tests(event, context):
                 'type': 'JobFailed',
                 'message': 'One or more tests failed'
             })
-    except:
+    except Exception as e:
+        print(e)
         code_pipeline.put_job_failure_result(jobId=jobId, failureDetails={
             'type': 'JobFailed',
-            'message': 'Unhandled exception during Runscope tests execution'
+            'message': 'Unhandled exception during Runscope tests execution: ' + e.message
         })
