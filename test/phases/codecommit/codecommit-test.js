@@ -67,7 +67,7 @@ describe('github phase module', function () {
         });
     });
 
-    describe('createPhase', function () {
+    describe('deployPhase', function () {
         it('should create the codebuild project and return the phase config', function () {
             let phaseContext = {
                 phaseName: 'myphase',
@@ -79,7 +79,7 @@ describe('github phase module', function () {
                 secrets: {}
             }
 
-            return codecommit.createPhase(phaseContext, {})
+            return codecommit.deployPhase(phaseContext, {})
                 .then(phase => {
                     expect(phase.name).to.equal(phaseContext.phaseName);
                 });

@@ -54,7 +54,7 @@ describe('npm phase module', function () {
         });
     });
 
-    describe('createPhase', function () {
+    describe('deployPhase', function () {
         let phaseContext = {
             appName: 'myApp',
             accountConfig: {
@@ -77,7 +77,7 @@ describe('npm phase module', function () {
             let createProjectStub = sandbox.stub(codebuildCalls, 'createProject').returns(Promise.resolve)
             let putParameterStub = sandbox.stub(ssmCalls, 'putParameter').returns(Promise.resolve({}));
 
-            return npm.createPhase(phaseContext, {})
+            return npm.deployPhase(phaseContext, {})
                 .then(() => {
                     expect(createRoleStub.callCount).to.equal(1);
                     expect(createPolicyStub.callCount).to.equal(1);
@@ -98,7 +98,7 @@ describe('npm phase module', function () {
             let updateProjectStub = sandbox.stub(codebuildCalls, 'updateProject').returns(Promise.resolve);
             let putParameterStub = sandbox.stub(ssmCalls, 'putParameter').returns(Promise.resolve({}));
 
-            return npm.createPhase(phaseContext, {})
+            return npm.deployPhase(phaseContext, {})
                 .then(() => {
                     expect(createRoleStub.callCount).to.equal(1);
                     expect(createPolicyStub.callCount).to.equal(1);

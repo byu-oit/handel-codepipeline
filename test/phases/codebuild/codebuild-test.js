@@ -65,7 +65,7 @@ describe('codebuild phase module', function () {
         });
     });
 
-    describe('createPhase', function () {
+    describe('deployPhase', function () {
         let phaseContext = {
             appName: 'myApp',
             accountConfig: {
@@ -86,7 +86,7 @@ describe('codebuild phase module', function () {
             let getProjectStub = sandbox.stub(codebuildCalls, 'getProject').returns(Promise.resolve(null));
             let createProjectStub = sandbox.stub(codebuildCalls, 'createProject').returns(Promise.resolve)
 
-            return codebuild.createPhase(phaseContext, {})
+            return codebuild.deployPhase(phaseContext, {})
                 .then(phase => {
                     expect(createRoleStub.calledOnce).to.be.true;
                     expect(createPolicyStub.calledOnce).to.be.true;
@@ -105,7 +105,7 @@ describe('codebuild phase module', function () {
             let getProjectStub = sandbox.stub(codebuildCalls, 'getProject').returns(Promise.resolve({}));
             let updateProjectStub = sandbox.stub(codebuildCalls, 'updateProject').returns(Promise.resolve)
 
-            return codebuild.createPhase(phaseContext, {})
+            return codebuild.deployPhase(phaseContext, {})
                 .then(phase => {
                     expect(createRoleStub.calledOnce).to.be.true;
                     expect(createPolicyStub.calledOnce).to.be.true;
@@ -184,7 +184,7 @@ describe('codebuild phase module', function () {
             });
         });
 
-        describe('createPhase', function () {
+        describe('deployPhase', function () {
             it('should create the extras and expose them to the codebuild project', function () {
 
                 let testPolicy = {
@@ -208,7 +208,7 @@ describe('codebuild phase module', function () {
                     environmentVariables: envVars
                 });
 
-                return codebuild.createPhase(phaseContext, {})
+                return codebuild.deployPhase(phaseContext, {})
                     .then(phase => {
                         expect(handelStub.deploy).to.have.been.calledWithMatch(
                             sinon.match(resourcesConfig),

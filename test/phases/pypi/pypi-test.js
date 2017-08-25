@@ -58,7 +58,7 @@ describe('pypi phase module', function () {
         });
     });
 
-    describe('createPhase', function () {
+    describe('deployPhase', function () {
         let phaseContext = {
             appName: 'myApp',
             accountConfig: {
@@ -81,7 +81,7 @@ describe('pypi phase module', function () {
             let createProjectStub = sandbox.stub(codebuildCalls, 'createProject').returns(Promise.resolve);
             let putParameterStub = sandbox.stub(ssmCalls, 'putParameter').returns(Promise.resolve({}));
 
-            return pypi.createPhase(phaseContext, {})
+            return pypi.deployPhase(phaseContext, {})
                 .then(() => {
                     expect(createRoleStub.callCount).to.equal(1);
                     expect(createPolicyStub.callCount).to.equal(1);
@@ -102,7 +102,7 @@ describe('pypi phase module', function () {
             let updateProjectStub = sandbox.stub(codebuildCalls, 'updateProject').returns(Promise.resolve);
             let putParameterStub = sandbox.stub(ssmCalls, 'putParameter').returns(Promise.resolve({}));
 
-            return pypi.createPhase(phaseContext, {})
+            return pypi.deployPhase(phaseContext, {})
                 .then(() => {
                     expect(createRoleStub.callCount).to.equal(1);
                     expect(createPolicyStub.callCount).to.equal(1);
