@@ -57,7 +57,7 @@ describe('handel phase module', function () {
         });
     });
 
-    describe('createPhase', function () {
+    describe('deployPhase', function () {
         let phaseContext = {
             appName: 'myApp',
             accountConfig: {
@@ -80,7 +80,7 @@ describe('handel phase module', function () {
             let getProjectStub = sandbox.stub(codebuildCalls, 'getProject').returns(Promise.resolve(null));
             let createProjectStub = sandbox.stub(codebuildCalls, 'createProject').returns(Promise.resolve)
 
-            return handel.createPhase(phaseContext, {})
+            return handel.deployPhase(phaseContext, {})
                 .then(phase => {
                     expect(createRoleStub.callCount).to.equal(1);
                     expect(createPolicyStub.callCount).to.equal(1);
@@ -99,7 +99,7 @@ describe('handel phase module', function () {
             let getProjectStub = sandbox.stub(codebuildCalls, 'getProject').returns(Promise.resolve({}));
             let updateProjectStub = sandbox.stub(codebuildCalls, 'updateProject').returns(Promise.resolve)
 
-            return handel.createPhase(phaseContext, {})
+            return handel.deployPhase(phaseContext, {})
                 .then(phase => {
                     expect(createRoleStub.callCount).to.equal(1);
                     expect(createPolicyStub.callCount).to.equal(1);

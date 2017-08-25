@@ -280,9 +280,9 @@ describe('lifecycle module', function () {
                 }
             }
             let handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
-            let pipelineToCreate = 'dev';
+            let pipelineToDeploy = 'dev';
 
-            return lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineToCreate)
+            return lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineToDeploy)
                 .then(results => {
                     expect(results.length).to.equal(2);
                     expect(results[0].githubSecret).to.equal('mysecret');
@@ -291,26 +291,26 @@ describe('lifecycle module', function () {
         });
     });
 
-    describe('createPhases', function () {
-        it('should create each phase in the pipeline', function () {
+    describe('deployPhases', function () {
+        it('should deploy each phase in the pipeline', function () {
             let phaseDeployers = {
                 github: {
-                    createPhase: function () {
+                    deployPhase: function () {
                         return Promise.resolve({});
                     }
                 },
                 codebuild: {
-                    createPhase: function () {
+                    deployPhase: function () {
                         return Promise.resolve({});
                     }
                 }
             }
             let handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
-            let pipelineToCreate = 'dev';
+            let pipelineToDeploy = 'dev';
             let accountConfig = {};
             let phaseSecrets = {};
 
-            return lifecycle.createPhases(phaseDeployers, handelCodePipelineFile, pipelineToCreate, accountConfig, phaseSecrets)
+            return lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineToDeploy, accountConfig, phaseSecrets)
                 .then(phases => {
                     expect(phases.length).to.equal(2);
                     expect(phases[0]).to.deep.equal({});
@@ -319,9 +319,9 @@ describe('lifecycle module', function () {
         });
     });
 
-    describe('createPipeline', function () {
+    describe('deployPipeline', function () {
         let handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
-        let pipelineToCreate = 'dev';
+        let pipelineToDeploy = 'dev';
         let accountConfig = {};
         let pipelinePhases = [];
 
@@ -329,7 +329,7 @@ describe('lifecycle module', function () {
             let getPipelineStub = sandbox.stub(codepipelineCalls, 'getPipeline').returns(Promise.resolve(null));
             let createPipelineStub = sandbox.stub(codepipelineCalls, 'createPipeline').returns(Promise.resolve({}));
 
-            return lifecycle.createPipeline(handelCodePipelineFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
+            return lifecycle.deployPipeline(handelCodePipelineFile, pipelineToDeploy, accountConfig, pipelinePhases, "FakeBucket")
                 .then(pipeline => {
                     expect(pipeline).to.deep.equal({});
                     expect(getPipelineStub.callCount).to.equal(1);
@@ -341,7 +341,7 @@ describe('lifecycle module', function () {
             let getPipelineStub = sandbox.stub(codepipelineCalls, 'getPipeline').returns(Promise.resolve({}));
             let updatePipelineStub = sandbox.stub(codepipelineCalls, 'updatePipeline').returns(Promise.resolve({}));
 
-            return lifecycle.createPipeline(handelCodePipelineFile, pipelineToCreate, accountConfig, pipelinePhases, "FakeBucket")
+            return lifecycle.deployPipeline(handelCodePipelineFile, pipelineToDeploy, accountConfig, pipelinePhases, "FakeBucket")
                 .then(pipeline => {
                     expect(pipeline).to.deep.equal({});
                     expect(getPipelineStub.callCount).to.equal(1);

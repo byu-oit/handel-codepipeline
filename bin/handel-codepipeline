@@ -13,7 +13,7 @@ function printGeneralUsage() {
 
 Action:
 check -- Checks the contents of your Handel file for errors.
-create -- Creates the given pipeline from your Handel-Codepipeline file.
+deploy -- Deploys the given pipeline from your Handel-Codepipeline file.
 delete -- Deletes the given pipeline from your AWS account.`;
     printAndExit(usageMsg);
 }
@@ -39,8 +39,8 @@ function loadHandelCodePipelineFile() {
 let handelCodePipelineFile = loadHandelCodePipelineFile();
 let phase = process.argv[2];
 switch (phase) {
-    case "create":
-        cli.createAction(handelCodePipelineFile);
+    case "deploy":
+        cli.deployAction(handelCodePipelineFile);
         break;
     case "check":
         cli.checkAction(handelCodePipelineFile);

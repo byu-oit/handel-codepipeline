@@ -60,8 +60,8 @@ describe('input module', function() {
         });
     });
 
-    describe('getPipelineConfigForCreate', function() {
-        it('should ask questions required for the create action', function() {
+    describe('getPipelineConfigForDeploy', function() {
+        it('should ask questions required for the deploy action', function() {
             let accountConfigsPath = "FakePath";
             let pipelineName = "FakePipeline";
             let accountName = "FakeAccount";
@@ -70,15 +70,15 @@ describe('input module', function() {
             let mkdirStub = sandbox.stub(fs, 'mkdirSync').returns(true);
             let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
                 accountConfigsPath: accountConfigsPath,
-                pipelineToCreate: pipelineName,
+                pipelineToDeploy: pipelineName,
                 accountName: accountName
             }));
             let saveYamlFileStub = sandbox.stub(util, 'saveYamlFile').returns(true);
 
-            return input.getPipelineConfigForCreate()
+            return input.getPipelineConfigForDeploy()
                 .then(config => {
                     expect(config.accountConfigsPath).to.equal(accountConfigsPath);
-                    expect(config.pipelineToCreate).to.equal(pipelineName);
+                    expect(config.pipelineToDeploy).to.equal(pipelineName);
                     expect(accountName).to.equal(accountName);
                     expect(existsStub.callCount).to.equal(3);
                     expect(mkdirStub.callCount).to.equal(1);

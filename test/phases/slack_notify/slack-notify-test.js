@@ -74,7 +74,7 @@ describe('slack_notify module', function () {
         });
     });
 
-    describe('createPhase', function () {
+    describe('deployPhase', function () {
         let phaseContext = {
             phaseName: 'MyPhase',
             params: {
@@ -106,7 +106,7 @@ describe('slack_notify module', function () {
                 }]
             }));
 
-            return slackNotify.createPhase(phaseContext, accountConfig)
+            return slackNotify.deployPhase(phaseContext, accountConfig)
                 .then(phaseSpec => {
                     expect(getStackStub.callCount).to.equal(1);
                     expect(createLambdaRoleStub.callCount).to.equal(1);
@@ -126,7 +126,7 @@ describe('slack_notify module', function () {
                 }]
             }));
 
-            return slackNotify.createPhase(phaseContext, accountConfig)
+            return slackNotify.deployPhase(phaseContext, accountConfig)
                 .then(phaseSpec => {
                     expect(getStackStub.callCount).to.equal(1);
                     expect(phaseSpec.name).to.equal(phaseContext.phaseName);

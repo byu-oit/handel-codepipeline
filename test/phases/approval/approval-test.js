@@ -49,7 +49,7 @@ describe('approval module', function() {
         });
     });
 
-    describe('createPhase', function() {
+    describe('deployPhase', function() {
         let phaseContext = {
             phaseName: 'MyPhase',
             params: {},
@@ -61,7 +61,7 @@ describe('approval module', function() {
         }
 
         it('should return the configuration for the phase', function() {
-            return approval.createPhase(phaseContext, accountConfig)
+            return approval.deployPhase(phaseContext, accountConfig)
                 .then(phaseSpec => {
                     expect(phaseSpec.name).to.equal(phaseContext.phaseName);
                 }); 

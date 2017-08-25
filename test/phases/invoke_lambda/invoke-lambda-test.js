@@ -53,7 +53,7 @@ describe('invoke lambda module', function () {
         });
     });
 
-    describe('createPhase', function () {
+    describe('deployPhase', function () {
         let phaseContext = {
             phaseName: 'MyPhase',
             params: {
@@ -69,7 +69,7 @@ describe('invoke lambda module', function () {
         }
 
         it('should create the role, upload the file, and create the stack when it doesnt exist', function () {
-            return invokeLambda.createPhase(phaseContext, accountConfig)
+            return invokeLambda.deployPhase(phaseContext, accountConfig)
                 .then(phaseSpec => {
                     expect(phaseSpec.name).to.equal(phaseContext.phaseName);
                     expect(phaseSpec.actions[0].configuration.FunctionName).to.equal("FakeFunction");
