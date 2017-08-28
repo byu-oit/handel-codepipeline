@@ -219,6 +219,8 @@ describe('codebuild phase module', function () {
                         expect(createProjectStub).to.have.been.calledWithMatch(
                             sinon.match('myApp-pipeline-phase'),
                             sinon.match('myApp'),
+                            sinon.match(phaseContext.pipelineName),
+                            sinon.match(phaseContext.phaseName),
                             sinon.match('FakeImage'),
                             sinon.match(envVars),
                             sinon.match.any,
