@@ -15,7 +15,7 @@ Action:
 check -- Checks the contents of your Handel file for errors.
 deploy -- Deploys the given pipeline from your Handel-Codepipeline file.
 delete -- Deletes the given pipeline from your AWS account.
-listSecrets -- List needed secrets for a specific pipeline.`
+listSecrets -- List needed secrets for a specific pipeline. Requires the --pipeline parameter.`
     printAndExit(usageMsg);
 }
 
