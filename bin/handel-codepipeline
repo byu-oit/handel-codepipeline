@@ -14,7 +14,8 @@ function printGeneralUsage() {
 Action:
 check -- Checks the contents of your Handel file for errors.
 deploy -- Deploys the given pipeline from your Handel-Codepipeline file.
-delete -- Deletes the given pipeline from your AWS account.`;
+delete -- Deletes the given pipeline from your AWS account.
+listSecrets -- List needed secrets for a specific pipeline.`
     printAndExit(usageMsg);
 }
 
@@ -36,17 +37,53 @@ function loadHandelCodePipelineFile() {
     }
 }
 
-let handelCodePipelineFile = loadHandelCodePipelineFile();
+function parseArgs() {
+    let args = {};
+    for(let i = 0; i < process.argv.length; i++) {
+        if(process.argv[i] === '--handel-codepipeline-config') {
+            args['handelCodePipelineConfig'] = yaml.safeLoad(new Buffer(process.argv[i+1], 'base64').toString('utf8'))
+            // console.log(`handelCodepipelineConfig: ${yaml.safeDump(args['handelCodepipelineConfig'])}`);
+        }
+        if(process.argv[i] === '--secrets') {
+            args['secrets'] = yaml.safeLoad(new Buffer(process.argv[i+1], 'base64').toString('utf8'))
+            // console.log(`secrets: ${yaml.safeDump(args['secrets'])}`);
+        }
+        if(process.argv[i] === '--handel-account-config') {
+            args['handelAccountConfig'] = yaml.safeLoad(new Buffer(process.argv[i+1], 'base64').toString('utf8'))
+            // console.log(`handelAccountConfig: ${yaml.safeDump(args['handelAccountConfig'])}`);
+        }
+        if(process.argv[i] === '--pipeline') {
+            args['pipeline'] = process.argv[i+1]
+            // console.log(`pipeline: ${args['pipeline']}`);
+        }
+    }
+    if(Object.keys(args).length > 0) {
+        return args;
+    } else {
+        return null;
+    }
+}
+
+let args = parseArgs()
+let handelCodePipelineFile;
 let phase = process.argv[2];
+if(!args) {
+    handelCodePipelineFile = loadHandelCodePipelineFile();
+} else {
+    handelCodePipelineFile = args.handelCodePipelineConfig;
+}
 switch (phase) {
     case "deploy":
-        cli.deployAction(handelCodePipelineFile);
+        cli.deployAction(handelCodePipelineFile, args);
         break;
     case "check":
         cli.checkAction(handelCodePipelineFile);
         break;
     case "delete":
         cli.deleteAction(handelCodePipelineFile);
+        break;
+    case "listSecrets":
+        cli.listSecretsAction(handelCodePipelineFile, args);
         break;
     default:
         printGeneralUsage();
