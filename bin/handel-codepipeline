@@ -67,10 +67,10 @@ function parseArgs() {
 let args = parseArgs()
 let handelCodePipelineFile;
 let phase = process.argv[2];
-if(!args) {
-    handelCodePipelineFile = loadHandelCodePipelineFile();
-} else {
+if(args && args.handelCodePipelineConfig) {
     handelCodePipelineFile = args.handelCodePipelineConfig;
+} else {
+    handelCodePipelineFile = loadHandelCodePipelineFile();
 }
 switch (phase) {
     case "deploy":
