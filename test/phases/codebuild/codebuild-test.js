@@ -238,6 +238,48 @@ describe('codebuild phase module', function () {
                     });
             });
 
+            it('should accept a custom build role', function() {
+                phaseConfig.build_role = 'custom-build-role';
+
+                let testPolicy = {
+                    //Man, I wish these policies were this simple.
+                    s3: 'read-write'
+                };
+
+                let getRoleStub = sandbox.stub(iamCalls, 'getRole').returns(Promise.resolve(role));
+                let getProjectStub = sandbox.stub(codebuildCalls, 'getProject').returns(Promise.resolve(null));
+                let createProjectStub = sandbox.stub(codebuildCalls, 'createProject').returns(Promise.resolve);
+
+                let envVars = {
+                    "FOO": 'bar'
+                };
+
+                handelStub.deploy.resolves({
+                    policies: [testPolicy],
+                    environmentVariables: envVars
+                });
+
+                return codebuild.deployPhase(phaseContext, {})
+                    .then(phase => {
+                        expect(handelStub.deploy).to.have.been.calledWithMatch(
+                            sinon.match(resourcesConfig),
+                            sinon.match(phaseContext),
+                            sinon.match.any
+                        );
+
+                        expect(createProjectStub).to.have.been.calledWithMatch(
+                            sinon.match('myApp-pipeline-phase'),
+                            sinon.match('myApp'),
+                            sinon.match(phaseContext.pipelineName),
+                            sinon.match(phaseContext.phaseName),
+                            sinon.match('FakeImage'),
+                            sinon.match(envVars),
+                            sinon.match.any,
+                            sinon.match('FakeArn'),
+                            sinon.match.any
+                        );
+                    });
+            });
         });
 
         describe('deletePhase', function () {
