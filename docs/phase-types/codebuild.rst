@@ -37,6 +37,11 @@ Parameters
      - No
      - {}
      - A set of key/value pairs that will be injected into the running CodeBuild jobs.
+   * - build_role
+     - string
+     - No
+     - Handel-created role
+     - The role that will be assigned to the CodeBuild project. This role must already exist in your account and must be assumable by CodeBuild.
    * - extra_resources
      - :ref:`codebuild-extras`
      - No
@@ -80,6 +85,10 @@ The following services are currently supported in `extra_resources`:
 * `DynamoDB <https://handel.readthedocs.io/en/latest/supported-services/dynamodb.html>`_
 * `S3 <https://handel.readthedocs.io/en/latest/supported-services/s3.html>`_
 
+.. NOTE::
+
+  If you use `extra_resources` together with a custom `build_role`, you are responsible for making sure that your custom build role allows access to the extra resources that are created.
+
 Environment Variable Prefix
 ***************************
 
@@ -110,7 +119,7 @@ This snippet of a handel-codepipeline.yml file shows the CodeBuild phase being c
             MY_CUSTOM_ENV: my_custom_value
         ...
 
-This is a snippet of a handel-codepipeline.yml file which includes an S3 bucket as an extra resource:
+This is a snippet of a handel-codepipeline.yml file which includes an S3 bucket as an extra resource and a custom IAM role:
 
 .. code-block:: yaml
 
@@ -125,6 +134,7 @@ This is a snippet of a handel-codepipeline.yml file which includes an S3 bucket 
           build_image: aws/codebuild/docker:1.12.1
           environment_Variables:
             MY_CUSTOM_ENV: my_custom_value
+          build_role: my-custom-codebuild-role
           extra_resources:
             cache_bucket:
               type: s3
