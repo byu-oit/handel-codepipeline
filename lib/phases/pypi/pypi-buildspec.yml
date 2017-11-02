@@ -1,15 +1,20 @@
 version: 0.2
 
+env:
+  parameter-store:
+    TWINE_USERNAME: {{parameter_prefix}}.twine_username
+    TWINE_PASSWORD: {{parameter_prefix}}.twine_password
+    TWINE_REPOSITORY: {{parameter_prefix}}.twine_repo
+    {{#if twine_repo_url}}
+    TWINE_REPOSITORY_URL: {{parameter_prefix}}.twine_repo
+    {{/if}}
+
 phases:
   pre_build:
     commands:
     - pip install twine wheel awscli
     - pip install -r requirements.txt
     - rm -rf dist
-    - export TWINE_USERNAME=$(aws ssm get-parameters --names ${HANDEL_PIPELINE_NAME}.twine_username | grep 'Value' | awk '{print $2}' | tr -d '",')
-    - export TWINE_PASSWORD=$(aws ssm get-parameters --names ${HANDEL_PIPELINE_NAME}.twine_password --with-decryption | grep 'Value' | awk '{print $2}' | tr -d '",')
-    - export TWINE_REPOSITORY=$(aws ssm get-parameters --names ${HANDEL_PIPELINE_NAME}.twine_repo | grep 'Value' | awk '{print $2}' | tr -d '",')
-    - if [ "$TWINE_REPOSITORY" != "pypi" ]; then export TWINE_REPOSITORY_URL=$TWINE_REPOSITORY; fi
   build:
     commands:
     - python setup.py sdist bdist_wheel
