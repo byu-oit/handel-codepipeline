@@ -2,11 +2,11 @@ version: 0.2
 
 env:
   parameter-store:
-    TWINE_USERNAME: {{pipeline_name}}.twine_username
-    TWINE_PASSWORD: {{pipeline_name}}.twine_password
-    TWINE_REPOSITORY: {{pipeline_name}}.twine_repo
+    TWINE_USERNAME: {{parameter_prefix}}.twine_username
+    TWINE_PASSWORD: {{parameter_prefix}}.twine_password
+    TWINE_REPOSITORY: {{parameter_prefix}}.twine_repo
     {{#if twine_repo_url}}
-    TWINE_REPOSITORY_URL: {{pipeline_name}}.twine_repo
+    TWINE_REPOSITORY_URL: {{parameter_prefix}}.twine_repo
     {{/if}}
 
 phases:

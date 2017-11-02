@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   parameter-store:
-    NPM_TOKEN: {{pipeline_name}}.npmToken
+    NPM_TOKEN: {{parameter_prefix}}.npmToken
 
 phases:
   pre_build:
