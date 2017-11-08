@@ -32,7 +32,11 @@ Parameters
      - string
      - Yes
      - 
-     - The Slack channel you wish to send to. This can either be a username, such as '@dsw88', or a channel, such as '#mydeploys'.
+     - The Slack channel you wish to send to. This can either be a username, such as "@dsw88", or a channel, such as "#mydeploys". 
+
+.. IMPORTANT::
+
+    In the *channel* parameter above, make sure that you put your channel names in quotes, since YAML treats the *#* character as a comment and will cause your Handel-CodePipeline file to be invalid.
 
 Secrets
 -------
@@ -56,6 +60,6 @@ This snippet of a handel-codepipeline.yml file shows the GitHub phase being conf
         phases:
         - type: slack_notify
           name: Notify
-          channel: #mydeployschannel
+          channel: "#mydeployschannel"
           message: Successfully deployed the app!
         ...
