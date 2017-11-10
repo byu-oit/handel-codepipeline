@@ -1,6 +1,6 @@
 .. _handel-codepipeline-file:
 
-Handel CodePipeline File
+Handel-CodePipeline File
 ========================
 Handel-CodePipeline requires you to specify a pipeline specification file, which contains information on how your pipeline should be configured. This specification file must be named *handel-codepipeline.yml*. It doesn't contain any secrets, so it may be committed to your repository alongside your Handel file.
 
