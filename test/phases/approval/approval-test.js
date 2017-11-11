@@ -15,7 +15,7 @@
  *
  */
 const expect = require('chai').expect;
-const approval = require('../../../lib/phases/approval');
+const approval = require('../../../dist/phases/approval');
 const sinon = require('sinon');
 const inquirer = require('inquirer');
 

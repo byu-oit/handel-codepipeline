@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-const s3Calls = require('../../lib/aws/s3-calls');
+const s3Calls = require('../../dist/aws/s3-calls');
 const sinon = require('sinon');
 const AWS = require('aws-sdk-mock');
 const expect = require('chai').expect;

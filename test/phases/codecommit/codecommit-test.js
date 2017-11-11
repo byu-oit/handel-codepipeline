@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-const codecommit = require('../../../lib/phases/codecommit');
+const codecommit = require('../../../dist/phases/codecommit');
 const expect = require('chai').expect;
 const sinon = require('sinon');
 

@@ -16,7 +16,7 @@
  */
 const expect = require('chai').expect;
 const AWS = require('aws-sdk-mock');
-const cli = require('../../lib/cli');
+const cli = require('../../dist/cli');
 const sinon = require('sinon');
 
 describe('cli module', function() {

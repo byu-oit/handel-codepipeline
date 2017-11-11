@@ -15,8 +15,8 @@
  *
  */
 const expect = require('chai').expect;
-const input = require('../../lib/input');
-const util = require('../../lib/common/util');
+const input = require('../../dist/input');
+const util = require('../../dist/common/util');
 const sinon = require('sinon');
 const fs = require('fs');
 const inquirer = require('inquirer');

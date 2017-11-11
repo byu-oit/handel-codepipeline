@@ -15,10 +15,10 @@
  *
  */
 const expect = require('chai').expect;
-const lifecycle = require('../../lib/lifecycle');
-const codepipelineCalls = require('../../lib/aws/codepipeline-calls');
+const lifecycle = require('../../dist/lifecycle');
+const codepipelineCalls = require('../../dist/aws/codepipeline-calls');
 const sinon = require('sinon');
-const util = require('../../lib/common/util');
+const util = require('../../dist/common/util');
 
 describe('lifecycle module', function () {
     let sandbox;

@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-const ssmCalls = require('../../lib/aws/ssm-calls');
+const ssmCalls = require('../../dist/aws/ssm-calls');
 const expect = require('chai').expect;
 const AWS = require('aws-sdk-mock');
 const sinon = require('sinon');
