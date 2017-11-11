@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-const github = require('../../../lib/phases/github');
+const github = require('../../../dist/phases/github');
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const inquirer = require('inquirer');

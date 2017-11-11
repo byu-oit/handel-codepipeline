@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-const codeBuildCalls = require('../../lib/aws/codebuild-calls');
+const codeBuildCalls = require('../../dist/aws/codebuild-calls');
 const sinon = require('sinon');
 const AWS = require('aws-sdk-mock');
 const expect = require('chai').expect;

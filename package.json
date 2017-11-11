@@ -2,11 +2,10 @@
   "name": "handel-codepipeline",
   "version": "0.8.3",
   "description": "Creates CodePipelines running Handel as the deploy action",
-  "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha 'test/**/*.js'",
-    "test-debug": "./node_modules/mocha/bin/mocha --debug-brk 'test/**/*.js'",
-    "test-coverage": "./node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- -- -u exports -R spec 'test/**/*-test.js'"
+    "lint": "tslint -p tsconfig.json -t stylish",
+    "build": "gulp build",
+    "test": "./node_modules/mocha/bin/mocha -r ts-node/register 'test/**/*.ts' && gulp build && ./node_modules/mocha/bin/mocha 'test/**/*.js'"
   },
   "bin": {
     "handel-codepipeline": "./bin/handel-codepipeline"
@@ -16,21 +15,34 @@
   "dependencies": {
     "archiver": "^1.3.0",
     "async": "^2.4.0",
-    "aws-sdk": "^2.94.0",
+    "aws-sdk": "^2.124.0",
     "handel": "^0.11.4",
     "handlebars": "^4.0.8",
     "inquirer": "^3.0.6",
     "js-yaml": "3.7.0",
+    "uuid": "^3.1.0",
     "winston": "^2.3.1"
   },
   "devDependencies": {
+    "@types/chai": "^4.0.4",
+    "@types/mocha": "^2.2.44",
+    "@types/node": "^8.0.47",
+    "@types/sinon": "^2.3.7",
+    "@types/winston": "^2.3.7",
     "aws-sdk-mock": "^1.6.1",
     "chai": "^3.5.0",
     "deep-equal": "^1.0.1",
     "eslint": "^3.15.0",
     "eslint-plugin-mocha": "^4.8.0",
+    "fs-extra": "^4.0.2",
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^3.2.3",
     "mocha": "^3.2.0",
+    "run-sequence": "^2.2.0",
     "sinon": "^2.4.1",
-    "sinon-chai": "^2.12.0"
+    "sinon-chai": "^2.12.0",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.1"
   }
 }

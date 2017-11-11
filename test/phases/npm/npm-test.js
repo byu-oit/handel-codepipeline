@@ -14,12 +14,12 @@
  * limitations under the License.
  *
  */
-const npm = require('../../../lib/phases/npm');
+const npm = require('../../../dist/phases/npm');
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const iamCalls = require('../../../lib/aws/iam-calls');
-const ssmCalls = require('../../../lib/aws/ssm-calls');
-const codebuildCalls = require('../../../lib/aws/codebuild-calls');
+const iamCalls = require('../../../dist/aws/iam-calls');
+const ssmCalls = require('../../../dist/aws/ssm-calls');
+const codebuildCalls = require('../../../dist/aws/codebuild-calls');
 const inquirer = require('inquirer');
 
 describe('npm phase module', function () {

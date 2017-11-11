@@ -15,9 +15,9 @@
  *
  */
 const expect = require('chai').expect;
-const runscope = require('../../../lib/phases/runscope');
-const deployersCommon = require('../../../lib/common/deployers-common');
-const cloudFormationCalls = require('../../../lib/aws/cloudformation-calls');
+const runscope = require('../../../dist/phases/runscope');
+const deployersCommon = require('../../../dist/common/deployers-common');
+const cloudFormationCalls = require('../../../dist/aws/cloudformation-calls');
 const sinon = require('sinon');
 const inquirer = require('inquirer');
 

@@ -21,7 +21,7 @@ const sinonChai = require('sinon-chai');
 const cloudFormationCalls = require('handel/lib/aws/cloudformation-calls');
 const handelUtil = require('handel/lib/common/util');
 
-const handel = require('../../lib/common/handel');
+const handel = require('../../dist/common/handel');
 
 chai.use(sinonChai);
 const expect = chai.expect;

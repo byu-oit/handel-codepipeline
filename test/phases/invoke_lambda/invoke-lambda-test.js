@@ -15,7 +15,7 @@
  *
  */
 const expect = require('chai').expect;
-const invokeLambda = require('../../../lib/phases/invoke_lambda');
+const invokeLambda = require('../../../dist/phases/invoke_lambda');
 const sinon = require('sinon');
 
 describe('invoke lambda module', function () {

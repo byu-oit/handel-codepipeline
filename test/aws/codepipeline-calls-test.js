@@ -16,9 +16,9 @@
  */
 const expect = require('chai').expect;
 const AWS = require('aws-sdk-mock');
-const codepipelineCalls = require('../../lib/aws/codepipeline-calls');
+const codepipelineCalls = require('../../dist/aws/codepipeline-calls');
 const sinon = require('sinon');
-const iamCalls = require('../../lib/aws/iam-calls');
+const iamCalls = require('../../dist/aws/iam-calls');
 
 describe('codepipelineCalls module', function () {
     let sandbox;

@@ -15,11 +15,11 @@
  *
  */
 const expect = require('chai').expect;
-const deployersCommon = require('../../lib/common/deployers-common');
+const deployersCommon = require('../../dist/common/deployers-common');
 const sinon = require('sinon');
-const util = require('../../lib/common/util');
-const s3Calls = require('../../lib/aws/s3-calls');
-const iamCalls = require('../../lib/aws/iam-calls');
+const util = require('../../dist/common/util');
+const s3Calls = require('../../dist/aws/s3-calls');
+const iamCalls = require('../../dist/aws/iam-calls');
 const fs = require('fs');
 
 describe('deployersCommon module', function() {

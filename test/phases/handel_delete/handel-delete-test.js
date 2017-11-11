@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
-const handelDelete = require('../../../lib/phases/handel_delete');
+const handelDelete = require('../../../dist/phases/handel_delete');
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const iamCalls = require('../../../lib/aws/iam-calls');
-const codebuildCalls = require('../../../lib/aws/codebuild-calls');
+const iamCalls = require('../../../dist/aws/iam-calls');
+const codebuildCalls = require('../../../dist/aws/codebuild-calls');
 
 describe('handel phase module', function () {
     let sandbox;

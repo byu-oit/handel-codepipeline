@@ -14,14 +14,14 @@
  * limitations under the License.
  *
  */
-const codebuild = require('../../../lib/phases/codebuild');
+const codebuild = require('../../../dist/phases/codebuild');
 const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
-const iamCalls = require('../../../lib/aws/iam-calls');
-const codebuildCalls = require('../../../lib/aws/codebuild-calls');
+const iamCalls = require('../../../dist/aws/iam-calls');
+const codebuildCalls = require('../../../dist/aws/codebuild-calls');
 
-const handel = require('../../../lib/common/handel');
+const handel = require('../../../dist/common/handel');
 
 const deepEqual = require('deep-equal');
 

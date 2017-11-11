@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const yaml = require('js-yaml');
 const fs = require('fs');
-const cli = require('../lib/cli');
+const cli = require('../dist/cli');
 
 function printAndExit(msg) {
     console.log(msg)
