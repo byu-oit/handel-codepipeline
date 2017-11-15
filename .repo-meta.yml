@@ -23,6 +23,8 @@ software:
       - Python
       - CircleCI.com
       - NodeJS
+      - TypeScript
+      - Shell
     stages:
       production:
         urls:
