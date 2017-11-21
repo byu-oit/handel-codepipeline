@@ -21,11 +21,13 @@
     "handlebars": "^4.0.8",
     "inquirer": "^3.0.6",
     "js-yaml": "3.7.0",
+    "minimist": "^1.2.0",
     "uuid": "^3.1.0",
     "winston": "^2.3.1"
   },
   "devDependencies": {
     "@types/chai": "^4.0.4",
+    "@types/minimist": "^1.2.0",
     "@types/mocha": "^2.2.44",
     "@types/node": "^8.0.47",
     "@types/sinon": "^2.3.7",
