@@ -42,3 +42,22 @@ exports.cloudFormation = {
         return cloudformation.deleteStack(params).promise();
     }
 }
+
+exports.codeBuild = {
+    createProject: function(params) {
+        const codeBuild = new AWS.CodeBuild({ apiVersion: '2016-10-06' });
+        return codeBuild.createProject(params).promise()
+    },
+    updateProject: function(params) {
+        const codeBuild = new AWS.CodeBuild({ apiVersion: '2016-10-06' });
+        return codeBuild.updateProject(params).promise();
+    },
+    batchGetProjects: function(params) {
+        const codeBuild = new AWS.CodeBuild({ apiVersion: '2016-10-06' });
+        return codeBuild.batchGetProjects(params).promise();
+    },
+    deleteProject: function(params) {
+        const codeBuild = new AWS.CodeBuild({ apiVersion: '2016-10-06' });
+        return codeBuild.deleteProject(params).promise();
+    }
+}
