@@ -2,6 +2,7 @@
 const yaml = require('js-yaml');
 const fs = require('fs');
 const cli = require('../dist/cli');
+const minimist = require('minimist');
 
 function printAndExit(msg) {
     console.log(msg)
@@ -37,16 +38,17 @@ function loadHandelCodePipelineFile() {
 }
 
 let handelCodePipelineFile = loadHandelCodePipelineFile();
-let phase = process.argv[2];
+let argv = minimist(process.argv.slice(2));
+let phase = process.argv[2] ? process.argv[2].toLowerCase() : '';
 switch (phase) {
     case "deploy":
-        cli.deployAction(handelCodePipelineFile);
+        cli.deployAction(handelCodePipelineFile, argv);
         break;
     case "check":
-        cli.checkAction(handelCodePipelineFile);
+        cli.checkAction(handelCodePipelineFile, argv);
         break;
     case "delete":
-        cli.deleteAction(handelCodePipelineFile);
+        cli.deleteAction(handelCodePipelineFile, argv);
         break;
     default:
         printGeneralUsage();

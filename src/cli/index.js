@@ -22,6 +22,15 @@ const util = require('../common/util');
 const s3Calls = require('../aws/s3-calls');
 const iamCalls = require('../aws/iam-calls');
 
+function configureLogger(argv) {
+    let level = "info";
+    if (argv.d) {
+        level = 'debug';
+    }
+    winston.level = level;
+    winston.cli();
+}
+
 function getCodePipelineBucketName(accountConfig) {
     return `codepipeline-${accountConfig.region}-${accountConfig.account_id}`;
 }
@@ -72,7 +81,8 @@ function validateCredentials(accountConfig) {
     });
 }
 
-exports.deployAction = function (handelCodePipelineFile) {
+exports.deployAction = function (handelCodePipelineFile, argv) {
+    configureLogger(argv);
     winston.info("Welcome to the Handel CodePipeline setup wizard");
     let phaseDeployers = util.getPhaseDeployers();
     validatePipelineSpec(handelCodePipelineFile);
@@ -114,14 +124,16 @@ exports.deployAction = function (handelCodePipelineFile) {
         });
 }
 
-exports.checkAction = function (handelCodePipelineFile) {
+exports.checkAction = function (handelCodePipelineFile, argv) {
+    configureLogger(argv);
     let phaseDeployers = util.getPhaseDeployers();
     validatePipelineSpec(handelCodePipelineFile);
     checkPhases(handelCodePipelineFile, phaseDeployers);
     winston.info("No errors were found in your Handel-CodePipeline file");
 }
 
-exports.deleteAction = function (handelCodePipelineFile) {
+exports.deleteAction = function (handelCodePipelineFile, argv) {
+    configureLogger(argv);
     winston.info("Welcome to the Handel CodePipeline deletion wizard");
 
     let phaseDeployers = util.getPhaseDeployers();
