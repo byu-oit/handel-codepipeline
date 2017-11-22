@@ -45,7 +45,7 @@ exports.check = function(phaseConfig) {
     return errors;
 }
 
-exports.getSecretsForPhase = function () {
+exports.getSecretsForPhase = function (phaseConfig) {
     return Promise.resolve({});
 }
 

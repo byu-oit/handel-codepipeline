@@ -126,7 +126,7 @@ exports.getPhaseSecrets = function (phaseDeployers, handelCodePipelineFile, pipe
             let phaseType = phaseSpec.type;
             let phaseDeployer = phaseDeployers[phaseType];
             inputFunctions.push(function (callback) {
-                phaseDeployer.getSecretsForPhase()
+                phaseDeployer.getSecretsForPhase(phaseSpec)
                     .then(phaseSecrets => {
                         callback(null, phaseSecrets);
                     })

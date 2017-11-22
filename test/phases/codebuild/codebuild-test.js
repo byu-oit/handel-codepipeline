@@ -58,7 +58,7 @@ describe('codebuild phase module', function () {
 
     describe('getSecretsForPhase', function () {
         it('should return an empty object', function () {
-            return codebuild.getSecretsForPhase()
+            return codebuild.getSecretsForPhase({})
                 .then(results => {
                     expect(results).to.deep.equal({});
                 });

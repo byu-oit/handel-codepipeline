@@ -50,7 +50,7 @@ describe('handel phase module', function () {
 
     describe('getSecretsForPhase', function () {
         it('should return an empty object', function () {
-            return handelDelete.getSecretsForPhase()
+            return handelDelete.getSecretsForPhase({})
                 .then(results => {
                     expect(results).to.deep.equal({});
                 });

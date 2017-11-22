@@ -14,11 +14,19 @@
  * limitations under the License.
  *
  */
-const winston = require('winston');
-const inquirer = require('inquirer');
+import { AccountConfig } from 'handel/src/datatypes/account-config';
+import * as inquirer from 'inquirer';
+import * as winston from 'winston';
+import { PhaseConfig, PhaseContext } from '../../datatypes/index';
 
-exports.check = function(phaseConfig) {
-    let errors = [];
+export interface GithubConfig extends PhaseConfig {
+    owner: string;
+    repo: string;
+    branch: string;
+}
+
+export function check(phaseConfig: GithubConfig) {
+    const errors = [];
 
     if(!phaseConfig.owner) {
         errors.push(`GitHub - The 'owner' parameter is required`);
@@ -29,24 +37,24 @@ exports.check = function(phaseConfig) {
     if(!phaseConfig.branch) {
         errors.push(`GitHub - The 'branch' parameter is required`);
     }
-    
+
     return errors;
 }
 
-exports.getSecretsForPhase = function() {
-    let questions = [
+export function getSecretsForPhase(phaseConfig: PhaseConfig) {
+    const questions = [
         {
             type: 'input',
             name: 'githubAccessToken',
-            message: 'Please enter your GitHub access token',
+            message: `'${phaseConfig.name}' phase - Please enter your GitHub access token`,
         }
     ];
     return inquirer.prompt(questions);
 }
 
-exports.deployPhase = function (phaseContext, accountConfig) {
+export function deployPhase(phaseContext: PhaseContext<GithubConfig>, accountConfig: AccountConfig) {
     winston.info(`Creating source phase '${phaseContext.phaseName}'`);
-    let branch = phaseContext.params.branch || "master";
+    const branch = phaseContext.params.branch || 'master';
 
     return Promise.resolve({
         name: phaseContext.phaseName,
@@ -55,10 +63,10 @@ exports.deployPhase = function (phaseContext, accountConfig) {
                 inputArtifacts: [],
                 name: phaseContext.phaseName,
                 actionTypeId: {
-                    category: "Source",
-                    owner: "ThirdParty",
-                    version: "1",
-                    provider: "GitHub"
+                    category: 'Source',
+                    owner: 'ThirdParty',
+                    version: '1',
+                    provider: 'GitHub'
                 },
                 outputArtifacts: [
                     {
@@ -77,7 +85,7 @@ exports.deployPhase = function (phaseContext, accountConfig) {
     });
 }
 
-exports.deletePhase = function(phaseContext, accountConfig) {
+export function deletePhase(phaseContext: PhaseContext<GithubConfig>, accountConfig: AccountConfig) {
     winston.info(`Nothing to delete for source phase '${phaseContext.phaseName}'`);
-    return Promise.resolve({}); //Nothing to delete
+    return Promise.resolve({}); // Nothing to delete
 }

@@ -46,7 +46,7 @@ describe('invoke lambda module', function () {
 
     describe('getSecretsForPhase', function () {
         it('should do nothing', function () {
-            return invokeLambda.getSecretsForPhase()
+            return invokeLambda.getSecretsForPhase({})
                 .then(results => {
                     expect(results).to.deep.equal({});
                 });

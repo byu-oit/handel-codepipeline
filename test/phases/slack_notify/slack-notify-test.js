@@ -66,7 +66,7 @@ describe('slack_notify module', function () {
             let url = "FakeUrl";
             let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({ slackUrl: url }));
 
-            return slackNotify.getSecretsForPhase()
+            return slackNotify.getSecretsForPhase({ name: 'FakePhaseName'})
                 .then(results => {
                     expect(results.slackUrl).to.equal(url);
                     expect(promptStub.callCount).to.equal(1);

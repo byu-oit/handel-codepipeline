@@ -67,12 +67,12 @@ exports.check = function(phaseConfig) {
     return errors;
 }
 
-exports.getSecretsForPhase = function () {
+exports.getSecretsForPhase = function (phaseConfig) {
     let questions = [
         {
             type: 'input',
             name: 'slackUrl',
-            message: 'Please enter the URL for Slack Notifications',
+            message: `'${phaseConfig.name}' phase - Please enter the URL for Slack Notifications`,
         }
     ];
     return inquirer.prompt(questions);
