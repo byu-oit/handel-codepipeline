@@ -14,9 +14,12 @@
  * limitations under the License.
  *
  */
-const winston = require('winston');
+import * as AWS from 'aws-sdk';
+import { AccountConfig } from 'handel/src/datatypes/account-config';
+import * as winston from 'winston';
+import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
 
-function getApprovalPhaseSpec(phaseContext) {
+function getApprovalPhaseSpec(phaseContext: PhaseContext<PhaseConfig>): AWS.CodePipeline.StageDeclaration {
     return {
         name: phaseContext.phaseName,
         actions: [
@@ -25,37 +28,36 @@ function getApprovalPhaseSpec(phaseContext) {
                 outputArtifacts: [],
                 name: phaseContext.phaseName,
                 actionTypeId: {
-                    category: "Approval",
-                    owner: "AWS",
-                    version: "1",
-                    provider: "Manual"
+                    category: 'Approval',
+                    owner: 'AWS',
+                    version: '1',
+                    provider: 'Manual'
                 },
                 configuration: {},
                 runOrder: 1
             }
         ]
-    }
+    };
 }
 
-exports.check = function(phaseConfig) {
-    let errors = [];
-    
-    //No required parameters
+export function check(phaseConfig: PhaseConfig): string[] {
+    const errors: string[] = [];
+
+    // No required parameters
 
     return errors;
 }
 
-exports.getSecretsForPhase = function (phaseConfig) {
+export function getSecretsForPhase(phaseConfig: PhaseConfig): Promise<PhaseSecrets> {
     return Promise.resolve({});
 }
 
-exports.deployPhase = function (phaseContext, accountConfig) {
+export function deployPhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {
     winston.info(`Creating manual approval phase '${phaseContext.phaseName}'`);
-
-    return Promise.resolve(getApprovalPhaseSpec(phaseContext))
+    return Promise.resolve(getApprovalPhaseSpec(phaseContext));
 }
 
-exports.deletePhase = function(phaseContext, accountConfig) {
+export function deletePhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<boolean> {
     winston.info(`Nothing to delete for source phase '${phaseContext.phaseName}'`);
-    return Promise.resolve({}); //Nothing to delete
+    return Promise.resolve(true); // Nothing to delete
 }

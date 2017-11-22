@@ -5,6 +5,14 @@ export interface PhaseConfig {
     name: string;
 }
 
+export interface PhaseSecrets {
+    [key: string]: string;
+}
+
+export interface EnvironmentVariables {
+    [key: string]: string;
+}
+
 export class PipelineContext {
     public appName: string;
     public pipelineName: string;

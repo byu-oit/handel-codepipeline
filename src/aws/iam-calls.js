@@ -52,7 +52,7 @@ exports.getRole = function(roleName) {
         })
         .catch(err => {
             if(err.code === 'NoSuchEntity') {
-                return null
+                return null;
             }
             throw err;
         });
