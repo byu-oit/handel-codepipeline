@@ -41,7 +41,7 @@ describe('approval module', function() {
         it('should not prompt for any secrets', function() {
             let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({}));
 
-            return approval.getSecretsForPhase()
+            return approval.getSecretsForPhase({})
                 .then(results => {
                     expect(results).to.deep.equal({});
                     expect(promptStub.callCount).to.equal(0);

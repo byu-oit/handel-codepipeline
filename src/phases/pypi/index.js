@@ -151,17 +151,17 @@ exports.check = function (phaseConfig) {
     return errors;
 }
 
-exports.getSecretsForPhase = function () {
+exports.getSecretsForPhase = function (phaseConfig) {
     let questions = [
         {
             type: 'input',
             name: 'pypiUsername',
-            message: 'Please enter your PyPi username',
+            message: `'${phaseConfig.name}' phase - Please enter your PyPi username`,
         },
         {
             type: 'input',
             name: 'pypiPassword',
-            message: 'Please enter your PyPi password',
+            message: `'${phaseConfig.name}' phase - Please enter your PyPi password`,
         }
     ];
     return inquirer.prompt(questions);

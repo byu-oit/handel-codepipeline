@@ -49,7 +49,7 @@ describe('runscope module', function () {
                 runscopeAccessToken: accessToken
             }));
 
-            return runscope.getSecretsForPhase()
+            return runscope.getSecretsForPhase({ name: 'FakePhaseName'})
                 .then(results => {
                     expect(results.runscopeTriggerUrl).to.equal(triggerUrl);
                     expect(results.runscopeAccessToken).to.equal(accessToken);

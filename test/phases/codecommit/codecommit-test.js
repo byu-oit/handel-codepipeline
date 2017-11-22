@@ -60,7 +60,7 @@ describe('github phase module', function () {
 
     describe('getSecretsForPhase', function () {
         it('should return an empty object', function () {
-            return codecommit.getSecretsForPhase()
+            return codecommit.getSecretsForPhase({})
                 .then(results => {
                     expect(results).to.deep.equal({});
                 });

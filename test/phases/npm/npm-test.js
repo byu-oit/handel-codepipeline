@@ -46,7 +46,7 @@ describe('npm phase module', function () {
             let token = "FakeUser";
             let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({ npmToken: token }));
 
-            return npm.getSecretsForPhase()
+            return npm.getSecretsForPhase({ name: 'FakePhaseName'})
                 .then(results => {
                     expect(results.npmToken).to.equal(token);
                     expect(promptStub.callCount).to.equal(1);

@@ -14,24 +14,23 @@
  * limitations under the License.
  *
  */
-const ServiceContext = require('handel/lib/datatypes/service-context');
-const EnvironmentContext = require('handel/lib/datatypes/environment-context');
-const EnvironmentDeployResult = require('handel/lib/datatypes/environment-deploy-result');
-const EnvironmentDeleteResult = require('handel/lib/datatypes/environment-delete-result');
-const handelUtil = require('handel/lib/common/util');
-const handelConfig = require('handel/lib/common/account-config');
+const ServiceContext = require('handel/dist/datatypes/service-context').ServiceContext; // TODO - Change to src/ once ported to TS
+const EnvironmentContext = require('handel/dist/datatypes/environment-context').EnvironmentContext; // TODO - Change to src/ once ported to TS
+const EnvironmentDeployResult = require('handel/dist/datatypes/environment-deploy-result').EnvironmentDeployResult; // TODO - Change to src/ once ported to TS
+const EnvironmentDeleteResult = require('handel/dist/datatypes/environment-delete-result').EnvironmentDeleteResult; // TODO - Change to src/ once ported to TS
+const handelUtil = require('handel/dist/common/util'); // TODO - Change to src/ once ported to TS
 
-const checkPhase = require('handel/lib/phases/check');
+const checkPhase = require('handel/dist/phases/check'); // TODO - Change to src/ once ported to TS
 
-const preDeployPhase = require('handel/lib/phases/pre-deploy');
-const bindPhase = require('handel/lib/phases/bind');
-const deployPhase = require('handel/lib/phases/deploy');
+const preDeployPhase = require('handel/dist/phases/pre-deploy'); // TODO - Change to src/ once ported to TS
+const bindPhase = require('handel/dist/phases/bind'); // TODO - Change to src/ once ported to TS
+const deployPhase = require('handel/dist/phases/deploy'); // TODO - Change to src/ once ported to TS
 
-const unPreDeployPhase = require('handel/lib/phases/un-pre-deploy');
-const unBindPhase = require('handel/lib/phases/un-bind');
-const unDeployPhase = require('handel/lib/phases/un-deploy');
+const unPreDeployPhase = require('handel/dist/phases/un-pre-deploy'); // TODO - Change to src/ once ported to TS
+const unBindPhase = require('handel/dist/phases/un-bind'); // TODO - Change to src/ once ported to TS
+const unDeployPhase = require('handel/dist/phases/un-deploy'); // TODO - Change to src/ once ported to TS
 
-const deployOrderCalc = require('handel/lib/deploy/deploy-order-calc');
+const deployOrderCalc = require('handel/dist/deploy/deploy-order-calc'); // TODO - Change to src/ once ported to TS
 
 const winston = require('winston');
 
@@ -39,29 +38,6 @@ const allowedHandelServices = ['apiaccess', 'dynamodb', 's3'];
 
 
 exports.check = function checkResources(resources) {
-    //TODO - This using a fake account config is pretty ugly. It'd be nice not to have to use it if possible
-    //Use fake account config
-    handelConfig({
-        account_id: 111111111111,
-        region: 'us-west-2',
-        vpc: 'vpc-aaaaaaaa',
-        public_subnets: [
-            'subnet-ffffffff',
-            'subnet-44444444'
-        ],
-        private_subnets: [
-            'subnet-00000000',
-            'subnet-77777777'
-        ],
-        data_subnets: [
-            'subnet-eeeeeeee',
-            'subnet-99999999'
-        ],
-        ecs_ami: 'ami-66666666',
-        ssh_bastion_sg: 'sg-44444444',
-        on_prem_cidr: '10.10.10.10/0'
-    }).getAccountConfig();
-
     let errors = [];
     for (let name of Object.getOwnPropertyNames(resources)) {
         let resErrors = checkResource(name, resources[name]);
@@ -71,7 +47,6 @@ exports.check = function checkResources(resources) {
 };
 
 exports.deploy = function deployResources(resources, phaseContext, accountConfig) {
-    handelConfig(accountConfig).getAccountConfig();
     return new Promise((resolve, reject) => {
         try {
             let deployers = getServiceDeployers();
@@ -87,7 +62,6 @@ exports.deploy = function deployResources(resources, phaseContext, accountConfig
 };
 
 exports.delete = function deleteResources(resources, phaseContext, accountConfig) {
-    handelConfig(accountConfig).getAccountConfig();
     return new Promise((resolve, reject) => {
         try {
             let deployers = getServiceDeployers();
@@ -119,7 +93,7 @@ function checkResource(name, config) {
 
     let type = config.type;
 
-    let context = new ServiceContext('check', 'check', name, type, '1', config);
+    let context = new ServiceContext('check', 'check', name, type, config, {});
 
     let deployer = deployers[type];
 
@@ -188,7 +162,7 @@ function createEnvironmentContext(resources, phaseContext, accountConfig) {
     let app = phaseContext.appName;
     let pipeline = phaseContext.pipelineName;
 
-    let envContext = new EnvironmentContext(app, '1', pipeline);
+    let envContext = new EnvironmentContext(app, pipeline, accountConfig);
     for (let name of Object.getOwnPropertyNames(resources)) {
         let serviceSpec = resources[name];
 
@@ -198,7 +172,7 @@ function createEnvironmentContext(resources, phaseContext, accountConfig) {
 
         serviceSpec.tags['handel-phase'] = phaseContext.phaseName;
 
-        envContext.serviceContexts[name] = new ServiceContext(app, pipeline, name, serviceSpec.type, '1', serviceSpec);
+        envContext.serviceContexts[name] = new ServiceContext(app, pipeline, name, serviceSpec.type, serviceSpec, accountConfig);
     }
     return envContext;
 }

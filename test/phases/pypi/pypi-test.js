@@ -49,7 +49,7 @@ describe('pypi phase module', function () {
             let password = "FakePassword";
             let promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({ pypiUsername: user, pypiPassword: password }));
 
-            return pypi.getSecretsForPhase()
+            return pypi.getSecretsForPhase({ name: 'FakePhaseName'})
                 .then(results => {
                     expect(results.pypiUsername).to.equal(user);
                     expect(results.pypiPassword).to.equal(password);

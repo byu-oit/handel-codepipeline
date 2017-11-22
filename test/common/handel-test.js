@@ -18,8 +18,9 @@ const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 
-const cloudFormationCalls = require('handel/lib/aws/cloudformation-calls');
-const handelUtil = require('handel/lib/common/util');
+const cloudFormationCalls = require('handel/dist/aws/cloudformation-calls'); // TODO - Change to src/ when ported to TS
+const s3Calls = require('handel/dist/aws/s3-calls'); // TODO - Change to src/ when ported to TS
+const handelUtil = require('handel/dist/common/util'); // TODO - Change to src/ when ported to TS
 
 const handel = require('../../dist/common/handel');
 
@@ -171,6 +172,7 @@ describe('handel interface', function () {
         };
 
         it('can deploy resources', function () {
+            let preDeployStub 
             let cfGetStub = sandbox.stub(cloudFormationCalls, 'getStack')
             //Checking for logging bucket
                 .onFirstCall().resolves({
@@ -195,6 +197,9 @@ describe('handel interface', function () {
                         s3BucketStatement, s3ObjectStatement
                     );
                     expect(result).to.have.property('environmentVariables').which.deep.equals({
+                        "BUCKET_BUCKET_NAME": 'test',
+                        "BUCKET_BUCKET_URL": 'https://test.s3.amazonaws.com/',
+                        "BUCKET_REGION_ENDPOINT": 's3-us-west-2.amazonaws.com',
                         "S3_MYAPP_PIPELINE_BUCKET_BUCKET_NAME": 'test',
                         "S3_MYAPP_PIPELINE_BUCKET_BUCKET_URL": 'https://test.s3.amazonaws.com/',
                         "S3_MYAPP_PIPELINE_BUCKET_REGION_ENDPOINT": 's3-us-west-2.amazonaws.com',
@@ -220,10 +225,15 @@ describe('handel interface', function () {
 
             let cfDeleteStackStub = sandbox.stub(cloudFormationCalls, 'deleteStack')
                 .resolves(true);
+            
+            let deleteMatchingPrefixStub = sandbox.stub(s3Calls, 'deleteMatchingPrefix')
+                .resolves(true);
 
             return handel.delete({bucket: bucketConfig}, phaseContext, accountConfig)
                 .then(result => {
                     expect(result).have.property('status', 'success');
+                    expect(cfGetStub.callCount).to.equal(1);
+                    expect(deleteMatchingPrefixStub.callCount).to.equal(1);
                     expect(cfDeleteStackStub).to.have.been.calledWith('myApp-pipeline-bucket-s3');
                 });
         });
@@ -231,8 +241,13 @@ describe('handel interface', function () {
             let cfGetStub = sandbox.stub(cloudFormationCalls, 'getStack')
                 .resolves(null);
 
+            let deleteMatchingPrefixStub = sandbox.stub(s3Calls, 'deleteMatchingPrefix')
+                .resolves(true);
+
             return handel.delete({bucket: bucketConfig}, phaseContext, accountConfig)
                 .then(result => {
+                    expect(cfGetStub.callCount).to.equal(1);
+                    expect(deleteMatchingPrefixStub.callCount).to.equal(1);
                     expect(result).have.property('status', 'success');
                 });
         });

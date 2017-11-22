@@ -60,17 +60,17 @@ exports.check = function (phaseConfig) {
     return errors;
 }
 
-exports.getSecretsForPhase = function () {
+exports.getSecretsForPhase = function (phaseConfig) {
     let questions = [
         {
             type: 'input',
             name: 'runscopeTriggerUrl',
-            message: 'Please enter your Runscope Trigger URL',
+            message: `'${phaseConfig.name}' phase - Please enter your Runscope Trigger URL`,
         },
         {
             type: 'input',
             name: 'runscopeAccessToken',
-            message: 'Please enter your Runscope Access Token'
+            message: `'${phaseConfig.name}' phase - Please enter your Runscope Access Token`
         }
     ];
     return inquirer.prompt(questions);

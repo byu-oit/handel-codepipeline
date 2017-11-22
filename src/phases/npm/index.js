@@ -120,12 +120,12 @@ exports.check = function (phaseConfig) {
     return errors;
 }
 
-exports.getSecretsForPhase = function() {
+exports.getSecretsForPhase = function(phaseConfig) {
     let questions = [
         {
             type: 'input',
             name: 'npmToken',
-            message: 'Please enter your NPM Token',
+            message: `${phaseConfig.name}' phase - Please enter your NPM Token`
         }
     ];
     return inquirer.prompt(questions);
