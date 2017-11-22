@@ -17,7 +17,7 @@
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as inquirer from 'inquirer';
 import * as winston from 'winston';
-import { PhaseConfig, PhaseContext } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
 
 export interface GithubConfig extends PhaseConfig {
     owner: string;
@@ -25,7 +25,7 @@ export interface GithubConfig extends PhaseConfig {
     branch: string;
 }
 
-export function check(phaseConfig: GithubConfig) {
+export function check(phaseConfig: GithubConfig): string[] {
     const errors = [];
 
     if(!phaseConfig.owner) {
@@ -41,7 +41,7 @@ export function check(phaseConfig: GithubConfig) {
     return errors;
 }
 
-export function getSecretsForPhase(phaseConfig: PhaseConfig) {
+export function getSecretsForPhase(phaseConfig: PhaseConfig): Promise<PhaseSecrets> {
     const questions = [
         {
             type: 'input',
