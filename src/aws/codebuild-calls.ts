@@ -110,24 +110,24 @@ function getProjectParams(projectName: string, appName: string, pipelineName: st
 
 // TODO - This function takes way too many parameters!
 export async function createProject(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string)
-    : Promise<AWS.CodeBuild.Project | undefined> {
+    : Promise<AWS.CodeBuild.Project> {
     const projectParams = getProjectParams(projectName, appName, pipelineName,
         phaseName, imageName, environmentVariables,
         accountId, serviceRoleArn, region, buildSpec);
 
     const createResponse = await createCodeBuildProject(projectParams);
-    return createResponse.project;
+    return createResponse.project!;
 }
 
 // TODO - This function takes way too many parameters!
 export async function updateProject(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string)
-    : Promise<AWS.CodeBuild.Project | undefined> {
+    : Promise<AWS.CodeBuild.Project> {
     const projectParams = getProjectParams(projectName, appName, pipelineName,
         phaseName, imageName, environmentVariables,
         accountId, serviceRoleArn, region, buildSpec);
 
     const updateResponse = await awsWrapper.codeBuild.updateProject(projectParams);
-    return updateResponse.project;
+    return updateResponse.project!;
 }
 
 export async function getProject(projectName: string): Promise<AWS.CodeBuild.Project | null> {
@@ -146,12 +146,10 @@ export async function getProject(projectName: string): Promise<AWS.CodeBuild.Pro
     }
 }
 
-export function deleteProject(projectName: string): Promise<boolean> {
+export async function deleteProject(projectName: string): Promise<boolean> {
     const deleteParams = {
         name: projectName
     };
-    return awsWrapper.codeBuild.deleteProject(deleteParams)
-        .then(() => {
-            return true;
-        });
+    await awsWrapper.codeBuild.deleteProject(deleteParams);
+    return true;
 }

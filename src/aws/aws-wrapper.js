@@ -25,39 +25,78 @@
 const AWS = require('aws-sdk');
 
 exports.cloudFormation = {
-    describeStacks: function(params) {
-        const cloudformation = new AWS.CloudFormation({apiVersion: '2010-05-15'});
+    describeStacks: function (params) {
+        const cloudformation = new AWS.CloudFormation({ apiVersion: '2010-05-15' });
         return cloudformation.describeStacks(params).promise();
     },
-    waitFor: function(stackState, params) {
-        const cloudformation = new AWS.CloudFormation({apiVersion: '2010-05-15'});
+    waitFor: function (stackState, params) {
+        const cloudformation = new AWS.CloudFormation({ apiVersion: '2010-05-15' });
         return cloudformation.waitFor(stackState, params).promise();
     },
-    createStack: function(params) {
-        const cloudformation = new AWS.CloudFormation({apiVersion: '2010-05-15'});
+    createStack: function (params) {
+        const cloudformation = new AWS.CloudFormation({ apiVersion: '2010-05-15' });
         return cloudformation.createStack(params).promise();
     },
-    deleteStack: function(params) {
-        const cloudformation = new AWS.CloudFormation({apiVersion: '2010-05-15'});
+    deleteStack: function (params) {
+        const cloudformation = new AWS.CloudFormation({ apiVersion: '2010-05-15' });
         return cloudformation.deleteStack(params).promise();
     }
 }
 
 exports.codeBuild = {
-    createProject: function(params) {
+    createProject: function (params) {
         const codeBuild = new AWS.CodeBuild({ apiVersion: '2016-10-06' });
         return codeBuild.createProject(params).promise()
     },
-    updateProject: function(params) {
+    updateProject: function (params) {
         const codeBuild = new AWS.CodeBuild({ apiVersion: '2016-10-06' });
         return codeBuild.updateProject(params).promise();
     },
-    batchGetProjects: function(params) {
+    batchGetProjects: function (params) {
         const codeBuild = new AWS.CodeBuild({ apiVersion: '2016-10-06' });
         return codeBuild.batchGetProjects(params).promise();
     },
-    deleteProject: function(params) {
+    deleteProject: function (params) {
         const codeBuild = new AWS.CodeBuild({ apiVersion: '2016-10-06' });
         return codeBuild.deleteProject(params).promise();
+    }
+}
+
+exports.iam = {
+    createRole: function (params) {
+        const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        return iam.createRole(params).promise();
+    },
+    getRole: function (params) {
+        const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        return iam.getRole(params).promise();
+    },
+    attachRolePolicy: function (params) {
+        const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        return iam.attachRolePolicy(params).promise();
+    },
+    getPolicy: function (params) {
+        const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        return iam.getPolicy(params).promise();
+    },
+    createPolicy: function(params) {
+        const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        return iam.createPolicy(params).promise();
+    },
+    listRoles: function(params) {
+        const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        return iam.listRoles(params).promise();
+    },
+    deleteRole: function(params) {
+        const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        return iam.deleteRole(params).promise();
+    },
+    deletePolicy: function(params) {
+        const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        return iam.deletePolicy(params).promise();
+    },
+    detachRolePolicy: function(params) {
+        const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        return iam.detachRolePolicy(params).promise();
     }
 }
