@@ -26,11 +26,19 @@ function getBuildProjectName(phaseContext) {
     return `${phaseContext.appName}-${phaseContext.pipelineName}-${phaseContext.phaseName}`;
 }
 
+function getBuildPhaseRoleName(appName) {
+    return `${appName}-HandelCodePipelineBuildPhase`;
+}
+
+function getBuildPhasePolicyArn(accountId, appName) {
+    return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${getBuildPhaseRoleName(appName)}`;
+}
+
 function createBuildPhaseServiceRole(accountConfig, appName, extraPolicies) {
-    let roleName = `${appName}-HandelCodePipelineBuildPhase`;
+    let roleName = getBuildPhaseRoleName(appName);
     return iamCalls.createRoleIfNotExists(roleName, ['codebuild.amazonaws.com'])
         .then(role => {
-            let policyArn = `arn:aws:iam::${accountConfig.account_id}:policy/handel-codepipeline/${roleName}`;
+            let policyArn = getBuildPhasePolicyArn(accountConfig.account_id, appName);
             let policyDocParams = {
                 region: accountConfig.region,
                 accountId: accountConfig.account_id,
@@ -48,6 +56,21 @@ function createBuildPhaseServiceRole(accountConfig, appName, extraPolicies) {
         })
         .then(policyAttachment => {
             return iamCalls.getRole(roleName);
+        });
+}
+
+function deleteBuildPhaseServiceRole(accountId, appName) {
+    let roleName = getBuildPhaseRoleName(appName);
+    let policyArn = getBuildPhasePolicyArn(accountId, appName);
+    return iamCalls.detachPolicyFromRole(roleName, policyArn)
+        .then(() => {
+            return iamCalls.deletePolicy(policyArn)
+        })
+        .then(() => {
+            return iamCalls.deleteRole(roleName);
+        })
+        .then(() => {
+            return true;
         });
 }
 
@@ -170,6 +193,12 @@ exports.deletePhase = function (phaseContext, accountConfig) {
     }
     return deleteExtras.then(() => {
         return codeBuildCalls.deleteProject(codeBuildProjectName);
+    })
+    .then(() => {
+        return deleteBuildPhaseServiceRole(accountConfig.account_id, phaseContext.appName)
+    })
+    .then(() => {
+        return true;
     });
 }
 

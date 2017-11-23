@@ -125,9 +125,16 @@ describe('codebuild phase module', function () {
 
         it('should delete the codebuild project', function () {
             let deleteProjectStub = sandbox.stub(codebuildCalls, 'deleteProject').returns(Promise.resolve(true))
+            let deleteRoleStub = sandbox.stub(iamCalls, 'deleteRole').resolves(true);
+            let deletePolicyStub = sandbox.stub(iamCalls, 'deletePolicy').resolves(true);
+            let detachPolicyStub = sandbox.stub(iamCalls, 'detachPolicyFromRole').resolves(true);
+
             return codebuild.deletePhase(phaseContext, {})
                 .then(result => {
                     expect(result).to.be.true;
+                    expect(deleteRoleStub.callCount).to.equal(1);
+                    expect(deletePolicyStub.callCount).to.equal(1);
+                    expect(detachPolicyStub.callCount).to.equal(1);
                     expect(deleteProjectStub.calledOnce).to.be.true;
                 });
         });
@@ -285,12 +292,18 @@ describe('codebuild phase module', function () {
         describe('deletePhase', function () {
             it('should delete the extra resources', function () {
                 let deleteProjectStub = sandbox.stub(codebuildCalls, 'deleteProject').resolves(true);
-
+                let deleteRoleStub = sandbox.stub(iamCalls, 'deleteRole').resolves(true);
+                let deletePolicyStub = sandbox.stub(iamCalls, 'deletePolicy').resolves(true);
+                let detachPolicyStub = sandbox.stub(iamCalls, 'detachPolicyFromRole').resolves(true);
                 handelStub.delete.resolves(true);
 
                 return codebuild.deletePhase(phaseContext, {})
                     .then(result => {
                         expect(result).to.be.true;
+                        expect(deleteProjectStub.callCount).to.equal(1);
+                        expect(deleteRoleStub.callCount).to.equal(1);
+                        expect(deletePolicyStub.callCount).to.equal(1);
+                        expect(detachPolicyStub.callCount).to.equal(1);
                         expect(handelStub.delete).to.have.been.calledOnce;
                     });
             });

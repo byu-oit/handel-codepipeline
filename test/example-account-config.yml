@@ -1,0 +1,16 @@
+account_id: 111111111111
+region: us-west-2
+vpc: vpc-1111111
+public_subnets:
+- subnet-aaaaaaa
+- subnet-bbbbbbb
+private_subnets:
+- subnet-aaaaaaa
+- subnet-bbbbbbb
+data_subnets:
+- subnet-aaaaaaa
+- subnet-bbbbbbb
+ssh_bastion_sg: sg-4444444444
+elasticache_subnet_group: elasticache-group-name
+rds_subnet_group: rds-group-name
+redshift_subnet_group: redshift-group-name
