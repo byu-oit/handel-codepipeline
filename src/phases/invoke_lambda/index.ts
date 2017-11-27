@@ -14,20 +14,32 @@
  * limitations under the License.
  *
  */
-const winston = require('winston');
+import * as AWS from 'aws-sdk';
+import { AccountConfig } from 'handel/src/datatypes/account-config';
+import * as winston from 'winston';
+import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
 
-function getRunscopePhaseSpec(phaseContext) {
-    let phaseConfig = {
+export interface InvokeLambdaConfig extends PhaseConfig {
+    function_name: string;
+    function_parameters?: LambdaFunctionParameters;
+}
+
+export interface LambdaFunctionParameters {
+    [key: string]: string;
+}
+
+function getInvokeLambdaPhaseSpec(phaseContext: PhaseContext<InvokeLambdaConfig>): AWS.CodePipeline.StageDeclaration {
+    const phaseConfig: AWS.CodePipeline.StageDeclaration = {
         name: phaseContext.phaseName,
         actions: [
             {
                 inputArtifacts: [],
                 name: phaseContext.phaseName,
                 actionTypeId: {
-                    category: "Invoke",
-                    owner: "AWS",
-                    version: "1",
-                    provider: "Lambda"
+                    category: 'Invoke',
+                    owner: 'AWS',
+                    version: '1',
+                    provider: 'Lambda'
                 },
                 configuration: {
                     FunctionName: phaseContext.params.function_name
@@ -35,18 +47,18 @@ function getRunscopePhaseSpec(phaseContext) {
                 runOrder: 1
             }
         ]
-    }
+    };
 
     if(phaseContext.params.function_parameters) {
-        phaseConfig.actions[0].configuration.UserParameters = JSON.stringify(phaseContext.params.function_parameters)
+        phaseConfig.actions[0].configuration!.UserParameters = JSON.stringify(phaseContext.params.function_parameters);
     }
 
     return phaseConfig;
 }
 
-exports.check = function (phaseConfig) {
-    let errors = [];
-    
+export function check(phaseConfig: InvokeLambdaConfig): string[] {
+    const errors = [];
+
     if(!phaseConfig.function_name) {
         errors.push(`Invoke Lambda - The 'function_name' parameter is required`);
     }
@@ -54,20 +66,19 @@ exports.check = function (phaseConfig) {
     return errors;
 }
 
-exports.getSecretsForPhase = function (phaseConfig) {
+export function getSecretsForPhase(phaseConfig: InvokeLambdaConfig): Promise<PhaseSecrets> {
     return Promise.resolve({});
 }
 
-exports.deployPhase = function (phaseContext, accountConfig) {
+export function deployPhase(phaseContext: PhaseContext<InvokeLambdaConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {
     winston.info(`Creating Invoke Lambda phase '${phaseContext.phaseName}'`);
 
     return new Promise((resolve, reject) => {
-        resolve(getRunscopePhaseSpec(phaseContext));
+        resolve(getInvokeLambdaPhaseSpec(phaseContext));
     });
 }
 
-exports.deletePhase = function (phaseContext, accountConfig) {
+export function deletePhase(phaseContext: PhaseContext<InvokeLambdaConfig>, accountConfig: AccountConfig): Promise<boolean> {
     winston.info(`Nothing to delete for Invoke Lambda phase '${phaseContext.phaseName}'`);
-    return Promise.resolve({}); //Nothing to delete
+    return Promise.resolve(true); // Nothing to delete
 }
-

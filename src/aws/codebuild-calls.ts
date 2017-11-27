@@ -53,7 +53,7 @@ function createCodeBuildProject(createParams: any): AWS.CodeBuild.CreateProjectO
 }
 
 // TODO - This function takes way too many parameters!
-function getProjectParams(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string)
+function getProjectParams(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string | null)
     : AWS.CodeBuild.CreateProjectInput {
 
     const projectParams: AWS.CodeBuild.Types.CreateProjectInput = {
@@ -109,7 +109,7 @@ function getProjectParams(projectName: string, appName: string, pipelineName: st
 }
 
 // TODO - This function takes way too many parameters!
-export async function createProject(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string)
+export async function createProject(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string | null)
     : Promise<AWS.CodeBuild.Project> {
     const projectParams = getProjectParams(projectName, appName, pipelineName,
         phaseName, imageName, environmentVariables,
@@ -120,7 +120,7 @@ export async function createProject(projectName: string, appName: string, pipeli
 }
 
 // TODO - This function takes way too many parameters!
-export async function updateProject(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string)
+export async function updateProject(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string | null)
     : Promise<AWS.CodeBuild.Project> {
     const projectParams = getProjectParams(projectName, appName, pipelineName,
         phaseName, imageName, environmentVariables,

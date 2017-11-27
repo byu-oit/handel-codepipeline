@@ -100,3 +100,18 @@ exports.iam = {
         return iam.detachRolePolicy(params).promise();
     }
 }
+
+exports.s3 = {
+    upload: function(params) {
+        const s3 = new AWS.S3({apiVersion: '2006-03-01'});
+        return  s3.upload(params).promise()
+    },
+    listBuckets: function() {
+        const s3 = new AWS.S3({apiVersion: '2006-03-01'});
+        return s3.listBuckets().promise();
+    },
+    createBucket: function(params) {
+        const s3 = new AWS.S3({apiVersion: '2006-03-01'});
+        return s3.createBucket(params).promise();
+    }
+}
