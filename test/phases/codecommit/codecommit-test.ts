@@ -16,18 +16,16 @@
  */
 import { expect } from 'chai';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
-import * as inquirer from 'inquirer';
 import * as sinon from 'sinon';
 import * as util from '../../../src/common/util';
-import { PhaseConfig, PhaseContext } from '../../../src/datatypes';
-import * as github from '../../../src/phases/github';
-import { GithubConfig } from '../../../src/phases/github';
+import { PhaseContext } from '../../../src/datatypes/index';
+import * as codecommit from '../../../src/phases/codecommit';
 
 describe('github phase module', () => {
     let sandbox: sinon.SinonSandbox;
     let accountConfig: AccountConfig;
-    let phaseConfig: github.GithubConfig;
-    let phaseContext: PhaseContext<github.GithubConfig>;
+    let phaseConfig: codecommit.CodeCommitConfig;
+    let phaseContext: PhaseContext<codecommit.CodeCommitConfig>;
 
     beforeEach(() => {
         sandbox = sinon.sandbox.create();
@@ -35,17 +33,16 @@ describe('github phase module', () => {
         accountConfig = util.loadYamlFile(`${__dirname}/../../example-account-config.yml`);
 
         phaseConfig = {
-            type: 'github',
+            type: 'codecommit',
             name: 'Source',
-            owner: 'SomeOwner',
-            repo: 'SomeRepo',
-            branch: 'master'
+            repo: 'MyRepo',
+            branch: 'MyBranch'
         };
 
-        phaseContext = new PhaseContext<github.GithubConfig>(
+        phaseContext = new PhaseContext<codecommit.CodeCommitConfig>(
             'myapp',
             'myphase',
-            'github',
+            'codecommit',
             'SomeBucket',
             'dev',
             accountConfig,
@@ -59,61 +56,44 @@ describe('github phase module', () => {
     });
 
     describe('check', () => {
-        it('should require the owner parameter', () => {
-            delete phaseConfig.owner;
-            const errors = github.check(phaseConfig);
-            expect(errors.length).to.equal(1);
-            expect(errors[0]).to.include(`The 'owner' parameter is required`);
-        });
-
         it('should require the repo parameter', () => {
             delete phaseConfig.repo;
-            const errors = github.check(phaseConfig);
+            const errors = codecommit.check(phaseConfig);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.include(`The 'repo' parameter is required`);
         });
 
         it('should require the branch parameter', () => {
             delete phaseConfig.branch;
-            const errors = github.check(phaseConfig);
+            const errors = codecommit.check(phaseConfig);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.include(`The 'branch' parameter is required`);
         });
 
         it('should work when all required parameters are provided', () => {
-            const errors = github.check(phaseConfig);
+            const errors = codecommit.check(phaseConfig);
             expect(errors.length).to.equal(0);
         });
     });
 
     describe('getSecretsForPhase', () => {
-        it('should prompt for a github access token', () => {
-            const token = 'FakeToken';
-            const promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({ githubAccessToken: token }));
-
-            return github.getSecretsForPhase(phaseConfig)
-                .then(results => {
-                    expect(promptStub.callCount).to.equal(1);
-                    expect(results.githubAccessToken).to.equal(token);
-                });
+        it('should return an empty object', async () => {
+            const results = await codecommit.getSecretsForPhase(phaseConfig);
+            expect(results).to.deep.equal({});
         });
     });
 
     describe('deployPhase', () => {
-        it('should return the github phase config', () => {
-            return github.deployPhase(phaseContext, accountConfig)
-                .then(phase => {
-                    expect(phase.name).to.equal(phaseContext.phaseName);
-                });
+        it('should create the codebuild project and return the phase config', async () => {
+            const phase = await codecommit.deployPhase(phaseContext, accountConfig);
+            expect(phase.name).to.equal(phaseContext.phaseName);
         });
     });
 
     describe('deletePhase', () => {
-        it('should do nothing', () => {
-            return github.deletePhase(phaseContext, accountConfig)
-                .then(result => {
-                    expect(result).to.deep.equal({});
-                });
+        it('should do nothing', async () => {
+            const result = await codecommit.deletePhase(phaseContext, accountConfig);
+            expect(result).to.equal(true);
         });
     });
 });

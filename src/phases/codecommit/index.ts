@@ -14,10 +14,18 @@
  * limitations under the License.
  *
  */
-const winston = require('winston');
+import * as AWS from 'aws-sdk';
+import { AccountConfig } from 'handel/src/datatypes/account-config';
+import * as winston from 'winston';
+import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
 
-exports.check = function (phaseConfig) {
-    let errors = [];
+export interface CodeCommitConfig extends PhaseConfig {
+    repo: string;
+    branch: string;
+}
+
+export function check(phaseConfig: CodeCommitConfig): string[] {
+    const errors = [];
 
     if (!phaseConfig.repo) {
         errors.push(`GitHub - The 'repo' parameter is required`);
@@ -29,13 +37,13 @@ exports.check = function (phaseConfig) {
     return errors;
 }
 
-exports.getSecretsForPhase = function (phaseConfig) {
+export function getSecretsForPhase(phaseConfig: CodeCommitConfig): Promise<PhaseSecrets> {
     return Promise.resolve({});
 }
 
-exports.deployPhase = function (phaseContext, accountConfig) {
+export function deployPhase(phaseContext: PhaseContext<CodeCommitConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {
     winston.info(`Creating source phase '${phaseContext.phaseName}'`);
-    let branch = phaseContext.params.branch || "master";
+    const branch = phaseContext.params.branch || 'master';
 
     return Promise.resolve({
         name: phaseContext.phaseName,
@@ -44,10 +52,10 @@ exports.deployPhase = function (phaseContext, accountConfig) {
                 inputArtifacts: [],
                 name: phaseContext.phaseName,
                 actionTypeId: {
-                    category: "Source",
-                    owner: "AWS",
-                    version: "1",
-                    provider: "CodeCommit"
+                    category: 'Source',
+                    owner: 'AWS',
+                    version: '1',
+                    provider: 'CodeCommit'
                 },
                 outputArtifacts: [
                     {
@@ -64,7 +72,7 @@ exports.deployPhase = function (phaseContext, accountConfig) {
     });
 }
 
-exports.deletePhase = function (phaseContext, accountConfig) {
+export function deletePhase(phaseContext: PhaseContext<CodeCommitConfig>, accountConfig: AccountConfig): Promise<boolean> {
     winston.info(`Nothing to delete for source phase '${phaseContext.phaseName}'`);
-    return Promise.resolve({}); //Nothing to delete
+    return Promise.resolve(true); // Nothing to delete
 }
