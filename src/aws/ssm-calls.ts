@@ -14,30 +14,25 @@
  * limitations under the License.
  *
  */
-const AWS = require('aws-sdk');
+import * as AWS from 'aws-sdk';
+import awsWrapper from './aws-wrapper';
 
-exports.putParameter = function (name, type, value, description) {
-    const ssm = new AWS.SSM({ apiVersion: '2014-11-06' });
-    let param = {
+export function putParameter(name: string, type: string, value: string, description: string): Promise<AWS.SSM.PutParameterResult> {
+    const param = {
         Name: name,
         Type: type,
         Value: value,
         Description: description
-    }
-
-    return ssm.putParameter(param).promise();
+    };
+    return awsWrapper.ssm.putParameter(param);
 }
 
-exports.deleteParameter = function (name) {
-    const ssm = new AWS.SSM({ apiVersion: '2014-11-06' });
-    let param = { Name: name };
-
-    return ssm.deleteParameter(param).promise();
+export function deleteParameter(name: string): Promise<AWS.SSM.DeleteParameterResult> {
+    const param = { Name: name };
+    return awsWrapper.ssm.deleteParameter(param);
 }
 
-exports.deleteParameters = function (names) {
-    const ssm = new AWS.SSM({ apiVersion: '2014-11-06' });
-    let params = { Names: names };
-
-    return ssm.deleteParameters(params).promise();
+export function deleteParameters(names: string[]): Promise<AWS.SSM.DeleteParametersResult> {
+    const params = { Names: names };
+    return awsWrapper.ssm.deleteParameters(params);
 }

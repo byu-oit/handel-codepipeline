@@ -16,7 +16,7 @@
  */
 import * as AWS from 'aws-sdk';
 import * as winston from 'winston';
-import { iam } from './aws-wrapper';
+import awsWrapper from './aws-wrapper';
 
 export async function createRole(roleName: string, trustedServices: string[]) {
     const assumeRolePolicyDoc = {
@@ -36,7 +36,7 @@ export async function createRole(roleName: string, trustedServices: string[]) {
         Path: '/handel-codepipeline/',
         RoleName: roleName
     };
-    const createResponse = await iam.createRole(createParams);
+    const createResponse = await awsWrapper.iam.createRole(createParams);
     return createResponse.Role;
 }
 
@@ -45,7 +45,7 @@ export async function getRole(roleName: string) {
         RoleName: roleName
     };
     try {
-        const response = await iam.getRole(getParams);
+        const response = await awsWrapper.iam.getRole(getParams);
         return response.Role;
     }
     catch (err) {
@@ -71,7 +71,7 @@ export async function attachPolicyToRole(policyArn: string, roleName: string) {
         PolicyArn: policyArn,
         RoleName: roleName
     };
-    const attachResponse = await iam.attachRolePolicy(params);
+    const attachResponse = await awsWrapper.iam.attachRolePolicy(params);
     return attachResponse;
 }
 
@@ -80,7 +80,7 @@ export async function getPolicy(policyArn: string) {
         PolicyArn: policyArn
     };
     try {
-        const response = await iam.getPolicy(params);
+        const response = await awsWrapper.iam.getPolicy(params);
         return response.Policy;
     }
     catch (err) {
@@ -98,7 +98,7 @@ export async function createPolicy(policyName: string, policyDocument: any) { //
         Description: `Policy for Handel-CodePipeline with name ${policyName}`,
         Path: '/handel-codepipeline/'
     };
-    const createResponse = await iam.createPolicy(createParams);
+    const createResponse = await awsWrapper.iam.createPolicy(createParams);
     return createResponse.Policy;
 }
 
@@ -118,7 +118,7 @@ export async function showAccount() {
         MaxItems: 1
     };
     try {
-        const response: any = await iam.listRoles(listRolesParams);
+        const response: any = await awsWrapper.iam.listRoles(listRolesParams);
         if (!response || !response.Roles || response.Roles.length < 1 || !response.Roles[0].Arn || response.Roles[0].Arn.indexOf('arn:aws:iam::') !== 0) {
             return null;
         }
@@ -141,7 +141,7 @@ export async function deleteRole(roleName: string): Promise<boolean> {
         RoleName: roleName
     };
     try {
-        await iam.deleteRole(deleteRoleParams);
+        await awsWrapper.iam.deleteRole(deleteRoleParams);
         winston.debug(`Finished deleting role '${roleName}'`);
         return true;
     }
@@ -164,7 +164,7 @@ export async function detachPolicyFromRole(roleName: string, policyArn: string):
         RoleName: roleName
     };
     try {
-        await iam.detachRolePolicy(detachParams);
+        await awsWrapper.iam.detachRolePolicy(detachParams);
         winston.debug(`Finished detaching policy '${policyArn}' from role '${roleName}'`);
         return true;
     }
@@ -186,7 +186,7 @@ export async function deletePolicy(policyArn: string): Promise<boolean> {
         PolicyArn: policyArn
     };
     try {
-        await iam.deletePolicy(deletePolicyParams);
+        await awsWrapper.iam.deletePolicy(deletePolicyParams);
         winston.debug(`Finished deleting policy '${policyArn}'`);
         return true;
     }

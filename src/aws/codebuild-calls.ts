@@ -15,7 +15,7 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import * as awsWrapper from './aws-wrapper';
+import awsWrapper from './aws-wrapper';
 
 function getCodeBuildEnvVarDef(key: string, value: string): AWS.CodeBuild.EnvironmentVariable {
     return {

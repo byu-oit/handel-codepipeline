@@ -15,7 +15,7 @@
  *
  */
 import * as winston from 'winston';
-import * as awsWrapper from './aws-wrapper';
+import awsWrapper from './aws-wrapper';
 
 /**
  * Given a stack name, returns the stack, or null if it doesnt exist

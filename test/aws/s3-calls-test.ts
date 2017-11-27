@@ -16,7 +16,7 @@
  */
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import * as awsWrapper from '../../src/aws/aws-wrapper';
+import awsWrapper from '../../src/aws/aws-wrapper';
 import * as s3Calls from '../../src/aws/s3-calls';
 
 describe('s3 calls module', () => {

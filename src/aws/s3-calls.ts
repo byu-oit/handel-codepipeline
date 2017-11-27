@@ -15,7 +15,7 @@
  *
  */
 import * as fs from 'fs';
-import { s3 } from './aws-wrapper';
+import awsWrapper from './aws-wrapper';
 
 export async function uploadFile(bucketName: string, key: string, filePath: string) {
     const fileStream = fs.createReadStream(filePath);
@@ -24,12 +24,12 @@ export async function uploadFile(bucketName: string, key: string, filePath: stri
         Key: key,
         Body: fileStream
     };
-    const uploadResponse = await s3.upload(uploadParams);
+    const uploadResponse = await awsWrapper.s3.upload(uploadParams);
     return uploadResponse;
 }
 
 export async function getBucket(bucketName: string) {
-    const response = await s3.listBuckets();
+    const response = await awsWrapper.s3.listBuckets();
     if(!response.Buckets) {
         return null; // None found
     }
@@ -52,7 +52,7 @@ export async function createBucket(bucketName: string, region: string) {
             LocationConstraint: region
         };
     }
-    const response = await s3.createBucket(createParams);
+    const response = await awsWrapper.s3.createBucket(createParams);
     return exports.getBucket(bucketName);
 }
 
