@@ -16,16 +16,16 @@
  */
 import * as chai from 'chai';
 import deepEqual = require('deep-equal');
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import {AccountConfig} from 'handel/src/datatypes/account-config';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as codebuildCalls from '../../../src/aws/codebuild-calls';
 import * as iamCalls from '../../../src/aws/iam-calls';
 import * as handel from '../../../src/common/handel';
 import * as util from '../../../src/common/util';
-import { PhaseContext } from '../../../src/datatypes/index';
+import {PhaseContext} from '../../../src/datatypes/index';
 import * as codebuild from '../../../src/phases/codebuild';
-import { HandelExtraResources } from '../../../src/phases/codebuild';
+import {HandelExtraResources} from '../../../src/phases/codebuild';
 
 chai.use(sinonChai);
 const expect = chai.expect;
@@ -226,17 +226,17 @@ describe('codebuild phase module', () => {
                     sinon.match.any
                 );
 
-                expect(createProjectStub).to.have.been.calledWithMatch(
-                    sinon.match('myApp-pipeline-phase'),
-                    sinon.match('myApp'),
-                    sinon.match(phaseContext.pipelineName),
-                    sinon.match(phaseContext.phaseName),
-                    sinon.match('FakeImage'),
-                    sinon.match(envVars),
-                    sinon.match.any,
-                    sinon.match('FakeArn'),
-                    sinon.match.any
-                );
+                expect(createProjectStub).to.have.been.calledWithMatch({
+                    projectName: sinon.match('myApp-pipeline-phase'),
+                    appName: sinon.match('myApp'),
+                    pipelineName: phaseContext.pipelineName,
+                    phaseName: phaseContext.phaseName,
+                    imageName: 'FakeImage',
+                    environmentVariables: sinon.match(envVars),
+                    accountId: sinon.match.any,
+                    serviceRoleArn: sinon.match('FakeArn'),
+                    buildSpec: sinon.match.any
+                });
 
                 expect(createPolicyStub).to.have.been.calledWithMatch(
                     sinon.match('myApp-HandelCodePipelineBuildPhase'),
@@ -275,17 +275,17 @@ describe('codebuild phase module', () => {
                     sinon.match.any
                 );
 
-                expect(createProjectStub).to.have.been.calledWithMatch(
-                    sinon.match('myApp-pipeline-phase'),
-                    sinon.match('myApp'),
-                    sinon.match(phaseContext.pipelineName),
-                    sinon.match(phaseContext.phaseName),
-                    sinon.match('FakeImage'),
-                    sinon.match(envVars),
-                    sinon.match.any,
-                    sinon.match('FakeArn'),
-                    sinon.match.any
-                );
+                expect(createProjectStub).to.have.been.calledWithMatch({
+                    projectName: sinon.match('myApp-pipeline-phase'),
+                    appName: sinon.match('myApp'),
+                    pipelineName: sinon.match(phaseContext.pipelineName),
+                    phaseName: sinon.match(phaseContext.phaseName),
+                    imageName: sinon.match('FakeImage'),
+                    environmentVariables: sinon.match(envVars),
+                    accountId: sinon.match.any,
+                    serviceRoleArn: sinon.match('FakeArn'),
+                    buildSpec: sinon.match.any
+                });
             });
         });
 

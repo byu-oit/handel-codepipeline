@@ -22,12 +22,14 @@ import * as iamCalls from '../../aws/iam-calls';
 import * as handel from '../../common/handel';
 import * as util from '../../common/util';
 import { EnvironmentVariables, PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import {CacheSpecification, CacheType} from "../../aws/codebuild-calls";
 
 export interface CodeBuildConfig extends PhaseConfig {
     build_image: string;
     environment_variables?: EnvironmentVariables;
     build_role?: string;
     extra_resources?: HandelExtraResources;
+    cache?: CacheType
 }
 
 export interface HandelExtraResources {
@@ -87,6 +89,12 @@ async function createBuildPhaseCodeBuildProject(phaseContext: PhaseContext<CodeB
 
     const envVars = Object.assign({}, phaseContext.params.environment_variables, extras.environmentVariables);
 
+    let cacheSpec: CacheSpecification | undefined;
+    const cacheSetting = phaseContext.params.cache;
+    if (cacheSetting && cacheSetting === CacheType.S3) {
+        cacheSpec = new CacheSpecification(CacheType.S3, getCacheLocation(phaseContext));
+    }
+
     let buildPhaseRole;
     if (phaseContext.params.build_role) {
         buildPhaseRole = await lookupRole(phaseContext.params.build_role);
@@ -101,12 +109,39 @@ async function createBuildPhaseCodeBuildProject(phaseContext: PhaseContext<CodeB
     const buildProject = await codeBuildCalls.getProject(buildProjectName);
     if (!buildProject) {
         winston.info(`Creating build phase CodeBuild project ${buildProjectName}`);
-        return codeBuildCalls.createProject(buildProjectName, appName, pipelineName, phaseName, buildImage, envVars, phaseContext.accountConfig.account_id.toString(), buildPhaseRole.Arn, phaseContext.accountConfig.region, null);
+        return codeBuildCalls.createProject({
+            projectName: buildProjectName,
+            appName: appName,
+            pipelineName: pipelineName,
+            phaseName: phaseName,
+            imageName: buildImage,
+            environmentVariables: envVars,
+            accountId: phaseContext.accountConfig.account_id.toString(),
+            serviceRoleArn: buildPhaseRole.Arn,
+            region: phaseContext.accountConfig.region,
+            cacheSpec: cacheSpec,
+        });
     }
     else {
         winston.info(`Updating build phase CodeBuild project ${buildProjectName}`);
-        return codeBuildCalls.updateProject(buildProjectName, appName, pipelineName, phaseName, buildImage, envVars, phaseContext.accountConfig.account_id.toString(), buildPhaseRole.Arn, phaseContext.accountConfig.region, null);
+        return codeBuildCalls.updateProject({
+            projectName: buildProjectName,
+            appName: appName,
+            pipelineName: pipelineName,
+            phaseName: phaseName,
+            imageName: buildImage,
+            environmentVariables: envVars,
+            accountId: phaseContext.accountConfig.account_id.toString(),
+            serviceRoleArn: buildPhaseRole.Arn,
+            region: phaseContext.accountConfig.region,
+            cacheSpec: cacheSpec,
+        });
     }
+}
+
+function getCacheLocation(phaseContext: PhaseContext<CodeBuildConfig>): string {
+    const {codePipelineBucketName: bucket, appName, pipelineName, phaseName} = phaseContext;
+    return `${bucket}/caches/${appName}/${pipelineName}/${phaseName}/codeBuildCache`
 }
 
 async function lookupRole(roleName: string): Promise<AWS.IAM.Role> {
@@ -160,6 +195,13 @@ export function check(phaseConfig: CodeBuildConfig): string[] {
         extraErrors.map(error => {
             return 'CodeBuild - extra_resources - ' + error;
         }).forEach(error => errors.push(error));
+    }
+
+    if (phaseConfig.cache) {
+        const cache = phaseConfig.cache;
+        if (cache !== CacheType.S3 && cache !== CacheType.NO_CACHE) {
+            errors.push(`CodeBuild - The 'cache' parameter must be either 's3' or 'no-cache'`)
+        }
     }
 
     return errors;

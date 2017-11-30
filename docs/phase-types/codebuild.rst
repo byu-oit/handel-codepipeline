@@ -37,6 +37,11 @@ Parameters
      - No
      - {}
      - A set of key/value pairs that will be injected into the running CodeBuild jobs.
+   * - cache
+     - string
+     - No
+     - `no-cache`
+     - Whether to enable a build cache for this phase. Valid values are `no-cache` and `s3`.
    * - build_role
      - string
      - No

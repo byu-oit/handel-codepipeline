@@ -86,11 +86,33 @@ async function createNpmPhaseCodeBuildProject(phaseContext: PhaseContext<NpmConf
     const buildProject = await codeBuildCalls.getProject(npmProjectName);
     if (!buildProject) {
         winston.info(`Creating NPM deploy phase CodeBuild project ${npmProjectName}`);
-        await codeBuildCalls.createProject(npmProjectName, appName, pipelineName, phaseName, npmDeployImage, {}, phaseContext.accountConfig.account_id.toString(), npmPhaseRole.Arn, phaseContext.accountConfig.region, npmDeployBuildSpec);
+        await codeBuildCalls.createProject({
+            projectName: npmProjectName,
+            appName: appName,
+            pipelineName: pipelineName,
+            phaseName: phaseName,
+            imageName: npmDeployImage,
+            environmentVariables: {},
+            accountId: phaseContext.accountConfig.account_id.toString(),
+            serviceRoleArn: npmPhaseRole.Arn,
+            region: phaseContext.accountConfig.region,
+            buildSpec: npmDeployBuildSpec
+        });
     }
     else {
         winston.info(`Updating NPM deploy phase CodeBuild project ${npmProjectName}`);
-        await codeBuildCalls.updateProject(npmProjectName, appName, pipelineName, phaseName, npmDeployImage, {}, phaseContext.accountConfig.account_id.toString(), npmPhaseRole.Arn, phaseContext.accountConfig.region, npmDeployBuildSpec);
+        await codeBuildCalls.updateProject({
+            projectName: npmProjectName,
+            appName: appName,
+            pipelineName: pipelineName,
+            phaseName: phaseName,
+            imageName: npmDeployImage,
+            environmentVariables: {},
+            accountId: phaseContext.accountConfig.account_id.toString(),
+            serviceRoleArn: npmPhaseRole.Arn,
+            region: phaseContext.accountConfig.region,
+            buildSpec: npmDeployBuildSpec
+        });
     }
     const paramName = getNpmTokenName(phaseContext);
     const paramType = 'SecureString';

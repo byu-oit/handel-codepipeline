@@ -67,11 +67,33 @@ async function createDeployPhaseCodeBuildProject(phaseContext: PhaseContext<Hand
     const buildProject = await codeBuildCalls.getProject(deployProjectName);
     if (!buildProject) {
         winston.info(`Creating Handel deploy phase CodeBuild project ${deployProjectName}`);
-        return codeBuildCalls.createProject(deployProjectName, appName, pipelineName, phaseName, handelDeployImage, handelDeployEnvVars, phaseContext.accountConfig.account_id.toString(), deployPhaseRole.Arn, phaseContext.accountConfig.region, handelDeployBuildSpec);
+        return codeBuildCalls.createProject({
+            projectName: deployProjectName,
+            appName: appName,
+            pipelineName: pipelineName,
+            phaseName: phaseName,
+            imageName: handelDeployImage,
+            environmentVariables: handelDeployEnvVars,
+            accountId: phaseContext.accountConfig.account_id.toString(),
+            serviceRoleArn: deployPhaseRole.Arn,
+            region: phaseContext.accountConfig.region,
+            buildSpec: handelDeployBuildSpec
+        });
     }
     else {
         winston.info(`Updating Handel deploy phase CodeBuild project ${deployProjectName}`);
-        return codeBuildCalls.updateProject(deployProjectName, appName, pipelineName, phaseName, handelDeployImage, handelDeployEnvVars, phaseContext.accountConfig.account_id.toString(), deployPhaseRole.Arn, phaseContext.accountConfig.region, handelDeployBuildSpec);
+        return codeBuildCalls.updateProject({
+            projectName: deployProjectName,
+            appName: appName,
+            pipelineName: pipelineName,
+            phaseName: phaseName,
+            imageName: handelDeployImage,
+            environmentVariables: handelDeployEnvVars,
+            accountId: phaseContext.accountConfig.account_id.toString(),
+            serviceRoleArn: deployPhaseRole.Arn,
+            region: phaseContext.accountConfig.region,
+            buildSpec: handelDeployBuildSpec
+        });
     }
 }
 
