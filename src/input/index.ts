@@ -14,29 +14,35 @@
  * limitations under the License.
  *
  */
-const inquirer = require('inquirer');
-const util = require('../common/util');
-const fs = require('fs');
-const os = require('os');
+import * as fs from 'fs';
+import * as inquirer from 'inquirer';
+import * as os from 'os';
+import * as util from '../common/util';
+import { PhaseSecrets } from '../datatypes/index';
+
 const HANDEL_CODEPIPELINE_DIR = `${os.homedir()}/.handel-codepipeline`;
 const HANDEL_CODEPIPELINE_CONFIG = `${HANDEL_CODEPIPELINE_DIR}/config.yml`;
 
-function inquirerValidateFilePath(filePath) {
+interface ConfigParamCache {
+    [key: string]: string;
+}
+
+function inquirerValidateFilePath(filePath: string): string | boolean {
     if(!fs.existsSync(filePath)) {
-        return `File path doesn't exist: ${filePath}`
+        return `File path doesn't exist: ${filePath}`;
     }
     return true;
 }
 
-function ensureConfigDirExists() {
+function ensureConfigDirExists(): void {
     if(!fs.existsSync(HANDEL_CODEPIPELINE_DIR)) {
         fs.mkdirSync(HANDEL_CODEPIPELINE_DIR);
     }
 }
 
-function getConfigParam(paramName) {
+function getConfigParam(paramName: string): string | null {
     if(fs.existsSync(HANDEL_CODEPIPELINE_CONFIG)) {
-        let handelCodePipelineConfig = util.loadYamlFile(HANDEL_CODEPIPELINE_CONFIG);
+        const handelCodePipelineConfig = util.loadYamlFile(HANDEL_CODEPIPELINE_CONFIG) as ConfigParamCache;
         if(handelCodePipelineConfig[paramName]) {
             return handelCodePipelineConfig[paramName];
         }
@@ -44,21 +50,21 @@ function getConfigParam(paramName) {
     return null;
 }
 
-function cacheConfigParam(paramName, paramValue) {
+function cacheConfigParam(paramName: string, paramValue: string) {
     if(fs.existsSync(HANDEL_CODEPIPELINE_CONFIG)) {
-        let handelCodePipelineConfig = util.loadYamlFile(HANDEL_CODEPIPELINE_CONFIG);
+        const handelCodePipelineConfig = util.loadYamlFile(HANDEL_CODEPIPELINE_CONFIG) as ConfigParamCache;
         handelCodePipelineConfig[paramName] = paramValue;
         util.saveYamlFile(HANDEL_CODEPIPELINE_CONFIG, handelCodePipelineConfig);
     }
     else {
-        let handelCodePipelineConfig = {};
+        const handelCodePipelineConfig: ConfigParamCache = {};
         handelCodePipelineConfig[paramName] = paramValue;
         util.saveYamlFile(HANDEL_CODEPIPELINE_CONFIG, handelCodePipelineConfig);
     }
 }
 
-function askAccountConfigsQuestionIfNeeded(configs, questions) {
-    let accountConfigsPath = getConfigParam('account_configs_path');
+function askAccountConfigsQuestionIfNeeded(configs: PhaseSecrets, questions: inquirer.Question[]) {
+    const accountConfigsPath = getConfigParam('account_configs_path');
     if(accountConfigsPath) {
         configs.accountConfigsPath = accountConfigsPath;
     }
@@ -72,10 +78,10 @@ function askAccountConfigsQuestionIfNeeded(configs, questions) {
     }
 }
 
-exports.getPipelineConfigForDelete = function() {
-    let configs = {};
+export async function getPipelineConfigForDelete(): Promise<PhaseSecrets> {
+    const secrets: PhaseSecrets = {};
 
-    let questions = [
+    const questions: inquirer.Question[] = [
         {
             type: 'input',
             name: 'pipelineToDelete',
@@ -90,25 +96,22 @@ exports.getPipelineConfigForDelete = function() {
 
     ensureConfigDirExists();
 
-    askAccountConfigsQuestionIfNeeded(configs, questions);
+    askAccountConfigsQuestionIfNeeded(secrets, questions);
 
-    return inquirer.prompt(questions)
-        .then(answers => {
-            if(answers.accountConfigsPath) {
-                configs.accountConfigsPath = answers.accountConfigsPath;
-                cacheConfigParam('account_configs_path', answers.accountConfigsPath);
-            }
-            configs.pipelineToDelete = answers.pipelineToDelete;
-            configs.accountName = answers.accountName;
-            return configs;
-        });
+    const answers = await inquirer.prompt(questions);
+    if(answers.accountConfigsPath) {
+        secrets.accountConfigsPath = answers.accountConfigsPath;
+        cacheConfigParam('account_configs_path', answers.accountConfigsPath);
+    }
+    secrets.pipelineToDelete = answers.pipelineToDelete;
+    secrets.accountName = answers.accountName;
+    return secrets;
 }
 
+export async function getPipelineConfigForDeploy(): Promise<PhaseSecrets> {
+    const secrets: PhaseSecrets = {};
 
-exports.getPipelineConfigForDeploy = function() {
-    let configs = {};
-
-    let questions = [
+    const questions: inquirer.Question[] = [
         {
             type: 'input',
             name: 'pipelineToDeploy',
@@ -123,17 +126,15 @@ exports.getPipelineConfigForDeploy = function() {
 
     ensureConfigDirExists();
 
-    //Get account configs
-    askAccountConfigsQuestionIfNeeded(configs, questions);
+    // Get account configs
+    askAccountConfigsQuestionIfNeeded(secrets, questions);
 
-    return inquirer.prompt(questions)
-        .then(answers => {
-            if(answers.accountConfigsPath) {
-                configs.accountConfigsPath = answers.accountConfigsPath;
-                cacheConfigParam('account_configs_path', answers.accountConfigsPath);
-            }
-            configs.pipelineToDeploy = answers.pipelineToDeploy;
-            configs.accountName = answers.accountName;
-            return configs;
-        });
+    const answers = await inquirer.prompt(questions);
+    if(answers.accountConfigsPath) {
+        secrets.accountConfigsPath = answers.accountConfigsPath;
+        cacheConfigParam('account_configs_path', answers.accountConfigsPath);
+    }
+    secrets.pipelineToDeploy = answers.pipelineToDeploy;
+    secrets.accountName = answers.accountName;
+    return secrets;
 }
