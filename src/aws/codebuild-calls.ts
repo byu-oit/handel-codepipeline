@@ -24,6 +24,9 @@ function getCodeBuildEnvVarDef(key: string, value: string): AWS.CodeBuild.Enviro
     };
 }
 
+const CREATE_RETRY_TIMEOUT_SECONDS = 5;
+const MAX_CREATE_RETRIES = 120 / CREATE_RETRY_TIMEOUT_SECONDS; //try for about 2 minutes
+
 function createCodeBuildProject(createParams: any): AWS.CodeBuild.CreateProjectOutput {
     const deferred: any = {};
     deferred.promise = new Promise((resolve, reject) => {
@@ -40,10 +43,10 @@ function createCodeBuildProject(createParams: any): AWS.CodeBuild.CreateProjectO
             })
             .catch(err => {
                 tries++;
-                if (err.code === 'InvalidInputException' && tries < 5) { // Try again because the IAM role isn't available yet
+                if (err.code === 'InvalidInputException' && tries < MAX_CREATE_RETRIES) { // Try again because the IAM role isn't available yet
                     setTimeout(() => {
                         createProjectRec();
-                    }, 5000);
+                    }, CREATE_RETRY_TIMEOUT_SECONDS * 1000);
                 }
                 else {
                     deferred.reject(err);
