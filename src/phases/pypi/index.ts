@@ -123,11 +123,33 @@ async function createPypiPhaseCodeBuildProject(phaseContext: PhaseContext<PypiCo
     const buildProject = await codeBuildCalls.getProject(pypiProjectName);
     if (!buildProject) {
         winston.info(`Creating PyPi deploy phase CodeBuild project ${pypiProjectName}`);
-        await codeBuildCalls.createProject(pypiProjectName, appName, pipelineName, phaseName, pypiDeployImage, {}, phaseContext.accountConfig.account_id.toString(), pypiPhaseRole.Arn, phaseContext.accountConfig.region, pypiDeployBuildSpec);
+        await codeBuildCalls.createProject({
+            projectName: pypiProjectName,
+            appName: appName,
+            pipelineName: pipelineName,
+            phaseName: phaseName,
+            imageName: pypiDeployImage,
+            environmentVariables: {},
+            accountId: phaseContext.accountConfig.account_id.toString(),
+            serviceRoleArn: pypiPhaseRole.Arn,
+            region: phaseContext.accountConfig.region,
+            buildSpec: pypiDeployBuildSpec
+        });
     }
     else {
         winston.info(`Updating PyPi deploy phase CodeBuild project ${pypiProjectName}`);
-        await codeBuildCalls.updateProject(pypiProjectName, appName, pipelineName, phaseName, pypiDeployImage, {}, phaseContext.accountConfig.account_id.toString(), pypiPhaseRole.Arn, phaseContext.accountConfig.region, pypiDeployBuildSpec);
+        await codeBuildCalls.updateProject({
+            projectName: pypiProjectName,
+            appName: appName,
+            pipelineName: pipelineName,
+            phaseName: phaseName,
+            imageName: pypiDeployImage,
+            environmentVariables: {},
+            accountId: phaseContext.accountConfig.account_id.toString(),
+            serviceRoleArn: pypiPhaseRole.Arn,
+            region: phaseContext.accountConfig.region,
+            buildSpec: pypiDeployBuildSpec
+        });
     }
     return createPypiParameters(phaseContext);
 }
