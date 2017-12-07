@@ -24,6 +24,9 @@ function getCodeBuildEnvVarDef(key: string, value: string): AWS.CodeBuild.Enviro
     };
 }
 
+const CREATE_RETRY_TIMEOUT_SECONDS = 5;
+const MAX_CREATE_RETRIES = 120 / CREATE_RETRY_TIMEOUT_SECONDS; //try for about 2 minutes
+
 function createCodeBuildProject(createParams: any): AWS.CodeBuild.CreateProjectOutput {
     const deferred: any = {};
     deferred.promise = new Promise((resolve, reject) => {
@@ -31,30 +34,47 @@ function createCodeBuildProject(createParams: any): AWS.CodeBuild.CreateProjectO
         deferred.reject = reject;
     });
 
+    let tries = 0;
+
     function createProjectRec() {
         awsWrapper.codeBuild.createProject(createParams)
             .then(projectResponse => {
                 deferred.resolve(projectResponse);
             })
             .catch(err => {
-                if (err.code === 'InvalidInputException') { // Try again because the IAM role isn't available yet
+                tries++;
+                if (err.code === 'InvalidInputException' && tries < MAX_CREATE_RETRIES) { // Try again because the IAM role isn't available yet
                     setTimeout(() => {
                         createProjectRec();
-                    }, 5000);
+                    }, CREATE_RETRY_TIMEOUT_SECONDS * 1000);
                 }
                 else {
                     deferred.reject(err);
                 }
             });
     }
+
     createProjectRec();
 
     return deferred.promise;
 }
 
-// TODO - This function takes way too many parameters!
-function getProjectParams(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string | null)
-    : AWS.CodeBuild.CreateProjectInput {
+export interface ProjectInput {
+    projectName: string;
+    appName: string;
+    pipelineName: string;
+    phaseName: string;
+    imageName: string;
+    environmentVariables: any;
+    accountId: string;
+    serviceRoleArn: string;
+    region: string;
+    cacheSpec?: CacheSpecification;
+    buildSpec?: string;
+}
+
+function getProjectParams(parameters: ProjectInput): AWS.CodeBuild.CreateProjectInput {
+    let {projectName, appName, pipelineName, phaseName, imageName, environmentVariables, accountId, serviceRoleArn, region, cacheSpec, buildSpec} = parameters;
 
     const projectParams: AWS.CodeBuild.Types.CreateProjectInput = {
         name: projectName,
@@ -79,6 +99,13 @@ function getProjectParams(projectName: string, appName: string, pipelineName: st
             }
         ]
     };
+
+    if (cacheSpec && cacheSpec.type === CacheType.S3) {
+        projectParams.cache = {
+            type: 'S3',
+            location: cacheSpec.location
+        };
+    }
 
     // If using a custom image, set the build to use privilegedMode. Allows access to docker daemon for docker build
     // http://docs.aws.amazon.com/codebuild/latest/APIReference/API_ProjectEnvironment.html
@@ -108,23 +135,15 @@ function getProjectParams(projectName: string, appName: string, pipelineName: st
     return projectParams;
 }
 
-// TODO - This function takes way too many parameters!
-export async function createProject(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string | null)
-    : Promise<AWS.CodeBuild.Project> {
-    const projectParams = getProjectParams(projectName, appName, pipelineName,
-        phaseName, imageName, environmentVariables,
-        accountId, serviceRoleArn, region, buildSpec);
+export async function createProject(parameters: ProjectInput): Promise<AWS.CodeBuild.Project> {
+    const projectParams = getProjectParams(parameters);
 
     const createResponse = await createCodeBuildProject(projectParams);
     return createResponse.project!;
 }
 
-// TODO - This function takes way too many parameters!
-export async function updateProject(projectName: string, appName: string, pipelineName: string, phaseName: string, imageName: string, environmentVariables: any, accountId: string, serviceRoleArn: string, region: string, buildSpec: string | null)
-    : Promise<AWS.CodeBuild.Project> {
-    const projectParams = getProjectParams(projectName, appName, pipelineName,
-        phaseName, imageName, environmentVariables,
-        accountId, serviceRoleArn, region, buildSpec);
+export async function updateProject(parameters: ProjectInput): Promise<AWS.CodeBuild.Project> {
+    const projectParams = getProjectParams(parameters);
 
     const updateResponse = await awsWrapper.codeBuild.updateProject(projectParams);
     return updateResponse.project!;
@@ -152,4 +171,14 @@ export async function deleteProject(projectName: string): Promise<boolean> {
     };
     await awsWrapper.codeBuild.deleteProject(deleteParams);
     return true;
+}
+
+export const enum CacheType {
+    NO_CACHE = 'no-cache',
+    S3 = 's3'
+}
+
+export class CacheSpecification {
+    constructor(readonly type: CacheType, readonly location: string) {
+    }
 }

@@ -40,9 +40,18 @@ describe('codebuild calls module', () => {
                 }
             });
 
-            const project = await codeBuildCalls.createProject(projectName, projectName, 'pipeline',
-                'phase', 'FakeImage', { SOME_KEY: 'some_value' },
-                '777777777777', 'FakeArn', 'us-west-2', '');
+            const project = await codeBuildCalls.createProject({
+                projectName: projectName,
+                appName: projectName,
+                pipelineName: 'pipeline',
+                phaseName: 'phase',
+                imageName: 'FakeImage',
+                environmentVariables: {SOME_KEY: 'some_value'},
+                accountId: '777777777777',
+                serviceRoleArn: 'FakeArn',
+                region: 'us-west-2',
+                buildSpec: ''
+            });
 
             expect(createProjectStub.callCount).to.equal(1);
             expect(project!.name).to.equal(projectName);
@@ -59,8 +68,18 @@ describe('codebuild calls module', () => {
                 }
             });
 
-            const project = await codeBuildCalls.updateProject(projectName, projectName, 'pipeline',
-                'phase', 'FakeImage', {}, '777777777777', 'FakeArn', 'us-west-2', '');
+            const project = await codeBuildCalls.updateProject({
+                projectName: projectName,
+                appName: projectName,
+                pipelineName: 'pipeline',
+                phaseName: 'phase',
+                imageName: 'FakeImage',
+                environmentVariables: {},
+                accountId: '777777777777',
+                serviceRoleArn: 'FakeArn',
+                region: 'us-west-2',
+                buildSpec: ''
+            });
             expect(updateProjectStub.callCount).to.equal(1);
             expect(project!.name).to.equal(projectName);
         });

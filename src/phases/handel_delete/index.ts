@@ -67,11 +67,33 @@ async function createDeletePhaseCodeBuildProject(phaseContext: PhaseContext<Hand
     const buildProject = await codeBuildCalls.getProject(deleteProjectName);
     if (!buildProject) {
         winston.info(`Creating Handel delete phase CodeBuild project ${deleteProjectName}`);
-        return codeBuildCalls.createProject(deleteProjectName, appName, pipelineName, phaseName, handelDeleteImage, handelDeleteEnvVars, phaseContext.accountConfig.account_id.toString(), deletePhaseRole.Arn, phaseContext.accountConfig.region, handelDeleteBuildSpec);
+        return codeBuildCalls.createProject({
+            projectName: deleteProjectName,
+            appName: appName,
+            pipelineName: pipelineName,
+            phaseName: phaseName,
+            imageName: handelDeleteImage,
+            environmentVariables: handelDeleteEnvVars,
+            accountId: phaseContext.accountConfig.account_id.toString(),
+            serviceRoleArn: deletePhaseRole.Arn,
+            region: phaseContext.accountConfig.region,
+            buildSpec: handelDeleteBuildSpec
+        });
     }
     else {
         winston.info(`Updating Handel delete phase CodeBuild project ${deleteProjectName}`);
-        return codeBuildCalls.updateProject(deleteProjectName, appName, pipelineName, phaseName, handelDeleteImage, handelDeleteEnvVars, phaseContext.accountConfig.account_id.toString(), deletePhaseRole.Arn, phaseContext.accountConfig.region, handelDeleteBuildSpec);
+        return codeBuildCalls.updateProject({
+            projectName: deleteProjectName,
+            appName: appName,
+            pipelineName: pipelineName,
+            phaseName: phaseName,
+            imageName: handelDeleteImage,
+            environmentVariables: handelDeleteEnvVars,
+            accountId: phaseContext.accountConfig.account_id.toString(),
+            serviceRoleArn: deletePhaseRole.Arn,
+            region: phaseContext.accountConfig.region,
+            buildSpec: handelDeleteBuildSpec
+        });
     }
 }
 
