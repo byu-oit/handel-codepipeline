@@ -42,3 +42,26 @@ export class PhaseContext<Config extends PhaseConfig> {
         this.secrets = secrets;
     }
 }
+
+export interface PhaseDeployers {
+    [key: string]: PhaseDeployer;
+}
+
+export interface PhaseDeployer {
+    check(phaseConfig: PhaseConfig): string[];
+    getSecretsForPhase(phaseConfig: PhaseConfig): Promise<PhaseSecrets>;
+    deployPhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration>;
+    deletePhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<boolean>;
+}
+
+export interface HandelCodePipelineFile {
+    version: number;
+    name: string;
+    pipelines: PipelineDefinition;
+}
+
+export interface PipelineDefinition {
+    [pipelineName: string]: {
+        phases: PhaseConfig[];
+    };
+}

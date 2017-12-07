@@ -17,6 +17,7 @@
 import { expect } from 'chai';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as sinon from 'sinon';
+import * as util from '../../../src/common/util';
 import { PhaseConfig, PhaseContext } from '../../../src/datatypes/index';
 import * as cloudformation from '../../../src/phases/cloudformation';
 
@@ -29,27 +30,7 @@ describe('cloudformation module', () => {
     beforeEach(() => {
         sandbox = sinon.sandbox.create();
 
-        accountConfig = {
-            account_id: 111111111111,
-            region: 'us-west-2',
-            vpc: 'vpc-1111111',
-            public_subnets: [
-                'subnet-aaaaaaa',
-                'subnet-bbbbbbb'
-            ],
-            private_subnets: [
-                'subnet-aaaaaaa',
-                'subnet-bbbbbbb'
-            ],
-            data_subnets: [
-                'subnet-aaaaaaa',
-                'subnet-bbbbbbb'
-            ],
-            ssh_bastion_sg: 'sg-4444444444',
-            elasticache_subnet_group: 'elasticache-group-name',
-            rds_subnet_group: 'rds-group-name',
-            redshift_subnet_group: 'redshift-group-name'
-        };
+        accountConfig = util.loadYamlFile(`${__dirname}/../../example-account-config.yml`);
 
         phaseConfig = {
             type: 'cloudformation',
