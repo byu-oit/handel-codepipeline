@@ -31,8 +31,6 @@ export interface SlackNotifyConfig extends PhaseConfig {
 const STACK_NAME = 'HandelCodePipelineSlackNotifyLambda';
 
 function getSlackNotifyPhaseSpec(phaseContext: PhaseContext<SlackNotifyConfig>, notifyFunctionName: string): AWS.CodePipeline.StageDeclaration {
-    winston.info(`Creating slack notification phase '${phaseContext.phaseName}'`);
-
     const userParameters = {
         webhook: phaseContext.secrets.slackUrl,
         message: phaseContext.params.message,

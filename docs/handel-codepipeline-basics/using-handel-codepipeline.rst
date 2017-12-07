@@ -1,3 +1,5 @@
+.. _using-handel-codepipeline:
+
 Using Handel-CodePipeline
 =========================
 Handel-CodePipeline is a command-line utility that you can use to facilitate creation of CodePipelines that use the Handel library for deployment. This page details how to use this library.

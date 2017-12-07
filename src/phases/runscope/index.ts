@@ -26,8 +26,6 @@ import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
 const STACK_NAME = 'HandelCodePipelineRunscopeLambda';
 
 function getRunscopePhaseSpec(phaseContext: PhaseContext<PhaseConfig>, runscopeFunctionName: string): AWS.CodePipeline.StageDeclaration {
-    winston.info(`Creating runscope phase '${phaseContext.phaseName}'`);
-
     const userParameters = {
         runscopeTriggerUrl: phaseContext.secrets.runscopeTriggerUrl,
         runscopeAccessToken: phaseContext.secrets.runscopeAccessToken

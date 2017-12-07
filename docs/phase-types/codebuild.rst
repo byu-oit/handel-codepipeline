@@ -99,7 +99,7 @@ Environment Variable Prefix
 
 Your extra resources will be exposed to your build as environment variables.
 
-The naming of these environment matches that used by `Handel <https://handel.readthedocs.io/en/latest/handel-basics/consuming-service-dependencies.html#environment-variable-prefix>`_, except that the pipeline name is used instead of the environment name.
+The naming of these environment matches that `used by Handel <https://handel.readthedocs.io/en/latest/handel-basics/consuming-service-dependencies.html#environment-variable-prefix>`_, except that the pipeline name is used instead of the environment name.
 
 Secrets
 -------
