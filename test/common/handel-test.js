@@ -199,10 +199,7 @@ describe('handel interface', function () {
                     expect(result).to.have.property('environmentVariables').which.deep.equals({
                         "BUCKET_BUCKET_NAME": 'test',
                         "BUCKET_BUCKET_URL": 'https://test.s3.amazonaws.com/',
-                        "BUCKET_REGION_ENDPOINT": 's3-us-west-2.amazonaws.com',
-                        "S3_MYAPP_PIPELINE_BUCKET_BUCKET_NAME": 'test',
-                        "S3_MYAPP_PIPELINE_BUCKET_BUCKET_URL": 'https://test.s3.amazonaws.com/',
-                        "S3_MYAPP_PIPELINE_BUCKET_REGION_ENDPOINT": 's3-us-west-2.amazonaws.com',
+                        "BUCKET_REGION_ENDPOINT": 's3-us-west-2.amazonaws.com'
                     });
 
                     expect(cfCreateStub).to.have.been.calledWithMatch(
