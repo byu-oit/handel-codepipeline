@@ -16,7 +16,7 @@
  */
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import * as cli from '../../dist/cli';
+import * as cli from '../../src/cli';
 
 describe('cli module', () => {
     let sandbox: sinon.SinonSandbox;
