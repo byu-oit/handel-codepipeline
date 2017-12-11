@@ -14,21 +14,20 @@
  * limitations under the License.
  *
  */
-const expect = require('chai').expect;
-const AWS = require('aws-sdk-mock');
-const cli = require('../../dist/cli');
-const sinon = require('sinon');
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+import * as cli from '../../dist/cli';
 
-describe('cli module', function() {
-    let sandbox;
+describe('cli module', () => {
+    let sandbox: sinon.SinonSandbox;
 
-    beforeEach(function() {
+    beforeEach(() => {
         sandbox = sinon.sandbox.create();
     });
 
-    afterEach(function() {
+    afterEach(() => {
         sandbox.restore();
     });
 
-    //TODO - Add unit tests
+    // TODO - Add unit tests
 });
