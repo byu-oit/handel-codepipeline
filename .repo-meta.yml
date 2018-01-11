@@ -1,4 +1,4 @@
-$schemaver: '2.0'
+$schemaver: 2.1
 repo_url: https://github.com/byu-oit/handel-codepipeline
 software:
   - name: handel-codepipeline
@@ -47,7 +47,4 @@ software:
             virtual_server:
             rack_server:
             blade_server:
-    tags:
-      data-sensitivity: confidential
-      app: handel-codepipeline
-      team: gro:AD-Global Education Initiative
+    data_sensitivity: confidential
