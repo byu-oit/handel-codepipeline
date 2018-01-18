@@ -57,7 +57,17 @@ export interface PhaseDeployer {
 export interface HandelCodePipelineFile {
     version: number;
     name: string;
+    plugins?: PipelinePlugins;
     pipelines: PipelineDefinition;
+}
+
+export interface PipelinePlugins {
+    [pluginName: string]: PluginConfig;
+}
+
+export interface PluginConfig {
+    name: string;
+    version: string;
 }
 
 export interface PipelineDefinition {

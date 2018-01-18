@@ -86,13 +86,13 @@ async function validateCredentials(accountConfig: AccountConfig) {
 }
 
 export async function deployAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
-    configureLogger(argv);
-    winston.info('Welcome to the Handel CodePipeline setup wizard');
-    const phaseDeployers = util.getPhaseDeployers();
-    validatePipelineSpec(handelCodePipelineFile);
-    checkPhases(handelCodePipelineFile, phaseDeployers);
-
     try {
+        configureLogger(argv);
+        winston.info('Welcome to the Handel CodePipeline setup wizard');
+        const phaseDeployers = util.getPhaseDeployers(handelCodePipelineFile);
+        validatePipelineSpec(handelCodePipelineFile);
+        checkPhases(handelCodePipelineFile, phaseDeployers);
+
         const pipelineConfig = await input.getPipelineConfigForDeploy();
         const accountName = pipelineConfig.accountName;
         const accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
@@ -115,39 +115,48 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
     catch (err) {
         winston.error(`Error setting up Handel CodePipeline: ${err.message}`);
         // winston.error(err);
+        process.exit(1);
     }
 }
 
-export function checkAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
-    configureLogger(argv);
-    const phaseDeployers = util.getPhaseDeployers();
-    validatePipelineSpec(handelCodePipelineFile);
-    checkPhases(handelCodePipelineFile, phaseDeployers);
-    winston.info('No errors were found in your Handel-CodePipeline file');
+export async function checkAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
+    try {
+        configureLogger(argv);
+        const phaseDeployers = util.getPhaseDeployers(handelCodePipelineFile);
+        validatePipelineSpec(handelCodePipelineFile);
+        checkPhases(handelCodePipelineFile, phaseDeployers);
+        winston.info('No errors were found in your Handel-CodePipeline file');
+    }
+    catch (err) {
+        winston.error(`Error running check in Handel CodePipeline: ${err}`);
+        // winston.error(err);
+        process.exit(1);
+    }
 }
 
 export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
-    configureLogger(argv);
-    winston.info('Welcome to the Handel CodePipeline deletion wizard');
-
-    const phaseDeployers = util.getPhaseDeployers();
-
-    const pipelineConfig = await input.getPipelineConfigForDelete();
-    const accountName = pipelineConfig.accountName;
-    const accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
-
-    await validateCredentials(accountConfig);
-    AWS.config.update({ region: accountConfig.region });
-    const codePipelineBucketName = getCodePipelineBucketName(accountConfig);
-    const pipelineName = pipelineConfig.pipelineToDelete;
-    const appName = handelCodePipelineFile.name;
-
     try {
-        const deleteResult = await lifecycle.deletePipeline(appName, pipelineName)
+        configureLogger(argv);
+        winston.info('Welcome to the Handel CodePipeline deletion wizard');
+
+        const phaseDeployers = util.getPhaseDeployers(handelCodePipelineFile);
+
+        const pipelineConfig = await input.getPipelineConfigForDelete();
+        const accountName = pipelineConfig.accountName;
+        const accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
+
+        await validateCredentials(accountConfig);
+        AWS.config.update({ region: accountConfig.region });
+        const codePipelineBucketName = getCodePipelineBucketName(accountConfig);
+        const pipelineName = pipelineConfig.pipelineToDelete;
+        const appName = handelCodePipelineFile.name;
+
+        const deleteResult = await lifecycle.deletePipeline(appName, pipelineName);
         return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
     }
     catch (err) {
         winston.error(`Error deleting Handel CodePipeline: ${err}`);
-        winston.error(err);
+        // winston.error(err);
+        process.exit(1);
     }
 }
