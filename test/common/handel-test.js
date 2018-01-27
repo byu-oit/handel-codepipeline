@@ -196,7 +196,7 @@ describe('handel interface', function () {
                     expect(result).to.have.property('policies').which.deep.includes(
                         s3BucketStatement, s3ObjectStatement
                     );
-                    expect(result).to.have.property('environmentVariables').which.deep.equals({
+                    expect(result).to.have.property('environmentVariables').which.includes({
                         "BUCKET_BUCKET_NAME": 'test',
                         "BUCKET_BUCKET_URL": 'https://test.s3.amazonaws.com/',
                         "BUCKET_REGION_ENDPOINT": 's3-us-west-2.amazonaws.com'

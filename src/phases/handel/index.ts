@@ -21,6 +21,7 @@ import * as codeBuildCalls from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as util from '../../common/util';
 import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import {getPipelineProjectName} from "../../aws/codepipeline-calls";
 
 export interface HandelConfig extends PhaseConfig {
     environments_to_deploy: string[];
@@ -55,7 +56,8 @@ async function createDeployPhaseCodeBuildProject(phaseContext: PhaseContext<Hand
 
     const handelDeployEnvVars = {
         ENVS_TO_DEPLOY: phaseContext.params.environments_to_deploy.join(','),
-        HANDEL_ACCOUNT_CONFIG: new Buffer(JSON.stringify(accountConfig)).toString('base64')
+        HANDEL_ACCOUNT_CONFIG: new Buffer(JSON.stringify(accountConfig)).toString('base64'),
+        PIPELINE_NAME: getPipelineProjectName(appName, pipelineName)
     };
     const handelDeployImage = 'aws/codebuild/nodejs:7.0.0';
     const buildSpecPath = `${__dirname}/deploy-buildspec.yml`;
