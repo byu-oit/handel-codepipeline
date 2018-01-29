@@ -14,11 +14,10 @@
  * limitations under the License.
  *
  */
-import * as async from 'async';
 import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as codepipelineCalls from '../aws/codepipeline-calls';
-import { HandelCodePipelineFile, PhaseConfig, PhaseContext, PhaseDeployer, PhaseDeployers, PhaseSecrets } from '../datatypes/index';
+import { HandelCodePipelineFile, PhaseConfig, PhaseContext, PhaseDeployer, PhaseDeployers, PhaseSecrets } from '../datatypes';
 
 interface PipelineCheckErrors {
     [pipelineName: string]: string[];

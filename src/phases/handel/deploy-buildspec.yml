@@ -6,4 +6,4 @@ phases:
     - npm install -g handel
   build:
     commands:
-    - handel deploy -e $ENVS_TO_DEPLOY -c $HANDEL_ACCOUNT_CONFIG
+    - handel deploy -e $ENVS_TO_DEPLOY -c $HANDEL_ACCOUNT_CONFIG -t handel-codepipeline-name=$PIPELINE_NAME
