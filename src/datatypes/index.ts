@@ -1,4 +1,5 @@
 import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { Questions } from 'inquirer';
 
 export interface PhaseConfig {
     type: string;
@@ -50,6 +51,7 @@ export interface PhaseDeployers {
 export interface PhaseDeployer {
     check(phaseConfig: PhaseConfig): string[];
     getSecretsForPhase(phaseConfig: PhaseConfig): Promise<PhaseSecrets>;
+    getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion;
     deployPhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration>;
     deletePhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<boolean>;
 }
@@ -64,4 +66,14 @@ export interface PipelineDefinition {
     [pipelineName: string]: {
         phases: PhaseConfig[];
     };
+}
+
+export interface PhaseSecretQuestion {
+    phaseName: string;
+    name: string;
+    message: string;
+}
+
+export interface PhaseSecretQuestionResponse extends PhaseSecretQuestion {
+    value: string;
 }

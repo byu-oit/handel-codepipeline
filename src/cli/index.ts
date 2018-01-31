@@ -18,12 +18,14 @@ import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import { ParsedArgs } from 'minimist';
 import * as winston from 'winston';
+import * as yaml from 'js-yaml'
 import * as iamCalls from '../aws/iam-calls';
 import * as s3Calls from '../aws/s3-calls';
 import * as util from '../common/util';
-import { HandelCodePipelineFile, PhaseDeployers } from '../datatypes/index';
+import { HandelCodePipelineFile, PhaseDeployers, PhaseSecretQuestion } from '../datatypes/index';
 import * as input from '../input';
 import * as lifecycle from '../lifecycle';
+import { Question } from 'inquirer';
 
 function configureLogger(argv: ParsedArgs) {
     let level = 'info';
@@ -150,4 +152,27 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
         winston.error(`Error deleting Handel CodePipeline: ${err}`);
         winston.error(err);
     }
+}
+
+export async function listSecretsAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
+    if(!argv.pipeline) {
+        winston.error('The --pipeline argument is required');
+        process.exit(1);
+    }
+    if (!handelCodePipelineFile.pipelines[argv.pipeline]) {
+        throw new Error(`The pipeline '${argv.pipeline}' you specified doesn't exist in your Handel-Codepipeline file`);
+    }
+    const phaseDeployers = util.getPhaseDeployers();
+    const phaseDeployerSecretsQuestions: PhaseSecretQuestion[] = [];
+    const pipelineConfig = handelCodePipelineFile.pipelines[argv.pipeline];
+    for(const phaseConfig of pipelineConfig.phases) {
+        const phaseDeployer = phaseDeployers[phaseConfig.type];
+        const questions = phaseDeployer.getSecretQuestions(phaseConfig);
+        questions.forEach((question: PhaseSecretQuestion) => {
+            phaseDeployerSecretsQuestions.push(question);
+        });
+        // phaseDeployerSecretsQuestions.concat(questions);
+    }
+    // tslint:disable-next-line:no-console
+    console.log(JSON.stringify(phaseDeployerSecretsQuestions));
 }

@@ -20,7 +20,7 @@ import * as winston from 'winston';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
 import {getPipelineProjectName} from "../../aws/codepipeline-calls";
 
 export interface HandelConfig extends PhaseConfig {
@@ -137,6 +137,10 @@ export function check(phaseConfig: HandelConfig): string[] {
 
 export function getSecretsForPhase(phaseConfig: HandelConfig): Promise<PhaseSecrets> {
     return Promise.resolve({});
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    return [];
 }
 
 export async function deployPhase(phaseContext: PhaseContext<HandelConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {

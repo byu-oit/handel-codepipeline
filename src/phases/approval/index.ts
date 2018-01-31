@@ -17,7 +17,7 @@
 import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as winston from 'winston';
-import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
 
 function getApprovalPhaseSpec(phaseContext: PhaseContext<PhaseConfig>): AWS.CodePipeline.StageDeclaration {
     return {
@@ -50,6 +50,10 @@ export function check(phaseConfig: PhaseConfig): string[] {
 
 export function getSecretsForPhase(phaseConfig: PhaseConfig): Promise<PhaseSecrets> {
     return Promise.resolve({});
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    return [];
 }
 
 export function deployPhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {
