@@ -18,7 +18,7 @@ import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import { ParsedArgs } from 'minimist';
 import * as winston from 'winston';
-import * as yaml from 'js-yaml'
+import * as yaml from 'js-yaml';
 import * as iamCalls from '../aws/iam-calls';
 import * as s3Calls from '../aws/s3-calls';
 import * as util from '../common/util';
@@ -87,7 +87,7 @@ async function validateCredentials(accountConfig: AccountConfig) {
     }
 }
 
-function getSecretsFromArgv(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs): PhaseSecrets[] { 
+function getSecretsFromArgv(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs): PhaseSecrets[] {
     argv.secrets = JSON.parse(new Buffer(argv.secrets, 'base64').toString());
     const pipelinePhases = handelCodePipelineFile.pipelines[argv.pipeline].phases;
     const result: PhaseSecrets[] = [];
@@ -197,7 +197,7 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
     const appName = handelCodePipelineFile.name;
 
     try {
-        const deleteResult = await lifecycle.deletePipeline(appName, pipelineName)
+        const deleteResult = await lifecycle.deletePipeline(appName, pipelineName);
         return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
     }
     catch (err) {
