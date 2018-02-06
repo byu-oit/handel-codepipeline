@@ -19,6 +19,7 @@ import * as inquirer from 'inquirer';
 import * as os from 'os';
 import * as util from '../common/util';
 import { PhaseSecrets } from '../datatypes/index';
+import { ParsedArgs } from 'minimist';
 
 const HANDEL_CODEPIPELINE_DIR = `${os.homedir()}/.handel-codepipeline`;
 const HANDEL_CODEPIPELINE_CONFIG = `${HANDEL_CODEPIPELINE_DIR}/config.yml`;
@@ -78,7 +79,7 @@ function askAccountConfigsQuestionIfNeeded(configs: PhaseSecrets, questions: inq
     }
 }
 
-export async function getPipelineConfigForDelete(): Promise<PhaseSecrets> {
+export async function getPipelineConfigForDelete(argv: ParsedArgs): Promise<PhaseSecrets> {
     const secrets: PhaseSecrets = {};
 
     const questions: inquirer.Question[] = [
@@ -94,21 +95,35 @@ export async function getPipelineConfigForDelete(): Promise<PhaseSecrets> {
         }
     ];
 
-    ensureConfigDirExists();
+    if(argv.pipeline && argv.account_name) {
+        if(!fs.existsSync(HANDEL_CODEPIPELINE_DIR)) {
+            throw new Error('Handel-CodePipeline config directory must exist when deploying with CLI params');
+        }
+        const accountConfigsPath = getConfigParam('account_configs_path');
+        if(accountConfigsPath) {
+            secrets.accountConfigsPath = accountConfigsPath;
+        } else {
+            throw new Error('account_configs_path not found in Handel-CodePipeline config directory');
+        }
+        secrets.pipelineToDelete = argv.pipeline;
+        secrets.accountName = argv.account_name;
+    } else {
+        ensureConfigDirExists();
 
-    askAccountConfigsQuestionIfNeeded(secrets, questions);
+        askAccountConfigsQuestionIfNeeded(secrets, questions);
 
-    const answers = await inquirer.prompt(questions);
-    if(answers.accountConfigsPath) {
-        secrets.accountConfigsPath = answers.accountConfigsPath;
-        cacheConfigParam('account_configs_path', answers.accountConfigsPath);
+        const answers = await inquirer.prompt(questions);
+        if(answers.accountConfigsPath) {
+            secrets.accountConfigsPath = answers.accountConfigsPath;
+            cacheConfigParam('account_configs_path', answers.accountConfigsPath);
+        }
+        secrets.pipelineToDelete = answers.pipelineToDelete;
+        secrets.accountName = answers.accountName;
     }
-    secrets.pipelineToDelete = answers.pipelineToDelete;
-    secrets.accountName = answers.accountName;
     return secrets;
 }
 
-export async function getPipelineConfigForDeploy(): Promise<PhaseSecrets> {
+export async function getPipelineConfigForDeploy(argv: ParsedArgs): Promise<PhaseSecrets> {
     const secrets: PhaseSecrets = {};
 
     const questions: inquirer.Question[] = [
@@ -124,17 +139,32 @@ export async function getPipelineConfigForDeploy(): Promise<PhaseSecrets> {
         }
     ];
 
-    ensureConfigDirExists();
-
     // Get account configs
-    askAccountConfigsQuestionIfNeeded(secrets, questions);
+    if(argv.pipeline && argv.account_name && argv.secrets) {
+        if(!fs.existsSync(HANDEL_CODEPIPELINE_DIR)) {
+            throw new Error('Handel-CodePipeline config directory must exist when deploying with CLI params');
+        }
+        const accountConfigsPath = getConfigParam('account_configs_path');
+        if(accountConfigsPath) {
+            secrets.accountConfigsPath = accountConfigsPath;
+        } else {
+            throw new Error('account_configs_path not found in Handel-CodePipeline config directory');
+        }
+        secrets.pipelineToDeploy = argv.pipeline;
+        secrets.accountName = argv.account_name;
+    } else {
+        ensureConfigDirExists();
 
-    const answers = await inquirer.prompt(questions);
-    if(answers.accountConfigsPath) {
-        secrets.accountConfigsPath = answers.accountConfigsPath;
-        cacheConfigParam('account_configs_path', answers.accountConfigsPath);
+        // Get account configs
+        askAccountConfigsQuestionIfNeeded(secrets, questions);
+
+        const answers = await inquirer.prompt(questions);
+        if(answers.accountConfigsPath) {
+            secrets.accountConfigsPath = answers.accountConfigsPath;
+            cacheConfigParam('account_configs_path', answers.accountConfigsPath);
+        }
+        secrets.pipelineToDeploy = answers.pipelineToDeploy;
+        secrets.accountName = answers.accountName;
     }
-    secrets.pipelineToDeploy = answers.pipelineToDeploy;
-    secrets.accountName = answers.accountName;
     return secrets;
 }

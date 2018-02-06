@@ -60,12 +60,14 @@ describe('lifecycle module', () => {
             github: {
                 check: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
                 getSecretsForPhase: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
+                getSecretQuestions: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
                 deployPhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); },
                 deletePhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); }
             },
             codebuild: {
                 check: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
                 getSecretsForPhase: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
+                getSecretQuestions: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
                 deployPhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); },
                 deletePhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); }
             }
