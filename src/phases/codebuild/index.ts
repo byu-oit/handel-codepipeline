@@ -18,18 +18,18 @@ import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as winston from 'winston';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
+import {CacheSpecification, CacheType} from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as handel from '../../common/handel';
 import * as util from '../../common/util';
 import { EnvironmentVariables, PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
-import {CacheSpecification, CacheType} from "../../aws/codebuild-calls";
 
 export interface CodeBuildConfig extends PhaseConfig {
     build_image: string;
     environment_variables?: EnvironmentVariables;
     build_role?: string;
     extra_resources?: HandelExtraResources;
-    cache?: CacheType
+    cache?: CacheType;
 }
 
 export interface HandelExtraResources {
@@ -141,7 +141,7 @@ async function createBuildPhaseCodeBuildProject(phaseContext: PhaseContext<CodeB
 
 function getCacheLocation(phaseContext: PhaseContext<CodeBuildConfig>): string {
     const {codePipelineBucketName: bucket, appName, pipelineName, phaseName} = phaseContext;
-    return `${bucket}/caches/${appName}/${pipelineName}/${phaseName}/codeBuildCache`
+    return `${bucket}/caches/${appName}/${pipelineName}/${phaseName}/codeBuildCache`;
 }
 
 async function lookupRole(roleName: string): Promise<AWS.IAM.Role> {
@@ -200,7 +200,7 @@ export function check(phaseConfig: CodeBuildConfig): string[] {
     if (phaseConfig.cache) {
         const cache = phaseConfig.cache;
         if (cache !== CacheType.S3 && cache !== CacheType.NO_CACHE) {
-            errors.push(`CodeBuild - The 'cache' parameter must be either 's3' or 'no-cache'`)
+            errors.push(`CodeBuild - The 'cache' parameter must be either 's3' or 'no-cache'`);
         }
     }
 
