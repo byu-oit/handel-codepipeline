@@ -1,6 +1,6 @@
 {
   "name": "handel-codepipeline",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "description": "Creates CodePipelines running Handel as the deploy action",
   "scripts": {
     "lint": "tslint -p tsconfig.json -t stylish",
