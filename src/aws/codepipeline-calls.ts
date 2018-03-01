@@ -22,111 +22,103 @@ import awsWrapper from './aws-wrapper';
 
 const CODEPIPELINE_ROLE_NAME = 'HandelCodePipelineServiceRole';
 
-function createCodePipelineRole(accountId: number) {
-    return iamCalls.createRoleIfNotExists(CODEPIPELINE_ROLE_NAME, ['codepipeline.amazonaws.com', 'cloudformation.amazonaws.com'])
-        .then(role => {
-            const policyArn = `arn:aws:iam::${accountId}:policy/handel-codepipeline/${CODEPIPELINE_ROLE_NAME}`;
-            const policyDocument = {
-                Version: '2012-10-17',
-                Statement: [
-                    {
-                        Action: [
-                            's3:GetObject',
-                            's3:GetObjectVersion',
-                            's3:GetBucketVersioning'
-                        ],
-                        Resource: '*',
-                        Effect: 'Allow'
-                    },
-                    {
-                        Action: [
-                            's3:PutObject'
-                        ],
-                        Resource: [
-                            'arn:aws:s3:::codepipeline*',
-                            'arn:aws:s3:::elasticbeanstalk*'
-                        ],
-                        Effect: 'Allow'
-                    },
-                    {
-                        Action: [
-                            'codecommit:CancelUploadArchive',
-                            'codecommit:GetBranch',
-                            'codecommit:GetCommit',
-                            'codecommit:GetUploadArchiveStatus',
-                            'codecommit:UploadArchive'
-                        ],
-                        Resource: '*',
-                        Effect: 'Allow'
-                    },
-                    {
-                        Action: [
-                            'cloudwatch:*',
-                        ],
-                        Resource: '*',
-                        Effect: 'Allow'
-                    },
-                    {
-                        Action: [
-                            'lambda:InvokeFunction',
-                            'lambda:ListFunctions'
-                        ],
-                        Resource: '*',
-                        Effect: 'Allow'
-                    },
-                    {
-                        Action: [
-                            'codebuild:BatchGetBuilds',
-                            'codebuild:StartBuild'
-                        ],
-                        Resource: '*',
-                        Effect: 'Allow'
-                    },
-                    {
-                        Action: [
-                            'cloudformation:*'
-                        ],
-                        Resource: '*',
-                        Effect: 'Allow'
-                    },
-                    {
-                        Action: [
-                            'iam:PassRole'
-                        ],
-                        Resource: '*',
-                        Effect: 'Allow'
-                    },
-                    {
-                        Action: [
-                            'cloudwatch:*'
-                        ],
-                        Resource: '*',
-                        Effect: 'Allow'
-                    },
-                    {
-                        Action: [
-                            'iam:DeleteRole'
-                        ],
-                        Resource: '*',
-                        Effect: 'Allow'
-                    },
-                    {
-                        Action: [
-                            'iam:DeleteRolePolicy'
-                        ],
-                        Resource: '*',
-                        Effect: 'Allow'
-                    }
-                ]
-            };
-            return iamCalls.createPolicyIfNotExists(CODEPIPELINE_ROLE_NAME, policyArn, policyDocument);
-        })
-        .then(policy => {
-            return iamCalls.attachPolicyToRole(policy.Arn, CODEPIPELINE_ROLE_NAME);
-        })
-        .then(policyAttachment => {
-            return iamCalls.getRole(CODEPIPELINE_ROLE_NAME);
-        });
+async function createCodePipelineRole(accountId: number) {
+    const trustedServices = ['codepipeline.amazonaws.com', 'cloudformation.amazonaws.com'];
+    const policyArn = `arn:aws:iam::${accountId}:policy/handel-codepipeline/${CODEPIPELINE_ROLE_NAME}`;
+    const policyDocument = {
+        Version: '2012-10-17',
+        Statement: [
+            {
+                Action: [
+                    's3:GetObject',
+                    's3:GetObjectVersion',
+                    's3:GetBucketVersioning'
+                ],
+                Resource: '*',
+                Effect: 'Allow'
+            },
+            {
+                Action: [
+                    's3:PutObject'
+                ],
+                Resource: [
+                    'arn:aws:s3:::codepipeline*',
+                    'arn:aws:s3:::elasticbeanstalk*'
+                ],
+                Effect: 'Allow'
+            },
+            {
+                Action: [
+                    'codecommit:CancelUploadArchive',
+                    'codecommit:GetBranch',
+                    'codecommit:GetCommit',
+                    'codecommit:GetUploadArchiveStatus',
+                    'codecommit:UploadArchive'
+                ],
+                Resource: '*',
+                Effect: 'Allow'
+            },
+            {
+                Action: [
+                    'cloudwatch:*',
+                ],
+                Resource: '*',
+                Effect: 'Allow'
+            },
+            {
+                Action: [
+                    'lambda:InvokeFunction',
+                    'lambda:ListFunctions'
+                ],
+                Resource: '*',
+                Effect: 'Allow'
+            },
+            {
+                Action: [
+                    'codebuild:BatchGetBuilds',
+                    'codebuild:StartBuild'
+                ],
+                Resource: '*',
+                Effect: 'Allow'
+            },
+            {
+                Action: [
+                    'cloudformation:*'
+                ],
+                Resource: '*',
+                Effect: 'Allow'
+            },
+            {
+                Action: [
+                    'iam:PassRole'
+                ],
+                Resource: '*',
+                Effect: 'Allow'
+            },
+            {
+                Action: [
+                    'cloudwatch:*'
+                ],
+                Resource: '*',
+                Effect: 'Allow'
+            },
+            {
+                Action: [
+                    'iam:DeleteRole'
+                ],
+                Resource: '*',
+                Effect: 'Allow'
+            },
+            {
+                Action: [
+                    'iam:DeleteRolePolicy'
+                ],
+                Resource: '*',
+                Effect: 'Allow'
+            }
+        ]
+    };
+    return iamCalls.createOrUpdateRoleAndPolicy(CODEPIPELINE_ROLE_NAME, trustedServices, policyArn, policyDocument);
 }
 
 function createPipelineWithRetries(createParams: AWS.CodePipeline.CreatePipelineInput) {
@@ -180,7 +172,7 @@ function getPipelineConfig(pipelineProjectName: string, codePipelineBucketName: 
 
 async function createCodePipelineProject(accountId: number, pipelineProjectName: string, codePipelineBucketName: string, codePipelinePhases: AWS.CodePipeline.StageDeclaration[]): Promise<AWS.CodePipeline.PipelineDeclaration> {
     const codePipelineRole = await createCodePipelineRole(accountId);
-    if(!codePipelineRole) {
+    if (!codePipelineRole) {
         throw new Error(`Couldn't create CodePipeline role`);
     }
     const pipelineConfig = getPipelineConfig(pipelineProjectName, codePipelineBucketName, codePipelinePhases, codePipelineRole);
@@ -207,14 +199,14 @@ export async function getPipeline(pipelineName: string): Promise<AWS.CodePipelin
 
     try {
         const result = await awsWrapper.codePipeline.getPipeline(getParams);
-        if(result.pipeline) {
+        if (result.pipeline) {
             return result.pipeline;
         }
         else {
             return null;
         }
     }
-    catch(err) {
+    catch (err) {
         if (err.code === 'PipelineNotFoundException') {
             return null; // No pipeline found
         }

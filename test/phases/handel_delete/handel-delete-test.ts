@@ -85,35 +85,23 @@ describe('handel phase module', () => {
         };
 
         it('should create the codebuild project and return the phase config', async () => {
-            const createRoleStub = sandbox.stub(iamCalls, 'createRoleIfNotExists').resolves(role);
-            const createPolicyStub = sandbox.stub(iamCalls, 'createPolicyIfNotExists').resolves(role);
-            const attachPolicyStub = sandbox.stub(iamCalls, 'attachPolicyToRole').resolves({});
-            const getRoleStub = sandbox.stub(iamCalls, 'getRole').resolves(role);
+            const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
             const getProjectStub = sandbox.stub(codebuildCalls, 'getProject').resolves(null);
             const createProjectStub = sandbox.stub(codebuildCalls, 'createProject').resolves({});
 
             const phase = await handelDelete.deployPhase(phaseContext, accountConfig);
-            expect(createRoleStub.callCount).to.equal(1);
-            expect(createPolicyStub.callCount).to.equal(1);
-            expect(attachPolicyStub.callCount).to.equal(1);
-            expect(getRoleStub.callCount).to.equal(1);
+            expect(createOrUpdateRoleStub.callCount).to.equal(1);
             expect(getProjectStub.callCount).to.equal(1);
             expect(createProjectStub.callCount).to.equal(1);
         });
 
         it('should update the project when it already exists', async () => {
-            const createRoleStub = sandbox.stub(iamCalls, 'createRoleIfNotExists').resolves(role);
-            const createPolicyStub = sandbox.stub(iamCalls, 'createPolicyIfNotExists').resolves(role);
-            const attachPolicyStub = sandbox.stub(iamCalls, 'attachPolicyToRole').resolves({});
-            const getRoleStub = sandbox.stub(iamCalls, 'getRole').resolves(role);
+            const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
             const getProjectStub = sandbox.stub(codebuildCalls, 'getProject').resolves({});
             const updateProjectStub = sandbox.stub(codebuildCalls, 'updateProject').resolves({});
 
             const phase = await handelDelete.deployPhase(phaseContext, accountConfig);
-            expect(createRoleStub.callCount).to.equal(1);
-            expect(createPolicyStub.callCount).to.equal(1);
-            expect(attachPolicyStub.callCount).to.equal(1);
-            expect(getRoleStub.callCount).to.equal(1);
+            expect(createOrUpdateRoleStub.callCount).to.equal(1);
             expect(getProjectStub.callCount).to.equal(1);
             expect(updateProjectStub.callCount).to.equal(1);
         });

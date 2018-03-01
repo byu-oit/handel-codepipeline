@@ -59,21 +59,13 @@ describe('deployersCommon module', () => {
             const accountId = 111111111111;
             const fakeArn = 'FakeArn';
 
-            const createRoleStub = sandbox.stub(iamCalls, 'createRoleIfNotExists').resolves({});
-            const createPolicyStub = sandbox.stub(iamCalls, 'createPolicyIfNotExists').resolves({
-                Arn: fakeArn
-            });
-            const attachPolicyStub = sandbox.stub(iamCalls, 'attachPolicyToRole').resolves({});
-            const getRoleStub = sandbox.stub(iamCalls, 'getRole').resolves({
+            const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves({
                 Arn: fakeArn
             });
 
             const role = await deployersCommon.createLambdaCodePipelineRole(accountId);
             expect(role!.Arn).to.equal(fakeArn);
-            expect(createRoleStub.callCount).to.equal(1);
-            expect(createPolicyStub.callCount).to.equal(1);
-            expect(attachPolicyStub.callCount).to.equal(1);
-            expect(getRoleStub.callCount).to.equal(1);
+            expect(createOrUpdateRoleStub.callCount).to.equal(1);
         });
     });
 });
