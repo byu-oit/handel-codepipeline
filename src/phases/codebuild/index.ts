@@ -51,9 +51,8 @@ function getBuildPhasePolicyArn(accountId: number, appName: string): string {
     return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${getBuildPhaseRoleName(appName)}`;
 }
 
-async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName: string, extraPolicies: any) {
+async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName: string, extraPolicies: any): Promise<AWS.IAM.Role | null> {
     const roleName = getBuildPhaseRoleName(appName);
-    const role = await iamCalls.createRoleIfNotExists(roleName, ['codebuild.amazonaws.com']);
     const policyArn = getBuildPhasePolicyArn(accountConfig.account_id, appName);
     const policyDocParams = {
         region: accountConfig.region,
@@ -63,9 +62,7 @@ async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName
     const compiledPolicyDoc = await util.compileHandlebarsTemplate(`${__dirname}/build-phase-service-policy.json`, policyDocParams);
     const policyDocObj = JSON.parse(compiledPolicyDoc);
     policyDocObj.Statement = policyDocObj.Statement.concat(extraPolicies);
-    const policy = await iamCalls.createPolicyIfNotExists(roleName, policyArn, policyDocObj);
-    const policyAttachment = await iamCalls.attachPolicyToRole(policy.Arn, roleName);
-    return iamCalls.getRole(roleName);
+    return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, policyDocObj);
 }
 
 async function deleteBuildPhaseServiceRole(accountId: number, appName: string) {

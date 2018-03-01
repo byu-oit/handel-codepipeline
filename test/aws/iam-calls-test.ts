@@ -145,25 +145,84 @@ describe('iam calls', () => {
         });
     });
 
-    describe('createPolicyIfNotExists', () => {
-        it('should create the policy when it doesnt exist', async () => {
-            const getPolicyStub = sandbox.stub(iamCalls, 'getPolicy').resolves(null);
-            const createPolicyStub = sandbox.stub(iamCalls, 'createPolicy').resolves({});
+    describe('createPolicyVersion', () => {
+        it('should create the version on the existing policy', async () => {
+            const createPolicyVersionStub = sandbox.stub(awsWrapper.iam, 'createPolicyVersion').resolves({
+                PolicyVersion: {}
+            });
 
-            const policy = await iamCalls.createPolicyIfNotExists('FakePolicy', 'FakeArn', {});
+            const policyVersion = await iamCalls.createPolicyVersion('PolicyArn', {});
+            expect(createPolicyVersionStub.callCount).to.equal(1);
+            expect(policyVersion).to.deep.equal({});
+        });
+    });
+
+    describe('deleteAllPolicyVersionsButProvided', () => {
+        it('should delete all policy versions but the one provided', async () => {
+            const policyVersionToKeep = {
+                VersionId: 'v2'
+            };
+            const listPolicyVersionsStub = sandbox.stub(awsWrapper.iam, 'listPolicyVersions').resolves({
+                Versions: [
+                    {
+                        VersionId: 'v1'
+                    },
+                    policyVersionToKeep,
+                    {
+                        VersionId: 'v3'
+                    }
+                ]
+            });
+            const deletePolicyVersionStub = sandbox.stub(awsWrapper.iam, 'deletePolicyVersion').resolves({});
+
+            const policyVersionKept = await iamCalls.deleteAllPolicyVersionsButProvided('FakeArn', policyVersionToKeep);
+
+            expect(listPolicyVersionsStub.callCount).to.equal(1);
+            expect(deletePolicyVersionStub.callCount).to.equal(2);
+            expect(policyVersionKept.VersionId).to.equal('v2');
+        });
+    });
+
+    describe('createOrUpdatePolicy', () => {
+        it('should create the policy when it doesnt exist', async () => {
+            const getPolicyStub = sandbox.stub(awsWrapper.iam, 'getPolicy').rejects({
+                code: 'NoSuchEntity'
+            });
+            const createPolicyStub = sandbox.stub(awsWrapper.iam, 'createPolicy').resolves({
+                Policy: {}
+            });
+
+            const policy = await iamCalls.createOrUpdatePolicy('FakePolicy', 'FakeArn', {});
             expect(policy).to.deep.equal({});
             expect(getPolicyStub.callCount).to.equal(1);
             expect(createPolicyStub.callCount).to.equal(1);
         });
 
-        it('should just return the policy when it exists', async () => {
-            const getPolicyStub = sandbox.stub(iamCalls, 'getPolicy').resolves({});
-            const createPolicyStub = sandbox.stub(iamCalls, 'createPolicy').resolves({});
+        it('should update the policy when it exists', async () => {
+            const versionToKeep = 'FakeVersion';
+            const getPolicyStub = sandbox.stub(awsWrapper.iam, 'getPolicy').resolves({
+                Policy: {}
+            });
+            const createPolicyVersionStub = sandbox.stub(awsWrapper.iam, 'createPolicyVersion').resolves({
+                PolicyVersion: {
+                    VersionId: versionToKeep
+                }
+            });
+            const listPolicyVersionsStub = sandbox.stub(awsWrapper.iam, 'listPolicyVersions').resolves({
+                Versions: [{
+                    VersionId: versionToKeep
+                }, {
+                    VersionId: 'OtherVersion'
+                }]
+            });
+            const deletePolicyVersionStub = sandbox.stub(awsWrapper.iam, 'deletePolicyVersion').resolves({});
 
-            const policy = await iamCalls.createPolicyIfNotExists('FakePolicy', 'FakeArn', {});
+            const policy = await iamCalls.createOrUpdatePolicy('FakePolicy', 'FakeArn', {});
             expect(policy).to.deep.equal({});
-            expect(getPolicyStub.callCount).to.equal(1);
-            expect(createPolicyStub.callCount).to.equal(0);
+            expect(getPolicyStub.callCount).to.equal(2);
+            expect(createPolicyVersionStub.callCount).to.equal(1);
+            expect(listPolicyVersionsStub.callCount).to.equal(1);
+            expect(deletePolicyVersionStub.callCount).to.equal(1);
         });
     });
 

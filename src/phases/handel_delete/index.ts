@@ -38,12 +38,9 @@ function getDeleteServiceRoleArn(accountId: number): string {
 
 async function createDeletePhaseServiceRole(accountId: number): Promise<AWS.IAM.Role | null> {
     const roleName = DELETE_PHASE_ROLE_NAME;
-    const role = await iamCalls.createRoleIfNotExists(roleName, ['codebuild.amazonaws.com']);
     const policyArn = getDeleteServiceRoleArn(accountId);
     const policyDocument = util.loadJsonFile(`${__dirname}/delete-phase-service-policy.json`);
-    const policy = await iamCalls.createPolicyIfNotExists(roleName, policyArn, policyDocument);
-    const policyAttachment = await iamCalls.attachPolicyToRole(policy!.Arn, roleName);
-    return iamCalls.getRole(roleName);
+    return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, policyDocument);
 }
 
 async function createDeletePhaseCodeBuildProject(phaseContext: PhaseContext<HandelDeleteConfig>, accountConfig: AccountConfig): Promise<AWS.CodeBuild.Project> {
