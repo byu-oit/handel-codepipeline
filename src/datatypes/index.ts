@@ -1,5 +1,6 @@
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import { Questions } from 'inquirer';
+import * as AWS from 'aws-sdk';
 
 export interface PhaseConfig {
     type: string;
@@ -14,12 +15,12 @@ export interface EnvironmentVariables {
     [key: string]: string;
 }
 
-export class PipelineContext {
-    public appName: string;
-    public pipelineName: string;
-    public phaseContexts: any; // TODO - Make this better
-    public accountConfig: AccountConfig;
-}
+// export class PipelineContext {
+//     public appName: string;
+//     public pipelineName: string;
+//     public phaseContexts: any; // TODO - Make this better
+//     public accountConfig: AccountConfig;
+// }
 
 export class PhaseContext<Config extends PhaseConfig> {
     public appName: string;
