@@ -87,86 +87,43 @@ async function validateCredentials(accountConfig: AccountConfig) {
     }
 }
 
-function getSecretsFromArgv(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs): PhaseSecrets[] {
-    argv.secrets = JSON.parse(new Buffer(argv.secrets, 'base64').toString());
-    const pipelinePhases = handelCodePipelineFile.pipelines[argv.pipeline].phases;
-    const result: PhaseSecrets[] = [];
-    // tslint:disable-next-line:prefer-for-of
-    for (let i = 0; i < pipelinePhases.length; i++) {
-        const phase = pipelinePhases[i];
-        const phaseSecrets: PhaseSecrets = {};
-        for(const secret of argv.secrets) {
-            if(secret.phaseName === phase.name) {
-                phaseSecrets[secret.name] = secret.value;
-            }
-        }
-        result.push(phaseSecrets);
-    }
-    return result;
-}
-
 export async function deployAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
     configureLogger(argv);
-    if(argv.pipeline && argv.account_name && argv.secrets) {
-        configureLogger(argv);
-        const phaseDeployers = util.getPhaseDeployers();
-        validatePipelineSpec(handelCodePipelineFile);
-        checkPhases(handelCodePipelineFile, phaseDeployers);
+    const phaseDeployers = util.getPhaseDeployers();
+    validatePipelineSpec(handelCodePipelineFile);
+    checkPhases(handelCodePipelineFile, phaseDeployers);
+    const nonInteractive = (argv.pipeline && argv.account_name && argv.secrets);
 
-        try {
-            const pipelineConfig = await input.getPipelineConfigForDeploy(argv);
-            const accountName = pipelineConfig.accountName;
-            const accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
-
-            await validateCredentials(accountConfig);
-            AWS.config.update({ region: accountConfig.region });
-            const pipelineName = pipelineConfig.pipelineToDeploy;
-
-            if (!handelCodePipelineFile.pipelines[pipelineName]) {
-                throw new Error(`The pipeline '${pipelineName}' you specified doesn't exist in your Handel-Codepipeline file`);
-            }
-
-            const codePipelineBucketName = getCodePipelineBucketName(accountConfig);
-            const bucket = await s3Calls.createBucketIfNotExists(codePipelineBucketName, accountConfig.region);
-            const phasesSecrets = getSecretsFromArgv(handelCodePipelineFile, argv);
-            const pipelinePhases = await lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
-            const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
-            winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
+    try {
+        if(!nonInteractive) {
+            winston.info('Welcome to the Handel CodePipeline setup wizard');
         }
-        catch (err) {
-            winston.error(`Error setting up Handel CodePipeline: ${err.message}`);
-            winston.error(err);
+        const pipelineConfig = await input.getPipelineConfigForDeploy(argv);
+        const accountName = pipelineConfig.accountName;
+        const accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
+
+        await validateCredentials(accountConfig);
+        AWS.config.update({ region: accountConfig.region });
+        const pipelineName = pipelineConfig.pipelineToDeploy;
+
+        if (!handelCodePipelineFile.pipelines[pipelineName]) {
+            throw new Error(`The pipeline '${pipelineName}' you specified doesn't exist in your Handel-Codepipeline file`);
         }
-    } else {
-        winston.info('Welcome to the Handel CodePipeline setup wizard');
-        const phaseDeployers = util.getPhaseDeployers();
-        validatePipelineSpec(handelCodePipelineFile);
-        checkPhases(handelCodePipelineFile, phaseDeployers);
-
-        try {
-            const pipelineConfig = await input.getPipelineConfigForDeploy(argv);
-            const accountName = pipelineConfig.accountName;
-            const accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
-
-            await validateCredentials(accountConfig);
-            AWS.config.update({ region: accountConfig.region });
-            const pipelineName = pipelineConfig.pipelineToDeploy;
-
-            if (!handelCodePipelineFile.pipelines[pipelineName]) {
-                throw new Error(`The pipeline '${pipelineName}' you specified doesn't exist in your Handel-Codepipeline file`);
-            }
-
-            const codePipelineBucketName = getCodePipelineBucketName(accountConfig);
-            const bucket = await s3Calls.createBucketIfNotExists(codePipelineBucketName, accountConfig.region);
-            const phasesSecrets = await lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineName);
-            const pipelinePhases = await lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
-            const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
-            winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
+        const codePipelineBucketName = getCodePipelineBucketName(accountConfig);
+        const bucket = await s3Calls.createBucketIfNotExists(codePipelineBucketName, accountConfig.region);
+        let phasesSecrets;
+        if(nonInteractive) {
+            phasesSecrets = lifecycle.getSecretsFromArgv(handelCodePipelineFile, argv);
+        } else {
+            phasesSecrets = await lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineName);
         }
-        catch (err) {
-            winston.error(`Error setting up Handel CodePipeline: ${err.message}`);
-            // winston.error(err);
-        }
+        const pipelinePhases = await lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
+        const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
+        winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
+
+    } catch(err) {
+        winston.error(`Error setting up Handel CodePipeline: ${err.message}`);
+        winston.error(err);
     }
 }
 

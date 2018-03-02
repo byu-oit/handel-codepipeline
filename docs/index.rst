@@ -9,6 +9,7 @@ Handel-CodePipeline is a tool to easily create AWS CodePipelines, including supp
    getting-started/introduction
    getting-started/installation
    getting-started/handel-codepipeline-tutorial
+   getting-started/cli-reference
 
 .. _handel-codepipeline-basics:
 

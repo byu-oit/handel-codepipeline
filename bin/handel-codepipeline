@@ -16,7 +16,7 @@ Action:
 check -- Checks the contents of your Handel file for errors.
 deploy -- Deploys the given pipeline from your Handel-Codepipeline file.
 delete -- Deletes the given pipeline from your AWS account.
-list-secrets -- List required secrets for all phases. Requires the --pipeline parameter.`;
+list-required-secrets -- List required secrets for all phases. Requires the --pipeline parameter.`;
     printAndExit(usageMsg);
 }
 
@@ -51,7 +51,7 @@ switch (phase) {
     case "delete":
         cli.deleteAction(handelCodePipelineFile, argv);
         break;
-    case "list-secrets":
+    case "list-required-secrets":
         cli.listSecretsAction(handelCodePipelineFile, argv);
         break;
     default:

@@ -18,6 +18,7 @@ import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as codepipelineCalls from '../aws/codepipeline-calls';
 import { HandelCodePipelineFile, PhaseConfig, PhaseContext, PhaseDeployer, PhaseDeployers, PhaseSecrets } from '../datatypes';
+import { ParsedArgs } from 'minimist';
 
 interface PipelineCheckErrors {
     [pipelineName: string]: string[];
@@ -139,6 +140,24 @@ export async function getPhaseSecrets(phaseDeployers: PhaseDeployers, handelCode
     }
 
     return pipelineSecrets;
+}
+
+export function getSecretsFromArgv(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs): PhaseSecrets[] {
+    argv.secrets = JSON.parse(new Buffer(argv.secrets, 'base64').toString());
+    const pipelinePhases = handelCodePipelineFile.pipelines[argv.pipeline].phases;
+    const result: PhaseSecrets[] = [];
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < pipelinePhases.length; i++) {
+        const phase = pipelinePhases[i];
+        const phaseSecrets: PhaseSecrets = {};
+        for(const secret of argv.secrets) {
+            if(secret.phaseName === phase.name) {
+                phaseSecrets[secret.name] = secret.value;
+            }
+        }
+        result.push(phaseSecrets);
+    }
+    return result;
 }
 
 export function deployPhases(phaseDeployers: PhaseDeployers,
