@@ -51,7 +51,6 @@ function getNpmPhasePolicyArn(accountId: number, appName: string): string {
 
 async function createNpmPhaseServiceRole(accountConfig: AccountConfig, appName: string): Promise<AWS.IAM.Role | null> {
     const roleName = getNpmPhaseRoleName(appName);
-    const role = await iamCalls.createRoleIfNotExists(roleName, ['codebuild.amazonaws.com']);
     const policyArn = getNpmPhasePolicyArn(accountConfig.account_id, appName);
     const policyDocParams = {
         region: accountConfig.region,
@@ -59,9 +58,7 @@ async function createNpmPhaseServiceRole(accountConfig: AccountConfig, appName: 
         appName: appName
     };
     const compiledPolicyDoc = await util.compileHandlebarsTemplate(`${__dirname}/npm-phase-service-policy.json`, policyDocParams);
-    const policy = await iamCalls.createPolicyIfNotExists(roleName, policyArn, JSON.parse(compiledPolicyDoc));
-    const policyAttachment = await iamCalls.attachPolicyToRole(policy!.Arn, roleName);
-    return iamCalls.getRole(roleName);
+    return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, compiledPolicyDoc);
 }
 
 async function deleteNpmPhaseServiceRole(accountId: number, appName: string): Promise<boolean> {

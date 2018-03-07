@@ -75,7 +75,7 @@ export async function attachPolicyToRole(policyArn: string, roleName: string) {
     return attachResponse;
 }
 
-export async function getPolicy(policyArn: string) {
+export async function getPolicy(policyArn: string): Promise<AWS.IAM.Policy | undefined | null> {
     const params = {
         PolicyArn: policyArn
     };
@@ -91,7 +91,7 @@ export async function getPolicy(policyArn: string) {
     }
 }
 
-export async function createPolicy(policyName: string, policyDocument: any) { // TODO - What type should be used for policyDocument?
+export async function createPolicy(policyName: string, policyDocument: any): Promise<AWS.IAM.Policy | undefined> {
     const createParams = {
         PolicyDocument: JSON.stringify(policyDocument),
         PolicyName: policyName,
@@ -102,12 +102,77 @@ export async function createPolicy(policyName: string, policyDocument: any) { //
     return createResponse.Policy;
 }
 
-export async function createPolicyIfNotExists(policyName: string, policyArn: string, policyDocument: any) { // TODO - What type should be used for policyDocument?
-    const policy = await exports.getPolicy(policyArn);
-    if (!policy) { // Create
-        return exports.createPolicy(policyName, policyDocument);
+/**
+ * Given the ARN of a policy, creates a new version with the provided policy document.
+ *
+ * The policy document must be a valid IAM policy
+ */
+export async function createPolicyVersion(policyArn: string, policyDocument: any): Promise<AWS.IAM.PolicyVersion | undefined> {
+    winston.verbose(`Creating new policy version for ${policyArn}`);
+    const createVersionParams = {
+        PolicyArn: policyArn,
+        PolicyDocument: JSON.stringify(policyDocument),
+        SetAsDefault: true
+    };
+    const createVersionResponse = await awsWrapper.iam.createPolicyVersion(createVersionParams);
+    winston.verbose(`Created new policy version for ${policyArn}`);
+    return createVersionResponse.PolicyVersion;
+}
+
+/**
+ * Given the ARN of a policy, deletes all versions of the policy except for the list
+ * of provided versions to keep (if any)
+ */
+export async function deleteAllPolicyVersionsButProvided(policyArn: string, policyVersionToKeep: AWS.IAM.PolicyVersion): Promise<AWS.IAM.PolicyVersion> {
+    winston.verbose(`Deleting all old policy versions for ${policyArn} but ${policyVersionToKeep.VersionId}`);
+    const listPolicyVersionsParams = {
+        PolicyArn: policyArn
+    };
+    const policyVersionsResponse = await awsWrapper.iam.listPolicyVersions(listPolicyVersionsParams);
+    const deletePolicyPromises = [];
+    for (const policyVersion of policyVersionsResponse.Versions!) {
+        if (policyVersion.VersionId !== policyVersionToKeep.VersionId) {
+            const deleteVersionParams = {
+                PolicyArn: policyArn,
+                VersionId: policyVersion.VersionId!
+            };
+            deletePolicyPromises.push(awsWrapper.iam.deletePolicyVersion(deleteVersionParams));
+        }
+
     }
-    return policy;
+    const deleteResponses = await Promise.all(deletePolicyPromises);
+    winston.verbose(`Deleted all old policy versions for ${policyArn} but ${policyVersionToKeep.VersionId}`);
+    return policyVersionToKeep; // Return kept version
+}
+
+export async function createOrUpdatePolicy(policyName: string, policyArn: string, policyDocument: any): Promise<AWS.IAM.Policy> {
+    const policy = await getPolicy(policyArn);
+    if (!policy) { // Create
+        const createdPolicy = await createPolicy(policyName, policyDocument);
+        if(!createdPolicy) {
+            throw new Error('Create policy call returned nothing');
+        }
+        return createdPolicy;
+    }
+    else { // Update
+        const policyVersion = await exports.createPolicyVersion(policyArn, policyDocument);
+        if(!policyVersion) {
+            throw new Error('Create policy version returned nothing');
+        }
+        const keptPolicyVersion = await deleteAllPolicyVersionsButProvided(policyArn, policyVersion);
+        const updatedPolicy = await getPolicy(policyArn);
+        if(!updatedPolicy) {
+            throw new Error('Get policy returned nothing when it should have');
+        }
+        return updatedPolicy!;
+    }
+}
+
+export async function createOrUpdateRoleAndPolicy(roleName: string, trustedServices: string[], policyArn: string, policyDocument: any): Promise<AWS.IAM.Role | null> {
+    const role = await exports.createRoleIfNotExists(roleName, trustedServices);
+    const policy = await exports.createOrUpdatePolicy(roleName, policyArn, policyDocument);
+    const policyAttachment = await exports.attachPolicyToRole(policy.Arn, roleName);
+    return exports.getRole(roleName);
 }
 
 /**

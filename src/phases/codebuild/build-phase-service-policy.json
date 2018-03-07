@@ -58,7 +58,10 @@
             "Action": [
                 "ssm:GetParameters"
             ],
-            "Resource": "arn:aws:ssm:{{region}}:{{accountId}}:parameter/{{appName}}*"
+            "Resource": [
+                "arn:aws:ssm:{{region}}:{{accountId}}:parameter/{{appName}}*",
+                "arn:aws:ssm:{{region}}:{{accountId}}:parameter/handel.global*"
+            ]
         },
         {
             "Effect": "Allow",

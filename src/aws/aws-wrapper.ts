@@ -82,6 +82,18 @@ const awsWrapper = {
             const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
             return iam.createPolicy(params).promise();
         },
+        createPolicyVersion: (params: AWS.IAM.CreatePolicyVersionRequest) => {
+            const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+            return iam.createPolicyVersion(params).promise();
+        },
+        listPolicyVersions: (params: AWS.IAM.ListPolicyVersionsRequest) => {
+            const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+            return iam.listPolicyVersions(params).promise();
+        },
+        deletePolicyVersion: (params: AWS.IAM.DeletePolicyVersionRequest) => {
+            const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+            return iam.deletePolicyVersion(params).promise();
+        },
         listRoles: (params: AWS.IAM.ListRolesRequest): Promise<AWS.IAM.ListRolesResponse> => {
             const iam = new AWS.IAM({ apiVersion: '2010-05-08' });
             return iam.listRoles(params).promise();

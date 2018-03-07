@@ -25,7 +25,7 @@ function getCodeBuildEnvVarDef(key: string, value: string): AWS.CodeBuild.Enviro
 }
 
 const CREATE_RETRY_TIMEOUT_SECONDS = 5;
-const MAX_CREATE_RETRIES = 120 / CREATE_RETRY_TIMEOUT_SECONDS; //try for about 2 minutes
+const MAX_CREATE_RETRIES = 120 / CREATE_RETRY_TIMEOUT_SECONDS; // try for about 2 minutes
 
 function createCodeBuildProject(createParams: any): AWS.CodeBuild.CreateProjectOutput {
     const deferred: any = {};
@@ -74,7 +74,7 @@ export interface ProjectInput {
 }
 
 function getProjectParams(parameters: ProjectInput): AWS.CodeBuild.CreateProjectInput {
-    let {projectName, appName, pipelineName, phaseName, imageName, environmentVariables, accountId, serviceRoleArn, region, cacheSpec, buildSpec} = parameters;
+    const { projectName, appName, pipelineName, phaseName, imageName, environmentVariables, accountId, serviceRoleArn, region, cacheSpec, buildSpec } = parameters;
 
     const projectParams: AWS.CodeBuild.Types.CreateProjectInput = {
         name: projectName,

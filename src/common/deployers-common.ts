@@ -32,7 +32,6 @@ export async function uploadDirectoryToBucket(directoryToUpload: string, s3FileN
 
 export async function createLambdaCodePipelineRole(accountId: number): Promise<AWS.IAM.Role | null> {
     const roleName = 'HandelCodePipelineLambdaRole';
-    const role = await iamCalls.createRoleIfNotExists(roleName, ['lambda.amazonaws.com']);
     const policyArn = `arn:aws:iam::${accountId}:policy/handel-codepipeline/${roleName}`;
     const policyDocument = {
         Version: '2012-10-17',
@@ -54,7 +53,5 @@ export async function createLambdaCodePipelineRole(accountId: number): Promise<A
             }
         ]
     };
-    const policy = await iamCalls.createPolicyIfNotExists(roleName, policyArn, policyDocument);
-    const policyAttachment = await iamCalls.attachPolicyToRole(policy.Arn, roleName);
-    return iamCalls.getRole(roleName);
+    return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['lambda.amazonaws.com'], policyArn, policyDocument);
 }

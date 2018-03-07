@@ -47,19 +47,13 @@ describe('codepipelineCalls module', () => {
             const role = {
                 Arn: 'FakeArn'
             };
-            const createRoleStub = sandbox.stub(iamCalls, 'createRoleIfNotExists').resolves(role);
-            const createPolicyStub = sandbox.stub(iamCalls, 'createPolicyIfNotExists').resolves(role);
-            const attachPolicyStub = sandbox.stub(iamCalls, 'attachPolicyToRole').resolves({});
-            const getRoleStub = sandbox.stub(iamCalls, 'getRole').resolves(role);
+            const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
             const createPipelineStub = sandbox.stub(awsWrapper.codePipeline, 'createPipeline').resolves({
                 pipeline: {}
             });
 
             const pipeline = await codepipelineCalls.createPipeline(appName, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
-            expect(createRoleStub.callCount).to.equal(1);
-            expect(createPolicyStub.callCount).to.equal(1);
-            expect(attachPolicyStub.callCount).to.equal(1);
-            expect(getRoleStub.callCount).to.equal(1);
+            expect(createOrUpdateRoleStub.callCount).to.equal(1);
             expect(pipeline).to.deep.equal({});
         });
     });

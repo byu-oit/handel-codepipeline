@@ -18,18 +18,18 @@ import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as winston from 'winston';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
+import {CacheSpecification, CacheType} from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as handel from '../../common/handel';
 import * as util from '../../common/util';
 import { EnvironmentVariables, PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
-import {CacheSpecification, CacheType} from "../../aws/codebuild-calls";
 
 export interface CodeBuildConfig extends PhaseConfig {
     build_image: string;
     environment_variables?: EnvironmentVariables;
     build_role?: string;
     extra_resources?: HandelExtraResources;
-    cache?: CacheType
+    cache?: CacheType;
 }
 
 export interface HandelExtraResources {
@@ -51,9 +51,8 @@ function getBuildPhasePolicyArn(accountId: number, appName: string): string {
     return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${getBuildPhaseRoleName(appName)}`;
 }
 
-async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName: string, extraPolicies: any) {
+async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName: string, extraPolicies: any): Promise<AWS.IAM.Role | null> {
     const roleName = getBuildPhaseRoleName(appName);
-    const role = await iamCalls.createRoleIfNotExists(roleName, ['codebuild.amazonaws.com']);
     const policyArn = getBuildPhasePolicyArn(accountConfig.account_id, appName);
     const policyDocParams = {
         region: accountConfig.region,
@@ -63,9 +62,7 @@ async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName
     const compiledPolicyDoc = await util.compileHandlebarsTemplate(`${__dirname}/build-phase-service-policy.json`, policyDocParams);
     const policyDocObj = JSON.parse(compiledPolicyDoc);
     policyDocObj.Statement = policyDocObj.Statement.concat(extraPolicies);
-    const policy = await iamCalls.createPolicyIfNotExists(roleName, policyArn, policyDocObj);
-    const policyAttachment = await iamCalls.attachPolicyToRole(policy.Arn, roleName);
-    return iamCalls.getRole(roleName);
+    return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, policyDocObj);
 }
 
 async function deleteBuildPhaseServiceRole(accountId: number, appName: string) {
@@ -141,7 +138,7 @@ async function createBuildPhaseCodeBuildProject(phaseContext: PhaseContext<CodeB
 
 function getCacheLocation(phaseContext: PhaseContext<CodeBuildConfig>): string {
     const {codePipelineBucketName: bucket, appName, pipelineName, phaseName} = phaseContext;
-    return `${bucket}/caches/${appName}/${pipelineName}/${phaseName}/codeBuildCache`
+    return `${bucket}/caches/${appName}/${pipelineName}/${phaseName}/codeBuildCache`;
 }
 
 async function lookupRole(roleName: string): Promise<AWS.IAM.Role> {
@@ -200,7 +197,7 @@ export function check(phaseConfig: CodeBuildConfig): string[] {
     if (phaseConfig.cache) {
         const cache = phaseConfig.cache;
         if (cache !== CacheType.S3 && cache !== CacheType.NO_CACHE) {
-            errors.push(`CodeBuild - The 'cache' parameter must be either 's3' or 'no-cache'`)
+            errors.push(`CodeBuild - The 'cache' parameter must be either 's3' or 'no-cache'`);
         }
     }
 

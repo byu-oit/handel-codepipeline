@@ -1,3 +1,4 @@
+import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import { Questions } from 'inquirer';
 import * as AWS from 'aws-sdk';

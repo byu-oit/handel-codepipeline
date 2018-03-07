@@ -18,10 +18,10 @@ import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as winston from 'winston';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
+import { getPipelineProjectName } from '../../aws/codepipeline-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as util from '../../common/util';
 import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
-import {getPipelineProjectName} from "../../aws/codepipeline-calls";
 
 export interface HandelConfig extends PhaseConfig {
     environments_to_deploy: string[];
@@ -38,12 +38,9 @@ function getDeployServiceRolePolicyArn(accountId: number): string {
 }
 
 async function createDeployPhaseServiceRole(accountId: number): Promise<AWS.IAM.Role | null> {
-    const role = await iamCalls.createRoleIfNotExists(DEPLOY_PHASE_ROLE_NAME, ['codebuild.amazonaws.com']);
     const policyArn = getDeployServiceRolePolicyArn(accountId);
     const policyDocument = util.loadJsonFile(`${__dirname}/deploy-phase-service-policy.json`);
-    const policy = await iamCalls.createPolicyIfNotExists(DEPLOY_PHASE_ROLE_NAME, policyArn, policyDocument);
-    const policyAttachment = await iamCalls.attachPolicyToRole(policy!.Arn, DEPLOY_PHASE_ROLE_NAME);
-    return iamCalls.getRole(DEPLOY_PHASE_ROLE_NAME);
+    return iamCalls.createOrUpdateRoleAndPolicy(DEPLOY_PHASE_ROLE_NAME, ['codebuild.amazonaws.com'], policyArn, policyDocument);
 }
 
 async function createDeployPhaseCodeBuildProject(phaseContext: PhaseContext<HandelConfig>, accountConfig: AccountConfig): Promise<AWS.CodeBuild.Project> {
