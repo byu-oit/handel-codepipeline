@@ -17,7 +17,8 @@
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as inquirer from 'inquirer';
 import * as winston from 'winston';
-import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';
+import { Questions, Question } from 'inquirer';
 
 export interface GithubConfig extends PhaseConfig {
     owner: string;
@@ -42,14 +43,30 @@ export function check(phaseConfig: GithubConfig): string[] {
 }
 
 export function getSecretsForPhase(phaseConfig: PhaseConfig): Promise<PhaseSecrets> {
-    const questions = [
+    return inquirer.prompt(getQuestions(phaseConfig));
+}
+
+function getQuestions(phaseConfig: PhaseConfig) {
+    return [
         {
             type: 'input',
             name: 'githubAccessToken',
             message: `'${phaseConfig.name}' phase - Please enter your GitHub access token`,
         }
     ];
-    return inquirer.prompt(questions);
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    const questions = getQuestions(phaseConfig);
+    let result: PhaseSecretQuestion[] = [];
+    questions.forEach((question) => {
+        result.push({
+            phaseName: phaseConfig.name,
+            name: question.name,
+            message: question.message
+        });
+    });
+    return result;
 }
 
 export function deployPhase(phaseContext: PhaseContext<GithubConfig>, accountConfig: AccountConfig) {

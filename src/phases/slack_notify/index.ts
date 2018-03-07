@@ -21,7 +21,7 @@ import * as winston from 'winston';
 import * as cloudformationCalls from '../../aws/cloudformation-calls';
 import * as deployersCommon from '../../common/deployers-common';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
 
 export interface SlackNotifyConfig extends PhaseConfig {
     message: string;
@@ -74,14 +74,30 @@ export function check(phaseConfig: SlackNotifyConfig): string[] {
 }
 
 export function getSecretsForPhase(phaseConfig: SlackNotifyConfig): Promise<PhaseSecrets> {
-    const questions = [
+    return inquirer.prompt(getQuestions(phaseConfig));
+}
+
+function getQuestions(phaseConfig: PhaseConfig) {
+    return [
         {
             type: 'input',
             name: 'slackUrl',
             message: `'${phaseConfig.name}' phase - Please enter the URL for Slack Notifications`,
         }
     ];
-    return inquirer.prompt(questions);
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    const questions = getQuestions(phaseConfig);
+    let result: PhaseSecretQuestion[] = [];
+    questions.forEach((question) => {
+        result.push({
+            phaseName: phaseConfig.name,
+            name: question.name,
+            message: question.message
+        });
+    });
+    return result;
 }
 
 export async function deployPhase(phaseContext: PhaseContext<SlackNotifyConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {

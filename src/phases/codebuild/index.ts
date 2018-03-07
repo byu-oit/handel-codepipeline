@@ -22,7 +22,7 @@ import {CacheSpecification, CacheType} from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as handel from '../../common/handel';
 import * as util from '../../common/util';
-import { EnvironmentVariables, PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import { EnvironmentVariables, PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
 
 export interface CodeBuildConfig extends PhaseConfig {
     build_image: string;
@@ -206,6 +206,10 @@ export function check(phaseConfig: CodeBuildConfig): string[] {
 
 export function getSecretsForPhase(phaseConfig: CodeBuildConfig): Promise<PhaseSecrets> {
     return Promise.resolve({});
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    return [];
 }
 
 export async function deployPhase(phaseContext: PhaseContext<CodeBuildConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {

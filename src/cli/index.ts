@@ -18,12 +18,14 @@ import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import { ParsedArgs } from 'minimist';
 import * as winston from 'winston';
+import * as yaml from 'js-yaml';
 import * as iamCalls from '../aws/iam-calls';
 import * as s3Calls from '../aws/s3-calls';
 import * as util from '../common/util';
-import { HandelCodePipelineFile, PhaseDeployers } from '../datatypes/index';
+import { HandelCodePipelineFile, PhaseDeployers, PhaseSecretQuestion, PhaseSecrets } from '../datatypes/index';
 import * as input from '../input';
 import * as lifecycle from '../lifecycle';
+import { Question } from 'inquirer';
 
 function configureLogger(argv: ParsedArgs) {
     let level = 'info';
@@ -87,13 +89,16 @@ async function validateCredentials(accountConfig: AccountConfig) {
 
 export async function deployAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
     configureLogger(argv);
-    winston.info('Welcome to the Handel CodePipeline setup wizard');
     const phaseDeployers = util.getPhaseDeployers();
     validatePipelineSpec(handelCodePipelineFile);
     checkPhases(handelCodePipelineFile, phaseDeployers);
+    const nonInteractive = (argv.pipeline && argv.account_name && argv.secrets);
 
     try {
-        const pipelineConfig = await input.getPipelineConfigForDeploy();
+        if(!nonInteractive) {
+            winston.info('Welcome to the Handel CodePipeline setup wizard');
+        }
+        const pipelineConfig = await input.getPipelineConfigForDeploy(argv);
         const accountName = pipelineConfig.accountName;
         const accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
 
@@ -104,17 +109,21 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
         if (!handelCodePipelineFile.pipelines[pipelineName]) {
             throw new Error(`The pipeline '${pipelineName}' you specified doesn't exist in your Handel-Codepipeline file`);
         }
-
         const codePipelineBucketName = getCodePipelineBucketName(accountConfig);
         const bucket = await s3Calls.createBucketIfNotExists(codePipelineBucketName, accountConfig.region);
-        const phasesSecrets = await lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineName);
+        let phasesSecrets;
+        if(nonInteractive) {
+            phasesSecrets = lifecycle.getSecretsFromArgv(handelCodePipelineFile, argv);
+        } else {
+            phasesSecrets = await lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineName);
+        }
         const pipelinePhases = await lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
         const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
         winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
-    }
-    catch (err) {
+
+    } catch(err) {
         winston.error(`Error setting up Handel CodePipeline: ${err.message}`);
-        // winston.error(err);
+        winston.error(err);
     }
 }
 
@@ -128,11 +137,13 @@ export function checkAction(handelCodePipelineFile: HandelCodePipelineFile, argv
 
 export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
     configureLogger(argv);
-    winston.info('Welcome to the Handel CodePipeline deletion wizard');
+    if(!(argv.pipeline && argv.account_name)) {
+        winston.info('Welcome to the Handel CodePipeline deletion wizard');
+    }
 
     const phaseDeployers = util.getPhaseDeployers();
 
-    const pipelineConfig = await input.getPipelineConfigForDelete();
+    const pipelineConfig = await input.getPipelineConfigForDelete(argv);
     const accountName = pipelineConfig.accountName;
     const accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
 
@@ -150,4 +161,27 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
         winston.error(`Error deleting Handel CodePipeline: ${err}`);
         winston.error(err);
     }
+}
+
+export async function listSecretsAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
+    if(!argv.pipeline) {
+        winston.error('The --pipeline argument is required');
+        process.exit(1);
+    }
+    if (!handelCodePipelineFile.pipelines[argv.pipeline]) {
+        throw new Error(`The pipeline '${argv.pipeline}' you specified doesn't exist in your Handel-Codepipeline file`);
+    }
+    const phaseDeployers = util.getPhaseDeployers();
+    const phaseDeployerSecretsQuestions: PhaseSecretQuestion[] = [];
+    const pipelineConfig = handelCodePipelineFile.pipelines[argv.pipeline];
+    for(const phaseConfig of pipelineConfig.phases) {
+        const phaseDeployer = phaseDeployers[phaseConfig.type];
+        const questions = phaseDeployer.getSecretQuestions(phaseConfig);
+        questions.forEach((question: PhaseSecretQuestion) => {
+            phaseDeployerSecretsQuestions.push(question);
+        });
+        // phaseDeployerSecretsQuestions.concat(questions);
+    }
+    // tslint:disable-next-line:no-console
+    console.log(JSON.stringify(phaseDeployerSecretsQuestions));
 }

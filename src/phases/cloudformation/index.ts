@@ -17,7 +17,7 @@
 import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as winston from 'winston';
-import { PhaseConfig, PhaseContext } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecretQuestion } from '../../datatypes/index';
 
 export interface CloudformationConfig extends PhaseConfig {
     template_path: string;
@@ -75,6 +75,10 @@ export function check(phaseConfig: CloudformationConfig) {
 
 export function getSecretsForPhase(phaseConfig: CloudformationConfig) {
     return Promise.resolve({});
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    return [];
 }
 
 export function deployPhase(phaseContext: PhaseContext<CloudformationConfig>, accountConfig: AccountConfig) {

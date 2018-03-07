@@ -17,7 +17,7 @@
 import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as winston from 'winston';
-import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
 
 export interface InvokeLambdaConfig extends PhaseConfig {
     function_name: string;
@@ -68,6 +68,10 @@ export function check(phaseConfig: InvokeLambdaConfig): string[] {
 
 export function getSecretsForPhase(phaseConfig: InvokeLambdaConfig): Promise<PhaseSecrets> {
     return Promise.resolve({});
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    return [];
 }
 
 export function deployPhase(phaseContext: PhaseContext<InvokeLambdaConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {

@@ -22,7 +22,7 @@ import * as codeBuildCalls from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as ssmCalls from '../../aws/ssm-calls';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes';
+import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes';
 
 export interface PypiConfig extends PhaseConfig {
     server: string;
@@ -182,7 +182,11 @@ export function check(phaseConfig: PypiConfig): string[] {
 }
 
 export function getSecretsForPhase(phaseConfig: PypiConfig): Promise<PhaseSecrets> {
-    const questions = [
+    return inquirer.prompt(getQuestions(phaseConfig));
+}
+
+function getQuestions(phaseConfig: PhaseConfig) {
+    return [
         {
             type: 'input',
             name: 'pypiUsername',
@@ -194,7 +198,19 @@ export function getSecretsForPhase(phaseConfig: PypiConfig): Promise<PhaseSecret
             message: `'${phaseConfig.name}' phase - Please enter your PyPi password`,
         }
     ];
-    return inquirer.prompt(questions);
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    const questions = getQuestions(phaseConfig);
+    let result: PhaseSecretQuestion[] = [];
+    questions.forEach((question) => {
+        result.push({
+            phaseName: phaseConfig.name,
+            name: question.name,
+            message: question.message
+        });
+    });
+    return result;
 }
 
 export async function deployPhase(phaseContext: PhaseContext<PypiConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {

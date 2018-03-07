@@ -22,7 +22,7 @@ import * as codeBuildCalls from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as ssmCalls from '../../aws/ssm-calls';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes';
+import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes';
 
 export interface NpmConfig extends PhaseConfig {
     build_image: string;
@@ -150,14 +150,30 @@ export function check(phaseConfig: NpmConfig): string[] {
 }
 
 export function getSecretsForPhase(phaseConfig: NpmConfig): Promise<PhaseSecrets> {
-    const questions = [
+    return inquirer.prompt(getQuestions(phaseConfig));
+}
+
+function getQuestions(phaseConfig: PhaseConfig) {
+    return [
         {
             type: 'input',
             name: 'npmToken',
             message: `${phaseConfig.name}' phase - Please enter your NPM Token`
         }
     ];
-    return inquirer.prompt(questions);
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    const questions = getQuestions(phaseConfig);
+    let result: PhaseSecretQuestion[] = [];
+    questions.forEach((question) => {
+        result.push({
+            phaseName: phaseConfig.name,
+            name: question.name,
+            message: question.message
+        });
+    });
+    return result;
 }
 
 export async function deployPhase(phaseContext: PhaseContext<NpmConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {

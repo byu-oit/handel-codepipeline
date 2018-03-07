@@ -17,7 +17,7 @@
 import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes/account-config';
 import * as winston from 'winston';
-import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
 
 export interface CodeCommitConfig extends PhaseConfig {
     repo: string;
@@ -39,6 +39,10 @@ export function check(phaseConfig: CodeCommitConfig): string[] {
 
 export function getSecretsForPhase(phaseConfig: CodeCommitConfig): Promise<PhaseSecrets> {
     return Promise.resolve({});
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    return [];
 }
 
 export function deployPhase(phaseContext: PhaseContext<CodeCommitConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {

@@ -21,7 +21,7 @@ import * as winston from 'winston';
 import * as cloudformationCalls from '../../aws/cloudformation-calls';
 import * as deployersCommon from '../../common/deployers-common';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
 
 const STACK_NAME = 'HandelCodePipelineRunscopeLambda';
 
@@ -58,7 +58,11 @@ export function check(phaseConfig: PhaseConfig): string[] {
 }
 
 export function getSecretsForPhase(phaseConfig: PhaseConfig): Promise<PhaseSecrets> {
-    const questions = [
+    return inquirer.prompt(getQuestions(phaseConfig));
+}
+
+function getQuestions(phaseConfig: PhaseConfig) {
+    return [
         {
             type: 'input',
             name: 'runscopeTriggerUrl',
@@ -70,7 +74,19 @@ export function getSecretsForPhase(phaseConfig: PhaseConfig): Promise<PhaseSecre
             message: `'${phaseConfig.name}' phase - Please enter your Runscope Access Token`
         }
     ];
-    return inquirer.prompt(questions);
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    const questions = getQuestions(phaseConfig);
+    let result: PhaseSecretQuestion[] = [];
+    questions.forEach((question) => {
+        result.push({
+            phaseName: phaseConfig.name,
+            name: question.name,
+            message: question.message
+        });
+    });
+    return result;
 }
 
 export async function deployPhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {

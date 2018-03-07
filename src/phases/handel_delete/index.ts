@@ -20,7 +20,7 @@ import * as  winston from 'winston';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
 
 export interface HandelDeleteConfig extends PhaseConfig {
     environments_to_delete: string[];
@@ -132,6 +132,10 @@ export function check(phaseConfig: HandelDeleteConfig): string[] {
 
 export function getSecretsForPhase(phaseConfig: HandelDeleteConfig): Promise<PhaseSecrets> {
     return Promise.resolve({});
+}
+
+export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
+    return [];
 }
 
 export async function deployPhase(phaseContext: PhaseContext<HandelDeleteConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {
