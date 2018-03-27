@@ -101,6 +101,7 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
         const pipelineConfig = await input.getPipelineConfigForDeploy(argv);
         const accountName = pipelineConfig.accountName;
         const accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
+        winston.debug(`Using account config: ${JSON.stringify(accountConfig)}`);
 
         await validateCredentials(accountConfig);
         AWS.config.update({ region: accountConfig.region });
