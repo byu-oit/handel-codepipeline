@@ -14,10 +14,10 @@
  * limitations under the License.
  *
  */
-const ServiceContext = require('handel/dist/datatypes/service-context').ServiceContext; // TODO - Change to src/ once ported to TS
-const EnvironmentContext = require('handel/dist/datatypes/environment-context').EnvironmentContext; // TODO - Change to src/ once ported to TS
-const EnvironmentDeployResult = require('handel/dist/datatypes/environment-deploy-result').EnvironmentDeployResult; // TODO - Change to src/ once ported to TS
-const EnvironmentDeleteResult = require('handel/dist/datatypes/environment-delete-result').EnvironmentDeleteResult; // TODO - Change to src/ once ported to TS
+const ServiceContext = require('handel/dist/datatypes').ServiceContext; // TODO - Change to src/ once ported to TS
+const EnvironmentContext = require('handel/dist/datatypes').EnvironmentContext; // TODO - Change to src/ once ported to TS
+const EnvironmentDeployResult = require('handel/dist/datatypes').EnvironmentDeployResult; // TODO - Change to src/ once ported to TS
+const EnvironmentDeleteResult = require('handel/dist/datatypes').EnvironmentDeleteResult; // TODO - Change to src/ once ported to TS
 const handelUtil = require('handel/dist/common/util'); // TODO - Change to src/ once ported to TS
 
 const checkPhase = require('handel/dist/phases/check'); // TODO - Change to src/ once ported to TS

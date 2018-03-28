@@ -206,6 +206,7 @@ describe('handel interface', function () {
                         sinon.match('myApp-pipeline-bucket-s3'),
                         sinon.match.string,
                         sinon.match.array.deepEquals([]),
+                        sinon.match(30),
                         sinon.match({
                             app: 'myApp',
                             env: 'pipeline',

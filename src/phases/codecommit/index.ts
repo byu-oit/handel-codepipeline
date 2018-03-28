@@ -15,9 +15,9 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as winston from 'winston';
-import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';
 
 export interface CodeCommitConfig extends PhaseConfig {
     repo: string;

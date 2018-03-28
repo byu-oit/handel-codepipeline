@@ -15,12 +15,12 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as  winston from 'winston';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';
 
 export interface HandelDeleteConfig extends PhaseConfig {
     environments_to_delete: string[];
@@ -32,11 +32,11 @@ function getDeleteProjectName(phaseContext: PhaseContext<HandelDeleteConfig>): s
 
 const DELETE_PHASE_ROLE_NAME = 'HandelCodePipelineDeletePhaseServiceRole';
 
-function getDeleteServiceRoleArn(accountId: number): string {
+function getDeleteServiceRoleArn(accountId: string): string {
     return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${DELETE_PHASE_ROLE_NAME}`;
 }
 
-async function createDeletePhaseServiceRole(accountId: number): Promise<AWS.IAM.Role | null> {
+async function createDeletePhaseServiceRole(accountId: string): Promise<AWS.IAM.Role | null> {
     const roleName = DELETE_PHASE_ROLE_NAME;
     const policyArn = getDeleteServiceRoleArn(accountId);
     const policyDocument = util.loadJsonFile(`${__dirname}/delete-phase-service-policy.json`);

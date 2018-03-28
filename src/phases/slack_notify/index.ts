@@ -15,13 +15,13 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as inquirer from 'inquirer';
 import * as winston from 'winston';
 import * as cloudformationCalls from '../../aws/cloudformation-calls';
 import * as deployersCommon from '../../common/deployers-common';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';
 
 export interface SlackNotifyConfig extends PhaseConfig {
     message: string;
@@ -89,7 +89,7 @@ function getQuestions(phaseConfig: PhaseConfig) {
 
 export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
     const questions = getQuestions(phaseConfig);
-    let result: PhaseSecretQuestion[] = [];
+    const result: PhaseSecretQuestion[] = [];
     questions.forEach((question) => {
         result.push({
             phaseName: phaseConfig.name,
@@ -113,7 +113,7 @@ export async function deployPhase(phaseContext: PhaseContext<SlackNotifyConfig>,
         const directoryToUpload = `${__dirname}/slack-notify-code`;
         const s3FileName = 'handel-codepipeline/slackNotifyLambda';
         const s3BucketName = `codepipeline-${accountConfig.region}-${accountConfig.account_id}`;
-        const s3ObjectInfo = await deployersCommon.uploadDirectoryToBucket(directoryToUpload, s3FileName, s3BucketName)
+        const s3ObjectInfo = await deployersCommon.uploadDirectoryToBucket(directoryToUpload, s3FileName, s3BucketName);
         const template = util.loadFile(`${__dirname}/lambda.yml`);
         if(!template) {
             throw new Error(`Could not load template for Slack Notify Lambda`);

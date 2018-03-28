@@ -56,7 +56,7 @@ describe('deployersCommon module', () => {
 
     describe('createLambdaCodePipelineRole', () => {
         it('should create the role for the Lambda', async () => {
-            const accountId = 111111111111;
+            const accountId = '111111111111';
             const fakeArn = 'FakeArn';
 
             const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves({

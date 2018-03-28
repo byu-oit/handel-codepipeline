@@ -15,10 +15,10 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
+import { ParsedArgs } from 'minimist';
 import * as codepipelineCalls from '../aws/codepipeline-calls';
 import { HandelCodePipelineFile, PhaseConfig, PhaseContext, PhaseDeployer, PhaseDeployers, PhaseSecrets } from '../datatypes';
-import { ParsedArgs } from 'minimist';
 
 interface PipelineCheckErrors {
     [pipelineName: string]: string[];

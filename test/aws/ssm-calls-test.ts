@@ -40,7 +40,7 @@ describe('ssm calls', () => {
                 param: {}
             });
 
-            const param = await ssmCalls.putParameter(paramName, paramType, paramValue, paramDescription)
+            const param = await ssmCalls.putParameter(paramName, paramType, paramValue, paramDescription);
             expect(param).to.deep.equal({param: {} });
             expect(putParameterStub.callCount).to.equal(1);
         });

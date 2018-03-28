@@ -30,7 +30,7 @@ export async function uploadDirectoryToBucket(directoryToUpload: string, s3FileN
     return s3ObjectInfo;
 }
 
-export async function createLambdaCodePipelineRole(accountId: number): Promise<AWS.IAM.Role | null> {
+export async function createLambdaCodePipelineRole(accountId: string): Promise<AWS.IAM.Role | null> {
     const roleName = 'HandelCodePipelineLambdaRole';
     const policyArn = `arn:aws:iam::${accountId}:policy/handel-codepipeline/${roleName}`;
     const policyDocument = {

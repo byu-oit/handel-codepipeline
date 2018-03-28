@@ -15,14 +15,14 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as winston from 'winston';
 import * as iamCalls from '../aws/iam-calls';
 import awsWrapper from './aws-wrapper';
 
 const CODEPIPELINE_ROLE_NAME = 'HandelCodePipelineServiceRole';
 
-async function createCodePipelineRole(accountId: number) {
+async function createCodePipelineRole(accountId: string) {
     const trustedServices = ['codepipeline.amazonaws.com', 'cloudformation.amazonaws.com'];
     const policyArn = `arn:aws:iam::${accountId}:policy/handel-codepipeline/${CODEPIPELINE_ROLE_NAME}`;
     const policyDocument = {
@@ -170,7 +170,7 @@ function getPipelineConfig(pipelineProjectName: string, codePipelineBucketName: 
     return pipelineConfig;
 }
 
-async function createCodePipelineProject(accountId: number, pipelineProjectName: string, codePipelineBucketName: string, codePipelinePhases: AWS.CodePipeline.StageDeclaration[]): Promise<AWS.CodePipeline.PipelineDeclaration> {
+async function createCodePipelineProject(accountId: string, pipelineProjectName: string, codePipelineBucketName: string, codePipelinePhases: AWS.CodePipeline.StageDeclaration[]): Promise<AWS.CodePipeline.PipelineDeclaration> {
     const codePipelineRole = await createCodePipelineRole(accountId);
     if (!codePipelineRole) {
         throw new Error(`Couldn't create CodePipeline role`);
