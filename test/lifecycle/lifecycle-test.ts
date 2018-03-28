@@ -15,7 +15,7 @@
  *
  */
 import { expect } from 'chai';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as sinon from 'sinon';
 import * as codepipelineCalls from '../../src/aws/codepipeline-calls';
 import * as util from '../../src/common/util';
@@ -61,15 +61,15 @@ describe('lifecycle module', () => {
                 check: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
                 getSecretsForPhase: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
                 getSecretQuestions: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
-                deployPhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); },
-                deletePhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); }
+                deployPhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfigFile: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); },
+                deletePhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfigFile: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); }
             },
             codebuild: {
                 check: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
                 getSecretsForPhase: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
                 getSecretQuestions: (phaseConfig: PhaseConfig) => { throw new Error('NOT IMPLEMENTED'); },
-                deployPhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); },
-                deletePhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); }
+                deployPhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfigFile: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); },
+                deletePhase: (phaseContext: PhaseContext<PhaseConfig>, accountConfigFile: AccountConfig) => { throw new Error('NOT IMPLEMENTED'); }
             }
         };
     });

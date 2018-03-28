@@ -9,7 +9,9 @@
         "removeComments": false,
         "strict": true,
         "strictNullChecks": true,
-        "lib": ["es2015"]
+        "lib": [
+            "es2015"
+        ]
     },
     "compileOnSave": false,
     "include": [

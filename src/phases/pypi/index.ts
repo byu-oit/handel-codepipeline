@@ -15,14 +15,14 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as inquirer from 'inquirer';
 import * as winston from 'winston';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as ssmCalls from '../../aws/ssm-calls';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes';
+import { PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes';
 
 export interface PypiConfig extends PhaseConfig {
     server: string;
@@ -79,7 +79,7 @@ function getPypiPhaseRoleName(appName: string): string {
     return `${appName}-HandelCodePipelinePyPiPhase`;
 }
 
-function getPypiPhasePolicyArn(accountId: number, appName: string): string {
+function getPypiPhasePolicyArn(accountId: string, appName: string): string {
     return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${getPypiPhaseRoleName(appName)}`;
 }
 
@@ -95,7 +95,7 @@ async function createPypiPhaseServiceRole(accountConfig: AccountConfig, appName:
     return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, compiledPolicyDoc);
 }
 
-async function deletePypiPhaseServiceRole(accountId: number, appName: string): Promise<boolean> {
+async function deletePypiPhaseServiceRole(accountId: string, appName: string): Promise<boolean> {
     const roleName = getPypiPhaseRoleName(appName);
     const policyArn = getPypiPhasePolicyArn(accountId, appName);
     await iamCalls.detachPolicyFromRole(roleName, policyArn);
@@ -202,7 +202,7 @@ function getQuestions(phaseConfig: PhaseConfig) {
 
 export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
     const questions = getQuestions(phaseConfig);
-    let result: PhaseSecretQuestion[] = [];
+    const result: PhaseSecretQuestion[] = [];
     questions.forEach((question) => {
         result.push({
             phaseName: phaseConfig.name,

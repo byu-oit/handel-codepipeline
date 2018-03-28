@@ -15,13 +15,13 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as inquirer from 'inquirer';
 import * as winston from 'winston';
 import * as cloudformationCalls from '../../aws/cloudformation-calls';
 import * as deployersCommon from '../../common/deployers-common';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';
 
 const STACK_NAME = 'HandelCodePipelineRunscopeLambda';
 
@@ -78,7 +78,7 @@ function getQuestions(phaseConfig: PhaseConfig) {
 
 export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
     const questions = getQuestions(phaseConfig);
-    let result: PhaseSecretQuestion[] = [];
+    const result: PhaseSecretQuestion[] = [];
     questions.forEach((question) => {
         result.push({
             phaseName: phaseConfig.name,

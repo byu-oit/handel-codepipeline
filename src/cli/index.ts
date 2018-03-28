@@ -15,17 +15,17 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
+import { Question } from 'inquirer';
+import * as yaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
 import * as winston from 'winston';
-import * as yaml from 'js-yaml';
 import * as iamCalls from '../aws/iam-calls';
 import * as s3Calls from '../aws/s3-calls';
 import * as util from '../common/util';
 import { HandelCodePipelineFile, PhaseDeployers, PhaseSecretQuestion, PhaseSecrets } from '../datatypes/index';
 import * as input from '../input';
 import * as lifecycle from '../lifecycle';
-import { Question } from 'inquirer';
 
 function configureLogger(argv: ParsedArgs) {
     let level = 'info';

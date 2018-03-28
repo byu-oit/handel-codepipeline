@@ -15,14 +15,14 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as winston from 'winston';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
 import {CacheSpecification, CacheType} from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as handel from '../../common/handel';
 import * as util from '../../common/util';
-import { EnvironmentVariables, PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
+import { EnvironmentVariables, PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';
 
 export interface CodeBuildConfig extends PhaseConfig {
     build_image: string;
@@ -47,7 +47,7 @@ function getBuildPhaseRoleName(appName: string): string {
     return `${appName}-HandelCodePipelineBuildPhase`;
 }
 
-function getBuildPhasePolicyArn(accountId: number, appName: string): string {
+function getBuildPhasePolicyArn(accountId: string, appName: string): string {
     return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${getBuildPhaseRoleName(appName)}`;
 }
 
@@ -65,7 +65,7 @@ async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName
     return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, policyDocObj);
 }
 
-async function deleteBuildPhaseServiceRole(accountId: number, appName: string) {
+async function deleteBuildPhaseServiceRole(accountId: string, appName: string) {
     const roleName = getBuildPhaseRoleName(appName);
     const policyArn = getBuildPhasePolicyArn(accountId, appName);
     await iamCalls.detachPolicyFromRole(roleName, policyArn);

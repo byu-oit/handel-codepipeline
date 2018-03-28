@@ -15,7 +15,7 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as winston from 'winston';
 import { PhaseConfig, PhaseContext, PhaseSecretQuestion } from '../../datatypes/index';
 

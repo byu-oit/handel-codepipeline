@@ -15,7 +15,7 @@
  *
  */
 import { expect } from 'chai';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as inquirer from 'inquirer';
 import * as sinon from 'sinon';
 import { PhaseConfig, PhaseContext } from '../../../src/datatypes/index';
@@ -25,7 +25,7 @@ describe('approval module', () => {
     let sandbox: sinon.SinonSandbox;
 
     const accountConfig: AccountConfig = {
-        account_id: 111111111111,
+        account_id: '111111111111',
         region: 'us-west-2',
         vpc: 'vpc-1111111',
         public_subnets: [

@@ -15,7 +15,7 @@
  *
  */
 import { expect } from 'chai';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as sinon from 'sinon';
 import * as util from '../../../src/common/util';
 import { PhaseContext } from '../../../src/datatypes/index';

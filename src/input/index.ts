@@ -16,10 +16,10 @@
  */
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
+import { ParsedArgs } from 'minimist';
 import * as os from 'os';
 import * as util from '../common/util';
 import { PhaseSecrets } from '../datatypes/index';
-import { ParsedArgs } from 'minimist';
 
 const HANDEL_CODEPIPELINE_DIR = `${os.homedir()}/.handel-codepipeline`;
 const HANDEL_CODEPIPELINE_CONFIG = `${HANDEL_CODEPIPELINE_DIR}/config.yml`;

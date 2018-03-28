@@ -178,7 +178,7 @@ export async function createOrUpdateRoleAndPolicy(roleName: string, trustedServi
 /**
  * This method is used to determine the account id
  */
-export async function showAccount() {
+export async function showAccount(): Promise<string | null> {
     const listRolesParams = {
         MaxItems: 1
     };
@@ -187,8 +187,7 @@ export async function showAccount() {
         if (!response || !response.Roles || response.Roles.length < 1 || !response.Roles[0].Arn || response.Roles[0].Arn.indexOf('arn:aws:iam::') !== 0) {
             return null;
         }
-        const accountId = response.Roles[0].Arn.split(':')[4];
-        return parseInt(accountId, 10);
+        return response.Roles[0].Arn.split(':')[4];
     }
     catch (err) {
         if (err.code === 'ExpiredToken') {

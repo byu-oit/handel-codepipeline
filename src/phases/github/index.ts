@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as inquirer from 'inquirer';
+import { Question, Questions } from 'inquirer';
 import * as winston from 'winston';
 import { PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';
-import { Questions, Question } from 'inquirer';
 
 export interface GithubConfig extends PhaseConfig {
     owner: string;
@@ -58,7 +58,7 @@ function getQuestions(phaseConfig: PhaseConfig) {
 
 export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[] {
     const questions = getQuestions(phaseConfig);
-    let result: PhaseSecretQuestion[] = [];
+    const result: PhaseSecretQuestion[] = [];
     questions.forEach((question) => {
         result.push({
             phaseName: phaseConfig.name,

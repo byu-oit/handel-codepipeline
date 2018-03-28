@@ -16,7 +16,7 @@
  */
 import * as chai from 'chai';
 import deepEqual = require('deep-equal');
-import {AccountConfig} from 'handel/src/datatypes/account-config';
+import {AccountConfig} from 'handel/src/datatypes';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as codebuildCalls from '../../../src/aws/codebuild-calls';

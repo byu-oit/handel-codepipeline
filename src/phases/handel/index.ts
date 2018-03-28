@@ -15,13 +15,13 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes/account-config';
+import { AccountConfig } from 'handel/src/datatypes';
 import * as winston from 'winston';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
 import { getPipelineProjectName } from '../../aws/codepipeline-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecrets, PhaseSecretQuestion } from '../../datatypes/index';
+import { PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';
 
 export interface HandelConfig extends PhaseConfig {
     environments_to_deploy: string[];
@@ -33,11 +33,11 @@ function getDeployProjectName(phaseContext: PhaseContext<HandelConfig>): string 
 
 const DEPLOY_PHASE_ROLE_NAME = 'HandelCodePipelineDeployPhaseServiceRole';
 
-function getDeployServiceRolePolicyArn(accountId: number): string {
+function getDeployServiceRolePolicyArn(accountId: string): string {
     return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${DEPLOY_PHASE_ROLE_NAME}`;
 }
 
-async function createDeployPhaseServiceRole(accountId: number): Promise<AWS.IAM.Role | null> {
+async function createDeployPhaseServiceRole(accountId: string): Promise<AWS.IAM.Role | null> {
     const policyArn = getDeployServiceRolePolicyArn(accountId);
     const policyDocument = util.loadJsonFile(`${__dirname}/deploy-phase-service-policy.json`);
     return iamCalls.createOrUpdateRoleAndPolicy(DEPLOY_PHASE_ROLE_NAME, ['codebuild.amazonaws.com'], policyArn, policyDocument);
