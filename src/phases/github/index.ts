@@ -35,9 +35,6 @@ export function check(phaseConfig: GithubConfig): string[] {
     if(!phaseConfig.repo) {
         errors.push(`GitHub - The 'repo' parameter is required`);
     }
-    if(!phaseConfig.branch) {
-        errors.push(`GitHub - The 'branch' parameter is required`);
-    }
 
     return errors;
 }

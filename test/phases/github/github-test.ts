@@ -73,13 +73,6 @@ describe('github phase module', () => {
             expect(errors[0]).to.include(`The 'repo' parameter is required`);
         });
 
-        it('should require the branch parameter', () => {
-            delete phaseConfig.branch;
-            const errors = github.check(phaseConfig);
-            expect(errors.length).to.equal(1);
-            expect(errors[0]).to.include(`The 'branch' parameter is required`);
-        });
-
         it('should work when all required parameters are provided', () => {
             const errors = github.check(phaseConfig);
             expect(errors.length).to.equal(0);
