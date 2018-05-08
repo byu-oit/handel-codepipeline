@@ -15,6 +15,7 @@
  *
  */
 import * as AWS from 'aws-sdk';
+import * as crypto from 'crypto';
 import { AccountConfig } from 'handel/src/datatypes';
 import * as winston from 'winston';
 import * as iamCalls from '../aws/iam-calls';
@@ -232,4 +233,46 @@ export async function deletePipeline(appName: string, pipelineName: string): Pro
 
     const deleteResult = await awsWrapper.codePipeline.deletePipeline(deleteParams);
     return true;
+}
+
+export async function putWebhook(pipelineName: string): Promise<AWS.CodePipeline.PutWebhookOutput> {
+    const webhook: AWS.CodePipeline.PutWebhookInput = {
+        'webhook': {
+            'name': `${pipelineName}-webhook`,
+            'targetPipeline': pipelineName,
+            'targetAction': 'Github',
+            'filters': [
+                {
+                    'jsonPath': '$.ref',
+                    'matchEquals': 'refs/heads/{Branch}'
+                }
+            ],
+            'authentication': 'GITHUB_HMAC',
+            'authenticationConfiguration': {
+                'SecretToken': crypto.randomBytes(32).toString('hex')
+            }
+        }
+    };
+    return await awsWrapper.codePipeline.putWebhook(webhook);
+}
+
+export async function deleteWebhook(webhookName: string): Promise<AWS.CodePipeline.DeleteWebhookOutput> {
+    const webhook: AWS.CodePipeline.DeleteWebhookInput = {
+        'name': webhookName
+    };
+    return await awsWrapper.codePipeline.deleteWebhook(webhook);
+}
+
+export async function registerWebhook(webhookName: string): Promise<AWS.CodePipeline.RegisterWebhookWithThirdPartyOutput> {
+    const webhook: AWS.CodePipeline.RegisterWebhookWithThirdPartyInput = {
+        'webhookName': webhookName
+    };
+    return await awsWrapper.codePipeline.registerWebhook(webhook);
+}
+
+export async function deregisterWebhook(webhookName: string): Promise<AWS.CodePipeline.DeregisterWebhookWithThirdPartyOutput> {
+    const webhook: AWS.CodePipeline.DeregisterWebhookWithThirdPartyInput = {
+        'webhookName': webhookName
+    };
+    return await awsWrapper.codePipeline.deregisterWebhook(webhook);
 }

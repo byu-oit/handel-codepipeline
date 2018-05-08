@@ -141,6 +141,22 @@ const awsWrapper = {
         deletePipeline: (params: AWS.CodePipeline.DeletePipelineInput) => {
             const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
             return codePipeline.deletePipeline(params).promise();
+        },
+        putWebhook: (params: AWS.CodePipeline.PutWebhookInput) => {
+            const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
+            return codePipeline.putWebhook(params).promise();
+        },
+        deleteWebhook: (params: AWS.CodePipeline.DeleteWebhookInput) => {
+            const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
+            return codePipeline.deleteWebhook(params).promise();
+        },
+        registerWebhook: (params: AWS.CodePipeline.RegisterWebhookWithThirdPartyInput) => {
+            const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
+            return codePipeline.registerWebhookWithThirdParty(params).promise();
+        },
+        deregisterWebhook: (params: AWS.CodePipeline.DeregisterWebhookWithThirdPartyInput) => {
+            const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
+            return codePipeline.deregisterWebhookWithThirdParty(params).promise();
         }
     },
     ssm: {

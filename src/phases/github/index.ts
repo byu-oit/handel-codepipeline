@@ -91,7 +91,8 @@ export function deployPhase(phaseContext: PhaseContext<GithubConfig>, accountCon
                     Owner: phaseContext.params.owner,
                     Repo: phaseContext.params.repo,
                     Branch: branch,
-                    OAuthToken: phaseContext.secrets.githubAccessToken
+                    OAuthToken: phaseContext.secrets.githubAccessToken,
+                    PollForSourceChanges: 'false'
                 },
                 runOrder: 1
             }

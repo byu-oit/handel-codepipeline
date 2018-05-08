@@ -20,6 +20,7 @@ import { Question } from 'inquirer';
 import * as yaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
 import * as winston from 'winston';
+import * as codepipelineCalls from '../aws/codepipeline-calls';
 import * as iamCalls from '../aws/iam-calls';
 import * as s3Calls from '../aws/s3-calls';
 import * as util from '../common/util';
@@ -120,6 +121,13 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
         }
         const pipelinePhases = await lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
         const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
+        const sourcePhaseProvider = pipelinePhases[0].actions[0].actionTypeId.provider;
+        if (sourcePhaseProvider === 'GitHub') {
+            const pipelineProjectName = `${handelCodePipelineFile.name}-${pipelineName}`;
+            const webhook = await codepipelineCalls.putWebhook(pipelineProjectName);
+            const webhookName = `${pipelineProjectName}-webhook`;
+            const registerWebhook = await codepipelineCalls.registerWebhook(webhookName);
+        }
         winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
 
     } catch(err) {
@@ -155,6 +163,12 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
     const appName = handelCodePipelineFile.name;
 
     try {
+        const sourcePhaseProvider = handelCodePipelineFile.pipelines[pipelineName].phases[0].type;
+        if (sourcePhaseProvider === 'github') {
+            const webhookName = `${appName}-${pipelineName}-webhook`;
+            const deregisterResult = await codepipelineCalls.deregisterWebhook(webhookName);
+            const deleteWebhook = await codepipelineCalls.deleteWebhook(webhookName);
+        }
         const deleteResult = await lifecycle.deletePipeline(appName, pipelineName);
         return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
     }
