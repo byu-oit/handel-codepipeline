@@ -1,6 +1,6 @@
 Handel
 ======
-The *Handel* phase type configures a pipeline phase to deploy one or more of your application environments using the Handel library. You may configure multiple phases of this type if you wish to deploy your application environments acrosss different phases. 
+The *Handel* phase type configures a pipeline phase to deploy one or more of your application environments using the Handel library. You may configure multiple phases of this type if you wish to deploy your application environments across different phases. 
 
 Parameters
 ----------
