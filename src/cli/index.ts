@@ -20,7 +20,6 @@ import { Question } from 'inquirer';
 import * as yaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
 import * as winston from 'winston';
-import * as codepipelineCalls from '../aws/codepipeline-calls';
 import * as iamCalls from '../aws/iam-calls';
 import * as s3Calls from '../aws/s3-calls';
 import * as util from '../common/util';
