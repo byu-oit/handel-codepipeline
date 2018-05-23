@@ -185,6 +185,10 @@ export function getPipelineProjectName(appName: string, pipelineName: string): s
     return `${appName}-${pipelineName}`;
 }
 
+export function getPipelineWebhookName(appName: string, pipelineName: string): string {
+    return `${appName}-${pipelineName}-webhook`;
+}
+
 export function createPipeline(appName: string, pipelineName: string, accountConfig: AccountConfig, pipelinePhases: AWS.CodePipeline.StageDeclaration[], codePipelineBucketName: string): Promise<AWS.CodePipeline.PipelineDeclaration> {
     const accountId = accountConfig.account_id;
     const pipelineProjectName = exports.getPipelineProjectName(appName, pipelineName);

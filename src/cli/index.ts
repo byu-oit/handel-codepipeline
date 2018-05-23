@@ -121,13 +121,7 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
         }
         const pipelinePhases = await lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
         const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
-        const sourcePhaseProvider = pipelinePhases[0].actions[0].actionTypeId.provider;
-        if (sourcePhaseProvider === 'GitHub') {
-            const pipelineProjectName = `${handelCodePipelineFile.name}-${pipelineName}`;
-            const webhook = await codepipelineCalls.putWebhook(pipelineProjectName);
-            const webhookName = `${pipelineProjectName}-webhook`;
-            const registerWebhook = await codepipelineCalls.registerWebhook(webhookName);
-        }
+        const webhook = await lifecycle.registerWebhooks(handelCodePipelineFile, pipelineName);
         winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
 
     } catch(err) {
@@ -163,12 +157,7 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
     const appName = handelCodePipelineFile.name;
 
     try {
-        const sourcePhaseProvider = handelCodePipelineFile.pipelines[pipelineName].phases[0].type;
-        if (sourcePhaseProvider === 'github') {
-            const webhookName = `${appName}-${pipelineName}-webhook`;
-            const deregisterResult = await codepipelineCalls.deregisterWebhook(webhookName);
-            const deleteWebhook = await codepipelineCalls.deleteWebhook(webhookName);
-        }
+        const deleteWebhook = await lifecycle.deregisterWebhooks(handelCodePipelineFile, pipelineName);
         const deleteResult = await lifecycle.deletePipeline(appName, pipelineName);
         return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
     }
