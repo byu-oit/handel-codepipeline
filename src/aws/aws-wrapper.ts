@@ -142,19 +142,19 @@ const awsWrapper = {
             const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
             return codePipeline.deletePipeline(params).promise();
         },
-        putWebhook: (params: AWS.CodePipeline.PutWebhookInput) => {
+        putWebhook: (params: AWS.CodePipeline.PutWebhookInput): Promise<AWS.CodePipeline.PutWebhookOutput> => {
             const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
             return codePipeline.putWebhook(params).promise();
         },
-        deleteWebhook: (params: AWS.CodePipeline.DeleteWebhookInput) => {
+        deleteWebhook: (params: AWS.CodePipeline.DeleteWebhookInput): Promise<AWS.CodePipeline.DeleteWebhookOutput> => {
             const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
             return codePipeline.deleteWebhook(params).promise();
         },
-        registerWebhook: (params: AWS.CodePipeline.RegisterWebhookWithThirdPartyInput) => {
+        registerWebhook: (params: AWS.CodePipeline.RegisterWebhookWithThirdPartyInput): Promise<AWS.CodePipeline.RegisterWebhookWithThirdPartyOutput> => {
             const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
             return codePipeline.registerWebhookWithThirdParty(params).promise();
         },
-        deregisterWebhook: (params: AWS.CodePipeline.DeregisterWebhookWithThirdPartyInput) => {
+        deregisterWebhook: (params: AWS.CodePipeline.DeregisterWebhookWithThirdPartyInput): Promise<AWS.CodePipeline.DeregisterWebhookWithThirdPartyOutput> => {
             const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
             return codePipeline.deregisterWebhookWithThirdParty(params).promise();
         }

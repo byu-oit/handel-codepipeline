@@ -109,4 +109,18 @@ describe('github phase module', () => {
                 });
         });
     });
+
+    describe('addWebhook', () => {
+        it('should put webhook and register it', () => {
+            // TODO: need to add
+            return;
+        });
+    });
+
+    describe('removeWebhook', () => {
+        it('should deregister webhook and delete it', () => {
+            // TODO: need to add
+            return;
+        });
+    });
 });

@@ -267,4 +267,18 @@ describe('lifecycle module', () => {
             expect(deletePipelineStub.callCount).to.equal(1);
         });
     });
+
+    describe('addWebhook', () => {
+        it('should put webhook and register it', () => {
+            // TODO: need to add
+            return;
+        });
+    });
+
+    describe('removeWebhook', () => {
+        it('should deregister webhook and delete it', () => {
+            // TODO: need to add
+            return;
+        });
+    });
 });

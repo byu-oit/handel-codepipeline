@@ -103,4 +103,46 @@ describe('codepipelineCalls module', () => {
             expect(success).to.equal(true);
         });
     });
+
+    describe('putWebhook', () => {
+        it('should put the webhook', async () => {
+            const putWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'putWebhook').resolves({
+                webhook: {}
+            });
+
+            const webhook = await codepipelineCalls.putWebhook('SomePipeline');
+            expect(putWebhookStub.callCount).to.equal(1);
+        });
+    });
+
+    describe('deleteWebhook', () => {
+        it('should delete the webhook', async () => {
+            const deleteWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'deleteWebhook').resolves({});
+
+            const webhook = await codepipelineCalls.deleteWebhook('SomeWebhook');
+            expect(deleteWebhookStub.callCount).to.equal(1);
+        });
+    });
+
+    describe('registerWebhook', () => {
+        it('should register the webhook', async () => {
+            const registerWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'registerWebhook').resolves({
+                webhook: {}
+            });
+
+            const webhook = await codepipelineCalls.registerWebhook('SomeWebhook');
+            expect(registerWebhookStub.callCount).to.equal(1);
+        });
+    });
+
+    describe('deregisterWebhook', () => {
+        it('should deregister the webhook', async () => {
+            const deregisterWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'deregisterWebhook').resolves({
+                webhook: {}
+            });
+
+            const webhook = await codepipelineCalls.deregisterWebhook('SomeWebhook');
+            expect(deregisterWebhookStub.callCount).to.equal(1);
+        });
+    });
 });

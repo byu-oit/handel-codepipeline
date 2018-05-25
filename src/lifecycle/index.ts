@@ -221,23 +221,12 @@ export function deletePipeline(appName: string, pipelineName: string) {
     return codepipelineCalls.deletePipeline(appName, pipelineName);
 }
 
-export async function registerWebhooks(handelCodePipelineFile: HandelCodePipelineFile, pipelineName: string) {
-    const sourcePhaseProvider = handelCodePipelineFile.pipelines[pipelineName].phases[0].type;
-    const appName = handelCodePipelineFile.name;
-    if (sourcePhaseProvider === 'github') {
-        const pipelineProjectName = codepipelineCalls.getPipelineProjectName(appName, pipelineName);
-        const webhook = await codepipelineCalls.putWebhook(pipelineProjectName);
-        const webhookName = codepipelineCalls.getPipelineWebhookName(appName, pipelineName);
-        const registerWebhook = await codepipelineCalls.registerWebhook(webhookName);
-    }
+export async function addWebhooks(phaseDeployers: PhaseDeployers) {
+    // TODO add logic to call phase deployer addWebhook
+    return;
 }
 
-export async function deregisterWebhooks(handelCodePipelineFile: HandelCodePipelineFile, pipelineName: string) {
-    const sourcePhaseProvider = handelCodePipelineFile.pipelines[pipelineName].phases[0].type;
-    const appName = handelCodePipelineFile.name;
-    if (sourcePhaseProvider === 'github') {
-        const webhookName = codepipelineCalls.getPipelineWebhookName(appName, pipelineName);
-        const deregisterResult = await codepipelineCalls.deregisterWebhook(webhookName);
-        const deleteWebhook = await codepipelineCalls.deleteWebhook(webhookName);
-    }
+export async function removeWebhooks(phaseDeployers: PhaseDeployers) {
+    // TODO add logic to call phase deployer removeWebhook
+    return;
 }
