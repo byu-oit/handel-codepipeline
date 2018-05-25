@@ -120,7 +120,7 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
         }
         const pipelinePhases = await lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
         const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
-        const webhook = await lifecycle.addWebhooks(phaseDeployers);
+        const webhook = await lifecycle.addWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
         winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
 
     } catch(err) {
@@ -156,7 +156,7 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
     const appName = handelCodePipelineFile.name;
 
     try {
-        const deleteWebhook = await lifecycle.removeWebhooks(phaseDeployers);
+        const deleteWebhook = await lifecycle.removeWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
         const deleteResult = await lifecycle.deletePipeline(appName, pipelineName);
         return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
     }

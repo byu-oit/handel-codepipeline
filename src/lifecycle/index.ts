@@ -221,12 +221,38 @@ export function deletePipeline(appName: string, pipelineName: string) {
     return codepipelineCalls.deletePipeline(appName, pipelineName);
 }
 
-export async function addWebhooks(phaseDeployers: PhaseDeployers) {
-    // TODO add logic to call phase deployer addWebhook
-    return;
+export async function addWebhooks(phaseDeployers: PhaseDeployers,
+    handelCodePipelineFile: HandelCodePipelineFile,
+    pipelineName: string,
+    accountConfig: AccountConfig,
+    codePipelineBucketName: string) {
+    const pipelinePhases = handelCodePipelineFile.pipelines[pipelineName].phases;
+    for (const pipelinePhase of pipelinePhases) {
+        const phaseType = pipelinePhase.type;
+        const phaseDeloyer = phaseDeployers[phaseType];
+
+        const phaseContext = getPhaseContext(handelCodePipelineFile, codePipelineBucketName, pipelineName, accountConfig, pipelinePhase, {});
+
+        if (phaseDeloyer.addWebhook) {
+            await phaseDeloyer.addWebhook(phaseContext);
+        }
+    }
 }
 
-export async function removeWebhooks(phaseDeployers: PhaseDeployers) {
-    // TODO add logic to call phase deployer removeWebhook
-    return;
+export async function removeWebhooks(phaseDeployers: PhaseDeployers,
+    handelCodePipelineFile: HandelCodePipelineFile,
+    pipelineName: string,
+    accountConfig: AccountConfig,
+    codePipelineBucketName: string) {
+    const pipelinePhases = handelCodePipelineFile.pipelines[pipelineName].phases;
+    for (const pipelinePhase of pipelinePhases) {
+        const phaseType = pipelinePhase.type;
+        const phaseDeloyer = phaseDeployers[phaseType];
+
+        const phaseContext = getPhaseContext(handelCodePipelineFile, codePipelineBucketName, pipelineName, accountConfig, pipelinePhase, {});
+
+        if (phaseDeloyer.removeWebhook) {
+            await phaseDeloyer.removeWebhook(phaseContext);
+        }
+    }
 }

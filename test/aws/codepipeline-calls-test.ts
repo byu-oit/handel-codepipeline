@@ -110,7 +110,25 @@ describe('codepipelineCalls module', () => {
                 webhook: {}
             });
 
-            const webhook = await codepipelineCalls.putWebhook('SomePipeline');
+            const webhookParam: AWS.CodePipeline.PutWebhookInput = {
+                'webhook': {
+                    'name': `pipelineprojectname-webhook`,
+                    'targetPipeline': 'pipelineprojectname',
+                    'targetAction': 'Github',
+                    'filters': [
+                        {
+                            'jsonPath': '$.ref',
+                            'matchEquals': 'refs/heads/{Branch}'
+                        }
+                    ],
+                    'authentication': 'GITHUB_HMAC',
+                    'authenticationConfiguration': {
+                        'SecretToken': 'secret'
+                    }
+                }
+            };
+
+            const webhook = await codepipelineCalls.putWebhook(webhookParam);
             expect(putWebhookStub.callCount).to.equal(1);
         });
     });

@@ -18,6 +18,7 @@ import { expect } from 'chai';
 import { AccountConfig } from 'handel/src/datatypes';
 import * as inquirer from 'inquirer';
 import * as sinon from 'sinon';
+import * as codepipelineCalls from '../../../src/aws/codepipeline-calls';
 import * as util from '../../../src/common/util';
 import { PhaseConfig, PhaseContext } from '../../../src/datatypes';
 import * as github from '../../../src/phases/github';
@@ -111,16 +112,22 @@ describe('github phase module', () => {
     });
 
     describe('addWebhook', () => {
-        it('should put webhook and register it', () => {
-            // TODO: need to add
-            return;
+        it('should put webhook and register it', async () => {
+            const putWebhookStub = sandbox.stub(codepipelineCalls, 'putWebhook');
+            const registerWebhookStub = sandbox.stub(codepipelineCalls, 'registerWebhook');
+            await github.addWebhook(phaseContext);
+            expect(putWebhookStub.callCount).to.equal(1);
+            expect(registerWebhookStub.callCount).to.equal(1);
         });
     });
 
     describe('removeWebhook', () => {
-        it('should deregister webhook and delete it', () => {
-            // TODO: need to add
-            return;
+        it('should deregister webhook and delete it', async () => {
+            const deleteWebhookStub = sandbox.stub(codepipelineCalls, 'deleteWebhook');
+            const deregisterWebhookStub = sandbox.stub(codepipelineCalls, 'deregisterWebhook');
+            await github.removeWebhook(phaseContext);
+            expect(deleteWebhookStub.callCount).to.equal(1);
+            expect(deregisterWebhookStub.callCount).to.equal(1);
         });
     });
 });

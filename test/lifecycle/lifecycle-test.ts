@@ -268,17 +268,27 @@ describe('lifecycle module', () => {
         });
     });
 
-    describe('addWebhook', () => {
-        it('should put webhook and register it', () => {
-            // TODO: need to add
-            return;
+    describe('addWebhooks', () => {
+        it('should put webhook and register it', async () => {
+            handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
+            const addWebhookStub = sandbox.stub().resolves();
+            phaseDeployers.github.addWebhook = addWebhookStub;
+            const pipelineToDeploy = 'dev';
+
+            await lifecycle.addWebhooks(phaseDeployers, handelCodePipelineFile, pipelineToDeploy, accountConfig, 'FakeBucket');
+            expect(addWebhookStub.callCount).to.equal(1);
         });
     });
 
-    describe('removeWebhook', () => {
-        it('should deregister webhook and delete it', () => {
-            // TODO: need to add
-            return;
+    describe('removeWebhooks', () => {
+        it('should deregister webhook and delete it', async () => {
+            handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
+            const removeWebhookStub = sandbox.stub().resolves();
+            phaseDeployers.github.removeWebhook = removeWebhookStub;
+            const pipelineToDeploy = 'dev';
+
+            await lifecycle.removeWebhooks(phaseDeployers, handelCodePipelineFile, pipelineToDeploy, accountConfig, 'FakeBucket');
+            expect(removeWebhookStub.callCount).to.equal(1);
         });
     });
 });

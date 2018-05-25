@@ -15,7 +15,6 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import * as crypto from 'crypto';
 import { AccountConfig } from 'handel/src/datatypes';
 import * as winston from 'winston';
 import * as iamCalls from '../aws/iam-calls';
@@ -239,24 +238,7 @@ export async function deletePipeline(appName: string, pipelineName: string): Pro
     return true;
 }
 
-export async function putWebhook(pipelineName: string): Promise<AWS.CodePipeline.PutWebhookOutput> {
-    const webhook: AWS.CodePipeline.PutWebhookInput = {
-        'webhook': {
-            'name': `${pipelineName}-webhook`,
-            'targetPipeline': pipelineName,
-            'targetAction': 'Github',
-            'filters': [
-                {
-                    'jsonPath': '$.ref',
-                    'matchEquals': 'refs/heads/{Branch}'
-                }
-            ],
-            'authentication': 'GITHUB_HMAC',
-            'authenticationConfiguration': {
-                'SecretToken': crypto.randomBytes(32).toString('hex')
-            }
-        }
-    };
+export async function putWebhook(webhook: AWS.CodePipeline.PutWebhookInput): Promise<AWS.CodePipeline.PutWebhookOutput> {
     return await awsWrapper.codePipeline.putWebhook(webhook);
 }
 

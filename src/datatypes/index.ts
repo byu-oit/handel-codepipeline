@@ -1,6 +1,7 @@
 import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes';
 import { Questions } from 'inquirer';
+import { addWebhook } from '../phases/github';
 
 export interface PhaseConfig {
     type: string;
@@ -55,6 +56,9 @@ export interface PhaseDeployer {
     getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion;
     deployPhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration>;
     deletePhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<boolean>;
+    addWebhook?(phaseContext: PhaseContext<PhaseConfig>): Promise<void>;
+    removeWebhook?(phaseContext: PhaseContext<PhaseConfig>): Promise<void>;
+
 }
 
 export interface HandelCodePipelineFile {

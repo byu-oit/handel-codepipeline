@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import * as crypto from 'crypto';
 import { AccountConfig } from 'handel/src/datatypes';
 import * as inquirer from 'inquirer';
 import { Question, Questions } from 'inquirer';
@@ -107,11 +108,27 @@ export function deletePhase(phaseContext: PhaseContext<GithubConfig>, accountCon
 }
 
 export async function addWebhook(phaseContext: PhaseContext<GithubConfig>) {
-    winston.info(`Adding Webhook for source phase`);
     const appName = phaseContext.appName;
     const pipelineName = phaseContext.pipelineName;
     const pipelineProjectName = codepipelineCalls.getPipelineProjectName(appName, pipelineName);
-    const webhook = await codepipelineCalls.putWebhook(pipelineProjectName);
+    const webhookParam: AWS.CodePipeline.PutWebhookInput = {
+        'webhook': {
+            'name': `${pipelineProjectName}-webhook`,
+            'targetPipeline': pipelineProjectName,
+            'targetAction': 'Github',
+            'filters': [
+                {
+                    'jsonPath': '$.ref',
+                    'matchEquals': 'refs/heads/{Branch}'
+                }
+            ],
+            'authentication': 'GITHUB_HMAC',
+            'authenticationConfiguration': {
+                'SecretToken': crypto.randomBytes(32).toString('hex')
+            }
+        }
+    };
+    const webhook = await codepipelineCalls.putWebhook(webhookParam);
     const webhookName = codepipelineCalls.getPipelineWebhookName(appName, pipelineName);
     const registerWebhook = await codepipelineCalls.registerWebhook(webhookName);
 }
