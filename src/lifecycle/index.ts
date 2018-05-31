@@ -210,7 +210,6 @@ export function deletePhases(phaseDeployers: PhaseDeployers,
         const phaseDeloyer = phaseDeployers[phaseType];
 
         const phaseContext = getPhaseContext(handelCodePipelineFile, codePipelineBucketName, pipelineName, accountConfig, pipelinePhase, {}); // Don't need phase secrets for delete
-
         deletePromises.push(phaseDeloyer.deletePhase(phaseContext, accountConfig));
     }
 
@@ -230,10 +229,8 @@ export async function addWebhooks(phaseDeployers: PhaseDeployers,
     for (const pipelinePhase of pipelinePhases) {
         const phaseType = pipelinePhase.type;
         const phaseDeloyer = phaseDeployers[phaseType];
-
-        const phaseContext = getPhaseContext(handelCodePipelineFile, codePipelineBucketName, pipelineName, accountConfig, pipelinePhase, {});
-
         if (phaseDeloyer.addWebhook) {
+            const phaseContext = getPhaseContext(handelCodePipelineFile, codePipelineBucketName, pipelineName, accountConfig, pipelinePhase, {});
             await phaseDeloyer.addWebhook(phaseContext);
         }
     }
@@ -248,10 +245,8 @@ export async function removeWebhooks(phaseDeployers: PhaseDeployers,
     for (const pipelinePhase of pipelinePhases) {
         const phaseType = pipelinePhase.type;
         const phaseDeloyer = phaseDeployers[phaseType];
-
-        const phaseContext = getPhaseContext(handelCodePipelineFile, codePipelineBucketName, pipelineName, accountConfig, pipelinePhase, {});
-
         if (phaseDeloyer.removeWebhook) {
+            const phaseContext = getPhaseContext(handelCodePipelineFile, codePipelineBucketName, pipelineName, accountConfig, pipelinePhase, {});
             await phaseDeloyer.removeWebhook(phaseContext);
         }
     }
