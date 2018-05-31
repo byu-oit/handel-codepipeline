@@ -210,7 +210,6 @@ export function deletePhases(phaseDeployers: PhaseDeployers,
         const phaseDeloyer = phaseDeployers[phaseType];
 
         const phaseContext = getPhaseContext(handelCodePipelineFile, codePipelineBucketName, pipelineName, accountConfig, pipelinePhase, {}); // Don't need phase secrets for delete
-
         deletePromises.push(phaseDeloyer.deletePhase(phaseContext, accountConfig));
     }
 
@@ -219,4 +218,36 @@ export function deletePhases(phaseDeployers: PhaseDeployers,
 
 export function deletePipeline(appName: string, pipelineName: string) {
     return codepipelineCalls.deletePipeline(appName, pipelineName);
+}
+
+export async function addWebhooks(phaseDeployers: PhaseDeployers,
+    handelCodePipelineFile: HandelCodePipelineFile,
+    pipelineName: string,
+    accountConfig: AccountConfig,
+    codePipelineBucketName: string) {
+    const pipelinePhases = handelCodePipelineFile.pipelines[pipelineName].phases;
+    for (const pipelinePhase of pipelinePhases) {
+        const phaseType = pipelinePhase.type;
+        const phaseDeloyer = phaseDeployers[phaseType];
+        if (phaseDeloyer.addWebhook) {
+            const phaseContext = getPhaseContext(handelCodePipelineFile, codePipelineBucketName, pipelineName, accountConfig, pipelinePhase, {});
+            await phaseDeloyer.addWebhook(phaseContext);
+        }
+    }
+}
+
+export async function removeWebhooks(phaseDeployers: PhaseDeployers,
+    handelCodePipelineFile: HandelCodePipelineFile,
+    pipelineName: string,
+    accountConfig: AccountConfig,
+    codePipelineBucketName: string) {
+    const pipelinePhases = handelCodePipelineFile.pipelines[pipelineName].phases;
+    for (const pipelinePhase of pipelinePhases) {
+        const phaseType = pipelinePhase.type;
+        const phaseDeloyer = phaseDeployers[phaseType];
+        if (phaseDeloyer.removeWebhook) {
+            const phaseContext = getPhaseContext(handelCodePipelineFile, codePipelineBucketName, pipelineName, accountConfig, pipelinePhase, {});
+            await phaseDeloyer.removeWebhook(phaseContext);
+        }
+    }
 }

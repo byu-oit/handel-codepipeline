@@ -184,6 +184,10 @@ export function getPipelineProjectName(appName: string, pipelineName: string): s
     return `${appName}-${pipelineName}`;
 }
 
+export function getPipelineWebhookName(appName: string, pipelineName: string): string {
+    return `${appName}-${pipelineName}-webhook`;
+}
+
 export function createPipeline(appName: string, pipelineName: string, accountConfig: AccountConfig, pipelinePhases: AWS.CodePipeline.StageDeclaration[], codePipelineBucketName: string): Promise<AWS.CodePipeline.PipelineDeclaration> {
     const accountId = accountConfig.account_id;
     const pipelineProjectName = exports.getPipelineProjectName(appName, pipelineName);
@@ -232,4 +236,29 @@ export async function deletePipeline(appName: string, pipelineName: string): Pro
 
     const deleteResult = await awsWrapper.codePipeline.deletePipeline(deleteParams);
     return true;
+}
+
+export async function putWebhook(webhook: AWS.CodePipeline.PutWebhookInput): Promise<AWS.CodePipeline.PutWebhookOutput> {
+    return await awsWrapper.codePipeline.putWebhook(webhook);
+}
+
+export async function deleteWebhook(webhookName: string): Promise<AWS.CodePipeline.DeleteWebhookOutput> {
+    const webhook: AWS.CodePipeline.DeleteWebhookInput = {
+        'name': webhookName
+    };
+    return await awsWrapper.codePipeline.deleteWebhook(webhook);
+}
+
+export async function registerWebhook(webhookName: string): Promise<AWS.CodePipeline.RegisterWebhookWithThirdPartyOutput> {
+    const webhook: AWS.CodePipeline.RegisterWebhookWithThirdPartyInput = {
+        'webhookName': webhookName
+    };
+    return await awsWrapper.codePipeline.registerWebhook(webhook);
+}
+
+export async function deregisterWebhook(webhookName: string): Promise<AWS.CodePipeline.DeregisterWebhookWithThirdPartyOutput> {
+    const webhook: AWS.CodePipeline.DeregisterWebhookWithThirdPartyInput = {
+        'webhookName': webhookName
+    };
+    return await awsWrapper.codePipeline.deregisterWebhook(webhook);
 }
