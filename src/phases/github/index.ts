@@ -111,26 +111,29 @@ export async function addWebhook(phaseContext: PhaseContext<GithubConfig>) {
     const appName = phaseContext.appName;
     const pipelineName = phaseContext.pipelineName;
     const pipelineProjectName = codepipelineCalls.getPipelineProjectName(appName, pipelineName);
-    const webhookParam: AWS.CodePipeline.PutWebhookInput = {
-        'webhook': {
-            'name': `${pipelineProjectName}-webhook`,
-            'targetPipeline': pipelineProjectName,
-            'targetAction': 'GitHub',
-            'filters': [
-                {
-                    'jsonPath': '$.ref',
-                    'matchEquals': 'refs/heads/{Branch}'
-                }
-            ],
-            'authentication': 'GITHUB_HMAC',
-            'authenticationConfiguration': {
-                'SecretToken': crypto.randomBytes(32).toString('hex')
-            }
-        }
-    };
-    const webhook = await codepipelineCalls.putWebhook(webhookParam);
     const webhookName = codepipelineCalls.getPipelineWebhookName(appName, pipelineName);
-    const registerWebhook = await codepipelineCalls.registerWebhook(webhookName);
+    const webhookExists = await checkWebhookExists(webhookName);
+    if (!webhookExists) {
+        const webhookParam: AWS.CodePipeline.PutWebhookInput = {
+            'webhook': {
+                'name': webhookName,
+                'targetPipeline': pipelineProjectName,
+                'targetAction': 'GitHub',
+                'filters': [
+                    {
+                        'jsonPath': '$.ref',
+                        'matchEquals': 'refs/heads/{Branch}'
+                    }
+                ],
+                'authentication': 'GITHUB_HMAC',
+                'authenticationConfiguration': {
+                    'SecretToken': crypto.randomBytes(32).toString('hex')
+                }
+            }
+        };
+        const webhook = await codepipelineCalls.putWebhook(webhookParam);
+        const registerWebhook = await codepipelineCalls.registerWebhook(webhookName);
+    }
 }
 
 export async function removeWebhook(phaseContext: PhaseContext<GithubConfig>) {
@@ -139,4 +142,17 @@ export async function removeWebhook(phaseContext: PhaseContext<GithubConfig>) {
     const webhookName = codepipelineCalls.getPipelineWebhookName(appName, pipelineName);
     const deregisterResult = await codepipelineCalls.deregisterWebhook(webhookName);
     const deleteWebhook = await codepipelineCalls.deleteWebhook(webhookName);
+}
+
+async function checkWebhookExists(webhookName: string): Promise<boolean> {
+    const webhooks = await codepipelineCalls.listWebhooks();
+    if (!webhooks.webhooks) {
+        return false;
+    }
+    for (const webhook of webhooks.webhooks) {
+        if (webhook.definition.name === webhookName) {
+            return true;
+        }
+    }
+    return false;
 }
