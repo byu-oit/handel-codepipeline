@@ -115,9 +115,31 @@ describe('github phase module', () => {
         it('should put webhook and register it', async () => {
             const putWebhookStub = sandbox.stub(codepipelineCalls, 'putWebhook');
             const registerWebhookStub = sandbox.stub(codepipelineCalls, 'registerWebhook');
+            const listWebhookStub = sandbox.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: []}));
             await github.addWebhook(phaseContext);
             expect(putWebhookStub.callCount).to.equal(1);
             expect(registerWebhookStub.callCount).to.equal(1);
+            expect(listWebhookStub.callCount).to.equal(1);
+        });
+
+        it('should skip if webhook exists', async () => {
+            const putWebhookStub = sandbox.stub(codepipelineCalls, 'putWebhook');
+            const registerWebhookStub = sandbox.stub(codepipelineCalls, 'registerWebhook');
+            const listWebhookStub = sandbox.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: [{definition: {name: 'myapp-dev-webhook'}}] }));
+            await github.addWebhook(phaseContext);
+            expect(putWebhookStub.callCount).to.equal(0);
+            expect(registerWebhookStub.callCount).to.equal(0);
+            expect(listWebhookStub.callCount).to.equal(1);
+        });
+
+        it('should put if webhook doenst match', async () => {
+            const putWebhookStub = sandbox.stub(codepipelineCalls, 'putWebhook');
+            const registerWebhookStub = sandbox.stub(codepipelineCalls, 'registerWebhook');
+            const listWebhookStub = sandbox.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: [{ definition: { name: 'myapp-prd-webhook' } }] }));
+            await github.addWebhook(phaseContext);
+            expect(putWebhookStub.callCount).to.equal(1);
+            expect(registerWebhookStub.callCount).to.equal(1);
+            expect(listWebhookStub.callCount).to.equal(1);
         });
     });
 

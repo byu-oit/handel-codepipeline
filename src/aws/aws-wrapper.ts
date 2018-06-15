@@ -157,6 +157,10 @@ const awsWrapper = {
         deregisterWebhook: (params: AWS.CodePipeline.DeregisterWebhookWithThirdPartyInput): Promise<AWS.CodePipeline.DeregisterWebhookWithThirdPartyOutput> => {
             const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
             return codePipeline.deregisterWebhookWithThirdParty(params).promise();
+        },
+        listWebhooks: (): Promise<AWS.CodePipeline.ListWebhooksOutput> => {
+            const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
+            return codePipeline.listWebhooks().promise();
         }
     },
     ssm: {

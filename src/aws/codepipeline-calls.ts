@@ -262,3 +262,7 @@ export async function deregisterWebhook(webhookName: string): Promise<AWS.CodePi
     };
     return await awsWrapper.codePipeline.deregisterWebhook(webhook);
 }
+
+export async function listWebhooks(): Promise<AWS.CodePipeline.ListWebhooksOutput> {
+    return await awsWrapper.codePipeline.listWebhooks();
+}
