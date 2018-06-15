@@ -163,4 +163,15 @@ describe('codepipelineCalls module', () => {
             expect(deregisterWebhookStub.callCount).to.equal(1);
         });
     });
+
+        describe('listWebhooks', () => {
+            it('should list the webhooks', async () => {
+                const listWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
+                    webhooks: []
+                });
+
+                const webhooks = await codepipelineCalls.listWebhooks();
+                expect(listWebhookStub.callCount).to.equal(1);
+            });
+    });
 });

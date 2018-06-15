@@ -264,5 +264,5 @@ export async function deregisterWebhook(webhookName: string): Promise<AWS.CodePi
 }
 
 export async function listWebhooks(): Promise<AWS.CodePipeline.ListWebhooksOutput> {
-    return await awsWrapper.codePipeline.listWebhook();
+    return await awsWrapper.codePipeline.listWebhooks();
 }

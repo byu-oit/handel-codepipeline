@@ -158,7 +158,7 @@ const awsWrapper = {
             const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
             return codePipeline.deregisterWebhookWithThirdParty(params).promise();
         },
-        listWebhook: (): Promise<AWS.CodePipeline.ListWebhooksOutput> => {
+        listWebhooks: (): Promise<AWS.CodePipeline.ListWebhooksOutput> => {
             const codePipeline = new AWS.CodePipeline({ apiVersion: '2015-07-09' });
             return codePipeline.listWebhooks().promise();
         }
