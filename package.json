@@ -48,7 +48,7 @@
     "fs-extra": "^4.0.2",
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.2.3",
-    "mocha": "^3.2.0",
+    "mocha": "^5.2.0",
     "nyc": "^11.3.0",
     "run-sequence": "^2.2.0",
     "sinon": "^2.4.1",
