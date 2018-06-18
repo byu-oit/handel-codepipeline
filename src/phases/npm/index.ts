@@ -58,7 +58,8 @@ async function createNpmPhaseServiceRole(accountConfig: AccountConfig, appName: 
         appName: appName
     };
     const compiledPolicyDoc = await util.compileHandlebarsTemplate(`${__dirname}/npm-phase-service-policy.json`, policyDocParams);
-    return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, compiledPolicyDoc);
+    const policyDocObj = JSON.parse(compiledPolicyDoc);
+    return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, policyDocObj);
 }
 
 async function deleteNpmPhaseServiceRole(accountId: string, appName: string): Promise<boolean> {
