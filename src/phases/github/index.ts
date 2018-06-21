@@ -110,6 +110,7 @@ export function deletePhase(phaseContext: PhaseContext<GithubConfig>, accountCon
 export async function addWebhook(phaseContext: PhaseContext<GithubConfig>) {
     const appName = phaseContext.appName;
     const pipelineName = phaseContext.pipelineName;
+    const phaseName = phaseContext.phaseName;
     const pipelineProjectName = codepipelineCalls.getPipelineProjectName(appName, pipelineName);
     const webhookName = codepipelineCalls.getPipelineWebhookName(appName, pipelineName);
     const webhookExists = await checkWebhookExists(webhookName);
@@ -118,7 +119,7 @@ export async function addWebhook(phaseContext: PhaseContext<GithubConfig>) {
             'webhook': {
                 'name': webhookName,
                 'targetPipeline': pipelineProjectName,
-                'targetAction': 'GitHub',
+                'targetAction': phaseName,
                 'filters': [
                     {
                         'jsonPath': '$.ref',
