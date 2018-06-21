@@ -144,12 +144,23 @@ describe('github phase module', () => {
     });
 
     describe('removeWebhook', () => {
-        it('should deregister webhook and delete it', async () => {
+        it('if webhook exists, should deregister webhook and delete it', async () => {
+            const webhookExistsStub = sandbox.stub(codepipelineCalls, 'webhookExists').returns(Promise.resolve(true));
             const deleteWebhookStub = sandbox.stub(codepipelineCalls, 'deleteWebhook');
             const deregisterWebhookStub = sandbox.stub(codepipelineCalls, 'deregisterWebhook');
             await github.removeWebhook(phaseContext);
+            expect(webhookExistsStub.callCount).to.equal(1);
             expect(deleteWebhookStub.callCount).to.equal(1);
             expect(deregisterWebhookStub.callCount).to.equal(1);
+        });
+        it('if webhook doesn\'t exist, should not try to deregister or delete webhook', async () => {
+            const webhookExistsStub = sandbox.stub(codepipelineCalls, 'webhookExists').returns(Promise.resolve(false));
+            const deleteWebhookStub = sandbox.stub(codepipelineCalls, 'deleteWebhook');
+            const deregisterWebhookStub = sandbox.stub(codepipelineCalls, 'deregisterWebhook');
+            await github.removeWebhook(phaseContext);
+            expect(webhookExistsStub.callCount).to.equal(1);
+            expect(deleteWebhookStub.callCount).to.equal(0);
+            expect(deregisterWebhookStub.callCount).to.equal(0);
         });
     });
 });

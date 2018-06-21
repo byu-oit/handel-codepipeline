@@ -141,8 +141,11 @@ export async function removeWebhook(phaseContext: PhaseContext<GithubConfig>) {
     const appName = phaseContext.appName;
     const pipelineName = phaseContext.pipelineName;
     const webhookName = codepipelineCalls.getPipelineWebhookName(appName, pipelineName);
-    const deregisterResult = await codepipelineCalls.deregisterWebhook(webhookName);
-    const deleteWebhook = await codepipelineCalls.deleteWebhook(webhookName);
+    const webhookExists = await codepipelineCalls.webhookExists(webhookName);
+    if(webhookExists) {
+        const deregisterResult = await codepipelineCalls.deregisterWebhook(webhookName);
+        const deleteWebhook = await codepipelineCalls.deleteWebhook(webhookName);
+    }
 }
 
 async function checkWebhookExists(webhookName: string): Promise<boolean> {
