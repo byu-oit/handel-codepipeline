@@ -92,7 +92,8 @@ async function createPypiPhaseServiceRole(accountConfig: AccountConfig, appName:
         appName: appName
     };
     const compiledPolicyDoc = await util.compileHandlebarsTemplate(`${__dirname}/pypi-phase-service-policy.json`, policyDocParams);
-    return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, compiledPolicyDoc);
+    const policyDocObj = JSON.parse(compiledPolicyDoc);
+    return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, policyDocObj);
 }
 
 async function deletePypiPhaseServiceRole(accountId: string, appName: string): Promise<boolean> {
@@ -115,7 +116,7 @@ async function createPypiPhaseCodeBuildProject(phaseContext: PhaseContext<PypiCo
     if(!pypiPhaseRole) {
         throw new Error(`Could not create PyPi phase role`);
     }
-    const pypiDeployImage = phaseContext.params.build_image || 'aws/codebuild/python:3.5.2';
+    const pypiDeployImage = phaseContext.params.build_image || 'aws/codebuild/python:3.6.5';
     const pypiDeployBuildSpec = await util.compileHandlebarsTemplate(`${__dirname}/pypi-buildspec.yml`, buildspecParams);
     const buildProject = await codeBuildCalls.getProject(pypiProjectName);
     if (!buildProject) {

@@ -118,7 +118,7 @@ export async function addWebhook(phaseContext: PhaseContext<GithubConfig>) {
             'webhook': {
                 'name': webhookName,
                 'targetPipeline': pipelineProjectName,
-                'targetAction': 'GitHub',
+                'targetAction': phaseContext.phaseName,
                 'filters': [
                     {
                         'jsonPath': '$.ref',
