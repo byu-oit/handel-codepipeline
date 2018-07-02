@@ -164,14 +164,41 @@ describe('codepipelineCalls module', () => {
         });
     });
 
-        describe('listWebhooks', () => {
-            it('should list the webhooks', async () => {
-                const listWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
-                    webhooks: []
-                });
-
-                const webhooks = await codepipelineCalls.listWebhooks();
-                expect(listWebhookStub.callCount).to.equal(1);
+    describe('listWebhooks', () => {
+        it('should list the webhooks', async () => {
+            const listWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
+                webhooks: []
             });
+
+            const webhooks = await codepipelineCalls.listWebhooks();
+            expect(listWebhookStub.callCount).to.equal(1);
+        });
+    });
+
+    describe('webhookExists', () => {
+        it('should return true if webhook exists', async () => {
+            const listWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
+                webhooks: [
+                    {
+                        definition: {
+                            name: 'name-of-webhook'
+                        }
+                    }
+                ]
+            });
+
+            const webhookExists = await codepipelineCalls.webhookExists('name-of-webhook');
+            expect(listWebhookStub.callCount).to.equal(1);
+            expect(webhookExists).to.equal(true);
+        });
+        it('should return false if webhook doesn\'t exist', async () => {
+            const listWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
+                webhooks: []
+            });
+
+            const webhookExists = await codepipelineCalls.webhookExists('name-of-webhook');
+            expect(listWebhookStub.callCount).to.equal(1);
+            expect(webhookExists).to.equal(false);
+        });
     });
 });

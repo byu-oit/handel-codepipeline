@@ -110,6 +110,7 @@ export function deletePhase(phaseContext: PhaseContext<GithubConfig>, accountCon
 export async function addWebhook(phaseContext: PhaseContext<GithubConfig>) {
     const appName = phaseContext.appName;
     const pipelineName = phaseContext.pipelineName;
+    const phaseName = phaseContext.phaseName;
     const pipelineProjectName = codepipelineCalls.getPipelineProjectName(appName, pipelineName);
     const webhookName = codepipelineCalls.getPipelineWebhookName(appName, pipelineName);
     const webhookExists = await checkWebhookExists(webhookName);
@@ -118,7 +119,7 @@ export async function addWebhook(phaseContext: PhaseContext<GithubConfig>) {
             'webhook': {
                 'name': webhookName,
                 'targetPipeline': pipelineProjectName,
-                'targetAction': phaseContext.phaseName,
+                'targetAction': phaseName,
                 'filters': [
                     {
                         'jsonPath': '$.ref',
@@ -140,8 +141,11 @@ export async function removeWebhook(phaseContext: PhaseContext<GithubConfig>) {
     const appName = phaseContext.appName;
     const pipelineName = phaseContext.pipelineName;
     const webhookName = codepipelineCalls.getPipelineWebhookName(appName, pipelineName);
-    const deregisterResult = await codepipelineCalls.deregisterWebhook(webhookName);
-    const deleteWebhook = await codepipelineCalls.deleteWebhook(webhookName);
+    const webhookExists = await codepipelineCalls.webhookExists(webhookName);
+    if(webhookExists) {
+        const deregisterResult = await codepipelineCalls.deregisterWebhook(webhookName);
+        const deleteWebhook = await codepipelineCalls.deleteWebhook(webhookName);
+    }
 }
 
 async function checkWebhookExists(webhookName: string): Promise<boolean> {
