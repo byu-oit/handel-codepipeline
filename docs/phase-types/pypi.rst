@@ -31,7 +31,7 @@ Parameters
    * - build_image
      - string
      - No
-     - aws/codebuild/python:3.5.2
+     - aws/codebuild/python:3.6.5
      - The code build image needed to deploy project to pypi. See here for more info `AWS Codebuild Docs <http://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref.html>`_
 
 Secrets
