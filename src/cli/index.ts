@@ -126,6 +126,7 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
     } catch(err) {
         winston.error(`Error setting up Handel CodePipeline: ${err.message}`);
         winston.error(err);
+        process.exit(1);
     }
 }
 
@@ -163,6 +164,7 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
     catch (err) {
         winston.error(`Error deleting Handel CodePipeline: ${err}`);
         winston.error(err);
+        process.exit(1);
     }
 }
 
