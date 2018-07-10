@@ -66,13 +66,11 @@
         {
             "Effect": "Allow",
             "Action": [
-                "ecr:DescribeRepositories"
-            ],
-            "Resource" : "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
+                "ecr:DescribeRepositories",
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
                 "ecr:CreateRepository"
             ],
             "Resource" : "*"
