@@ -15,7 +15,7 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes';
+import { AccountConfig } from 'handel-extension-api/dist/extension-api';
 import * as inquirer from 'inquirer';
 import * as winston from 'winston';
 import * as cloudformationCalls from '../../aws/cloudformation-calls';

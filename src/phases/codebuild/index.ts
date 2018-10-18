@@ -15,14 +15,20 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes';
+import { AccountConfig } from 'handel-extension-api/dist/extension-api';
 import * as winston from 'winston';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
 import {CacheSpecification, CacheType} from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as handel from '../../common/handel';
 import * as util from '../../common/util';
-import { EnvironmentVariables, PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';
+import {
+    EnvironmentVariables,
+    PhaseConfig,
+    PhaseContext,
+    PhaseSecretQuestion,
+    PhaseSecrets
+} from '../../datatypes/index';
 
 export interface CodeBuildConfig extends PhaseConfig {
     build_image: string;
@@ -47,7 +53,7 @@ function getBuildPhaseRoleName(appName: string): string {
     return `${appName}-HandelCodePipelineBuildPhase`;
 }
 
-function getBuildPhasePolicyArn(accountId: string, appName: string): string {
+function getBuildPhasePolicyArn(accountId: string|number, appName: string): string {
     return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${getBuildPhaseRoleName(appName)}`;
 }
 
@@ -65,7 +71,7 @@ async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName
     return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, policyDocObj);
 }
 
-async function deleteBuildPhaseServiceRole(accountId: string, appName: string) {
+async function deleteBuildPhaseServiceRole(accountId: string|number, appName: string) {
     const roleName = getBuildPhaseRoleName(appName);
     const policyArn = getBuildPhasePolicyArn(accountId, appName);
     await iamCalls.detachPolicyFromRole(roleName, policyArn);
@@ -223,7 +229,7 @@ export async function deletePhase(phaseContext: PhaseContext<CodeBuildConfig>, a
     winston.info(`Deleting CodeBuild project '${codeBuildProjectName}'`);
 
     if (phaseContext.params && phaseContext.params.extra_resources) {
-        await handel.delete(phaseContext.params.extra_resources, phaseContext, accountConfig);
+        await handel.deleteDeployedEnvironment(phaseContext.params.extra_resources, phaseContext, accountConfig);
     }
     await codeBuildCalls.deleteProject(codeBuildProjectName);
     await deleteBuildPhaseServiceRole(accountConfig.account_id, phaseContext.appName);

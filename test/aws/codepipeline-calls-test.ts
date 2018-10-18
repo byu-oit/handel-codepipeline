@@ -16,7 +16,7 @@
  */
 import * as AWS from 'aws-sdk';
 import { expect } from 'chai';
-import { AccountConfig } from 'handel/src/datatypes';
+import { AccountConfig } from 'handel-extension-api/dist/extension-api';
 import * as sinon from 'sinon';
 import awsWrapper from '../../src/aws/aws-wrapper';
 import * as codepipelineCalls from '../../src/aws/codepipeline-calls';

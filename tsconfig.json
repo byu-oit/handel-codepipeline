@@ -15,6 +15,6 @@
     },
     "compileOnSave": false,
     "include": [
-        "src/**/*"
+        "src/**/*", "gulpfile.ts", "gulpfile.js"
     ]
 }
