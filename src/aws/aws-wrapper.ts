@@ -34,7 +34,7 @@ const awsWrapper = {
             const cloudformation = new AWS.CloudFormation({ apiVersion: '2010-05-15' });
             return cloudformation.waitFor(stackState, params).promise();
         },
-        createStack: (params: AWS.CloudFormation.CreateStackInput): Promise<AWS.CloudFormation.DescribeStacksOutput> => {
+        createStack: (params: AWS.CloudFormation.CreateStackInput): Promise<AWS.CloudFormation.CreateStackOutput> => {
             const cloudformation = new AWS.CloudFormation({ apiVersion: '2010-05-15' });
             return cloudformation.createStack(params).promise();
         },
