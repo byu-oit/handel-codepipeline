@@ -15,7 +15,6 @@
  *
  */
 import * as chai from 'chai';
-import deepEqual = require('deep-equal');
 import {AccountConfig} from 'handel/src/datatypes';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
@@ -287,15 +286,3 @@ describe('codebuild phase module', () => {
         });
     });
 });
-
-function policyHasStatements(policy: any, statements: any) {
-    for (const statement of statements) {
-        const result = policy.Statement.some((actual: any) => {
-            return deepEqual(actual, statement);
-        });
-        if (!result) {
-            return false;
-        }
-    }
-    return true;
-}
