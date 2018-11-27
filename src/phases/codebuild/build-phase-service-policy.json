@@ -71,7 +71,8 @@
                 "ecr:BatchCheckLayerAvailability",
                 "ecr:GetDownloadUrlForLayer",
                 "ecr:BatchGetImage",
-                "ecr:CreateRepository"
+                "ecr:CreateRepository",
+                "ecr:PutLifecyclePolicy"
             ],
             "Resource" : "*"
         }
