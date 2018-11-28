@@ -139,7 +139,7 @@ export function getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestio
 }
 
 export async function deployPhase(phaseContext: PhaseContext<HandelDeleteConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration> {
-    const codeBuildProject = await createDeletePhaseCodeBuildProject(phaseContext, accountConfig);
+    await createDeletePhaseCodeBuildProject(phaseContext, accountConfig);
     return getCodePipelinePhaseSpec(phaseContext);
 }
 

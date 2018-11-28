@@ -15,8 +15,9 @@
  *
  */
 import * as AWS from 'aws-sdk';
+import { stripIndent } from 'common-tags';
 import { AccountConfig } from 'handel/src/datatypes';
-import { Question } from 'inquirer';
+import * as inquirer from 'inquirer';
 import * as yaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
 import * as winston from 'winston';
@@ -47,6 +48,39 @@ function validatePipelineSpec(handelCodePipelineFile: HandelCodePipelineFile) {
         winston.error(validateErrors.join('\n'));
         process.exit(1);
     }
+}
+
+async function confirmDelete(envName: string): Promise<boolean> {
+    const warnMsg = stripIndent`
+            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            WARNING: YOU ARE ABOUT TO DELETE YOUR HANDEL-CODEPIPELINE '${envName}'!
+            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+            If you choose to delete this pipeline, you will lose all data stored in the pipeline!
+
+            In particular, you will lose all data in the following:
+
+            ****The following may need to change to match what is deleted when you delete a pipeline instead of a handel environment****
+            * Anything you deployed in handel, including:
+              * Databases
+              * Caches
+              * S3 Buckets
+              * EFS Mounts
+            * All phases for your pipeline
+
+            PLEASE REVIEW this pipeline thoroughly, as you are responsible for all data loss associated with an accidental deletion.
+            PLEASE BACKUP your data sources before deleting this pipeline just to be safe.
+            `;
+    // tslint:disable-next-line:no-console
+    console.log(warnMsg);
+
+    const questions = [{
+        type: 'input',
+        name: 'confirmDelete',
+        message: `Enter 'yes' to delete your pipeline. Handel-Codepipeline will refuse to delete the pipeline with any other answer:`
+    }];
+    const answers = await inquirer.prompt(questions);
+    return answers.confirmDelete === 'yes';
 }
 
 function checkPhases(handelCodePipelineFile: HandelCodePipelineFile, phaseDeployers: PhaseDeployers) {
@@ -95,7 +129,7 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
     const nonInteractive = (argv.pipeline && argv.account_name && argv.secrets);
 
     try {
-        if(!nonInteractive) {
+        if (!nonInteractive) {
             winston.info('Welcome to the Handel CodePipeline setup wizard');
         }
         const pipelineConfig = await input.getPipelineConfigForDeploy(argv);
@@ -113,7 +147,7 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
         const codePipelineBucketName = getCodePipelineBucketName(accountConfig);
         const bucket = await s3Calls.createBucketIfNotExists(codePipelineBucketName, accountConfig.region);
         let phasesSecrets;
-        if(nonInteractive) {
+        if (nonInteractive) {
             phasesSecrets = lifecycle.getSecretsFromArgv(handelCodePipelineFile, argv);
         } else {
             phasesSecrets = await lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineName);
@@ -123,7 +157,7 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
         const webhook = await lifecycle.addWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
         winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
 
-    } catch(err) {
+    } catch (err) {
         winston.error(`Error setting up Handel CodePipeline: ${err.message}`);
         winston.error(err);
         process.exit(1);
@@ -140,7 +174,7 @@ export function checkAction(handelCodePipelineFile: HandelCodePipelineFile, argv
 
 export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
     configureLogger(argv);
-    if(!(argv.pipeline && argv.account_name)) {
+    if (!(argv.pipeline && argv.account_name)) {
         winston.info('Welcome to the Handel CodePipeline deletion wizard');
     }
 
@@ -157,9 +191,14 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
     const appName = handelCodePipelineFile.name;
 
     try {
-        const deleteWebhook = await lifecycle.removeWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
-        const deleteResult = await lifecycle.deletePipeline(appName, pipelineName);
-        return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
+        const deletePipelineConfirmed = await confirmDelete(pipelineName);
+        if (deletePipelineConfirmed) {
+            await lifecycle.removeWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
+            await lifecycle.deletePipeline(appName, pipelineName);
+            return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
+        } else {
+            winston.info('You did not type \'yes\' to confirm deletion. Will not delete the pipeline.');
+        }
     }
     catch (err) {
         winston.error(`Error deleting Handel CodePipeline: ${err}`);
@@ -169,7 +208,7 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
 }
 
 export async function listSecretsAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
-    if(!argv.pipeline) {
+    if (!argv.pipeline) {
         winston.error('The --pipeline argument is required');
         process.exit(1);
     }
@@ -179,7 +218,7 @@ export async function listSecretsAction(handelCodePipelineFile: HandelCodePipeli
     const phaseDeployers = util.getPhaseDeployers();
     const phaseDeployerSecretsQuestions: PhaseSecretQuestion[] = [];
     const pipelineConfig = handelCodePipelineFile.pipelines[argv.pipeline];
-    for(const phaseConfig of pipelineConfig.phases) {
+    for (const phaseConfig of pipelineConfig.phases) {
         const phaseDeployer = phaseDeployers[phaseConfig.type];
         const questions = phaseDeployer.getSecretQuestions(phaseConfig);
         questions.forEach((question: PhaseSecretQuestion) => {
