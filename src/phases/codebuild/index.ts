@@ -77,12 +77,7 @@ async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName
 async function deleteBuildPhaseServiceRole(accountConfig: AccountConfig, appName: string) {
     let roleName;
     let policyArn;
-    // This try/catch blocks is here to test for names of an old naming convention we used until we changed to the first try/catch of the code.
-    // In the future, once all of the roles from the old naming convention are not used anymore, we can remove the second try/catch of the code.
-    const getParams = {
-        RoleName: `${appName}-${accountConfig.region}-HandelCodePipelineBuildPhase`
-    };
-    await awsWrapper.iam.getRole(getParams);
+    // In the future, once all of the roles from the old naming convention are not used anymore, we can remove the second role removal code of the code.
     roleName = getBuildPhaseRoleName(appName, accountConfig.region);
     policyArn = getBuildPhasePolicyArn(accountConfig, appName);
     await iamCalls.detachPolicyFromRole(roleName, policyArn);
