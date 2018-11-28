@@ -157,8 +157,8 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
     const appName = handelCodePipelineFile.name;
 
     try {
-        const deleteWebhook = await lifecycle.removeWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
-        const deleteResult = await lifecycle.deletePipeline(appName, pipelineName);
+        await lifecycle.removeWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
+        await lifecycle.deletePipeline(appName, pipelineName);
         return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
     }
     catch (err) {
