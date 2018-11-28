@@ -17,6 +17,7 @@
 import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes';
 import { ParsedArgs } from 'minimist';
+import * as winston from 'winston';
 import * as codepipelineCalls from '../aws/codepipeline-calls';
 import { HandelCodePipelineFile, PhaseConfig, PhaseContext, PhaseDeployer, PhaseDeployers, PhaseSecrets } from '../datatypes';
 
@@ -213,6 +214,8 @@ export function deletePhases(phaseDeployers: PhaseDeployers,
         deletePromises.push(phaseDeloyer.deletePhase(phaseContext, accountConfig));
     }
 
+    winston.info(`Your pipeline was successfully deleted.`);
+    winston.info(`Your resources WERE NOT DELETED. If you want to delete these, you can do so through handel, cloudformation, etc.`);
     return Promise.all(deletePromises);
 }
 
