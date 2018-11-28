@@ -215,7 +215,7 @@ export function deletePhases(phaseDeployers: PhaseDeployers,
     }
 
     winston.info(`Your pipeline was successfully deleted.`);
-    winston.info(`Your resources WERE NOT DELETED. If you want to delete these, you can do so through handel, cloudformation, etc.`);
+    winston.info(`Any resources deployed by your pipeline WERE NOT DELETED. If you want to delete these, you can do so through Handel, CloudFormation, etc.`);
     return Promise.all(deletePromises);
 }
 
