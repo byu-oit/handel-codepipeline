@@ -17,8 +17,9 @@
 import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes';
 import * as winston from 'winston';
+import awsWrapper from '../../aws/aws-wrapper';
 import * as codeBuildCalls from '../../aws/codebuild-calls';
-import {CacheSpecification, CacheType} from '../../aws/codebuild-calls';
+import { CacheSpecification, CacheType } from '../../aws/codebuild-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as handel from '../../common/handel';
 import * as util from '../../common/util';
@@ -43,17 +44,25 @@ function getBuildProjectName(phaseContext: PhaseContext<CodeBuildConfig>): strin
     return `${phaseContext.appName}-${phaseContext.pipelineName}-${phaseContext.phaseName}`;
 }
 
-function getBuildPhaseRoleName(appName: string): string {
+function getBuildPhaseRoleName(appName: string, region: string): string {
+    return `${appName}-${region}-HandelCodePipelineBuildPhase`;
+}
+
+function getOldBuildPhaseRoleName(appName: string): string {
     return `${appName}-HandelCodePipelineBuildPhase`;
 }
 
-function getBuildPhasePolicyArn(accountId: string, appName: string): string {
-    return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${getBuildPhaseRoleName(appName)}`;
+function getBuildPhasePolicyArn(accountConfig: AccountConfig, appName: string): string {
+    return `arn:aws:iam::${accountConfig.account_id}:policy/handel-codepipeline/${getBuildPhaseRoleName(appName, accountConfig.region)}`;
+}
+
+function getOldBuildPhasePolicyArn(accountId: string, appName: string): string {
+    return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${getOldBuildPhaseRoleName(appName)}`;
 }
 
 async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName: string, extraPolicies: any): Promise<AWS.IAM.Role | null> {
-    const roleName = getBuildPhaseRoleName(appName);
-    const policyArn = getBuildPhasePolicyArn(accountConfig.account_id, appName);
+    const roleName = getBuildPhaseRoleName(appName, accountConfig.region);
+    const policyArn = getBuildPhasePolicyArn(accountConfig, appName);
     const policyDocParams = {
         region: accountConfig.region,
         accountId: accountConfig.account_id,
@@ -65,9 +74,17 @@ async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName
     return iamCalls.createOrUpdateRoleAndPolicy(roleName, ['codebuild.amazonaws.com'], policyArn, policyDocObj);
 }
 
-async function deleteBuildPhaseServiceRole(accountId: string, appName: string) {
-    const roleName = getBuildPhaseRoleName(appName);
-    const policyArn = getBuildPhasePolicyArn(accountId, appName);
+async function deleteBuildPhaseServiceRole(accountConfig: AccountConfig, appName: string) {
+    let roleName;
+    let policyArn;
+    // In the future, once all of the roles from the old naming convention are not used anymore, we can remove the second role removal code of the code.
+    roleName = getBuildPhaseRoleName(appName, accountConfig.region);
+    policyArn = getBuildPhasePolicyArn(accountConfig, appName);
+    await iamCalls.detachPolicyFromRole(roleName, policyArn);
+    await iamCalls.deletePolicy(policyArn);
+    await iamCalls.deleteRole(roleName);
+    roleName = getOldBuildPhaseRoleName(appName);
+    policyArn = getOldBuildPhasePolicyArn(accountConfig.account_id, appName);
     await iamCalls.detachPolicyFromRole(roleName, policyArn);
     await iamCalls.deletePolicy(policyArn);
     await iamCalls.deleteRole(roleName);
@@ -75,7 +92,7 @@ async function deleteBuildPhaseServiceRole(accountId: string, appName: string) {
 }
 
 async function createBuildPhaseCodeBuildProject(phaseContext: PhaseContext<CodeBuildConfig>, extras: any): Promise<AWS.CodeBuild.Project> {
-    const {appName, pipelineName, phaseName} = phaseContext;
+    const { appName, pipelineName, phaseName } = phaseContext;
     const buildProjectName = getBuildProjectName(phaseContext);
     let buildImage = phaseContext.params.build_image;
 
@@ -99,7 +116,7 @@ async function createBuildPhaseCodeBuildProject(phaseContext: PhaseContext<CodeB
         buildPhaseRole = await createBuildPhaseServiceRole(phaseContext.accountConfig, appName, extras.policies);
     }
 
-    if(!buildPhaseRole) {
+    if (!buildPhaseRole) {
         throw new Error(`Couldn't create build phase service role`);
     }
 
@@ -137,7 +154,7 @@ async function createBuildPhaseCodeBuildProject(phaseContext: PhaseContext<CodeB
 }
 
 function getCacheLocation(phaseContext: PhaseContext<CodeBuildConfig>): string {
-    const {codePipelineBucketName: bucket, appName, pipelineName, phaseName} = phaseContext;
+    const { codePipelineBucketName: bucket, appName, pipelineName, phaseName } = phaseContext;
     return `${bucket}/caches/${appName}/${pipelineName}/${phaseName}/codeBuildCache`;
 }
 
@@ -226,7 +243,7 @@ export async function deletePhase(phaseContext: PhaseContext<CodeBuildConfig>, a
         await handel.delete(phaseContext.params.extra_resources, phaseContext, accountConfig);
     }
     await codeBuildCalls.deleteProject(codeBuildProjectName);
-    await deleteBuildPhaseServiceRole(accountConfig.account_id, phaseContext.appName);
+    await deleteBuildPhaseServiceRole(accountConfig, phaseContext.appName);
     return true;
 }
 
