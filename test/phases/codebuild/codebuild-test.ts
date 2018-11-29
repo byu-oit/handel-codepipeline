@@ -93,7 +93,7 @@ describe('codebuild phase module', () => {
             const getProjectStub = sandbox.stub(codebuildCalls, 'getProject').resolves(null);
             const createProjectStub = sandbox.stub(codebuildCalls, 'createProject').resolves({});
 
-            const phase = await codebuild.deployPhase(phaseContext, accountConfig);
+            await codebuild.deployPhase(phaseContext, accountConfig);
             expect(createOrUpdateRoleStub.callCount).to.equal(1);
             expect(getProjectStub.callCount).to.equal(1);
             expect(createProjectStub.callCount).to.equal(1);
@@ -104,7 +104,7 @@ describe('codebuild phase module', () => {
             const getProjectStub = sandbox.stub(codebuildCalls, 'getProject').resolves({});
             const updateProjectStub = sandbox.stub(codebuildCalls, 'updateProject').resolves({});
 
-            const phase = await codebuild.deployPhase(phaseContext, accountConfig);
+            await codebuild.deployPhase(phaseContext, accountConfig);
             expect(createOrUpdateRoleStub.callCount).to.equal(1);
             expect(getProjectStub.callCount).to.equal(1);
             expect(updateProjectStub.callCount).to.equal(1);
@@ -120,9 +120,9 @@ describe('codebuild phase module', () => {
 
             const result = await codebuild.deletePhase(phaseContext, accountConfig);
             expect(result).to.equal(true);
-            expect(deleteRoleStub.callCount).to.equal(1);
-            expect(deletePolicyStub.callCount).to.equal(1);
-            expect(detachPolicyStub.callCount).to.equal(1);
+            expect(deleteRoleStub.callCount).to.equal(2);
+            expect(deletePolicyStub.callCount).to.equal(2);
+            expect(detachPolicyStub.callCount).to.equal(2);
             expect(deleteProjectStub.callCount).to.equal(1);
         });
     });
@@ -278,9 +278,9 @@ describe('codebuild phase module', () => {
                 const result = await codebuild.deletePhase(phaseContext, accountConfig);
                 expect(result).to.equal(true);
                 expect(deleteProjectStub.callCount).to.equal(1);
-                expect(deleteRoleStub.callCount).to.equal(1);
-                expect(deletePolicyStub.callCount).to.equal(1);
-                expect(detachPolicyStub.callCount).to.equal(1);
+                expect(deleteRoleStub.callCount).to.equal(2);
+                expect(deletePolicyStub.callCount).to.equal(2);
+                expect(detachPolicyStub.callCount).to.equal(2);
                 expect(handelStub.delete.callCount).to.equal(1);
             });
         });
