@@ -87,7 +87,43 @@ async function validateCredentials(accountConfig: AccountConfig) {
     }
 }
 
+async function validateLoggedIn(): Promise<void> {
+    winston.debug('Checking that the user is logged in');
+    const accountId = await getAccountId();
+    if (!accountId) {
+        winston.error(`You are not logged into an AWS account`);
+        process.exit(1);
+    }
+}
+
+async function getAccountId(): Promise<string|null> {
+    try {
+        const getResponse = await getCallerIdentity({});
+        return getResponse.Account!;
+    }
+    catch (err) {
+        if (err.code === 'CredentialsError') {
+            return null;
+        }
+        else {
+            throw err;
+        }
+    }
+}
+
+function getCallerIdentity(params: AWS.STS.GetCallerIdentityRequest) {
+    const sts = new AWS.STS({
+        apiVersion: '2011-06-15',
+        maxRetries: 1,
+        retryDelayOptions: {
+            base: 50
+        }
+    });
+    return sts.getCallerIdentity(params).promise();
+}
+
 export async function deployAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
+    await validateLoggedIn();
     configureLogger(argv);
     const phaseDeployers = util.getPhaseDeployers();
     validatePipelineSpec(handelCodePipelineFile);
