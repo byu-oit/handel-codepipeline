@@ -64,6 +64,20 @@ function cacheConfigParam(paramName: string, paramValue: string) {
     }
 }
 
+function clearCacheConfigParam(paramName: string, paramValue: string) {
+    // This is the base code to make the cache, modify it to empty the cache if needed
+    if(fs.existsSync(HANDEL_CODEPIPELINE_CONFIG)) {
+        const handelCodePipelineConfig = util.loadYamlFile(HANDEL_CODEPIPELINE_CONFIG) as ConfigParamCache;
+        handelCodePipelineConfig[paramName] = paramValue;
+        util.saveYamlFile(HANDEL_CODEPIPELINE_CONFIG, handelCodePipelineConfig);
+    }
+    else {
+        const handelCodePipelineConfig: ConfigParamCache = {};
+        handelCodePipelineConfig[paramName] = paramValue;
+        util.saveYamlFile(HANDEL_CODEPIPELINE_CONFIG, handelCodePipelineConfig);
+    }
+}
+
 function askAccountConfigsQuestionIfNeeded(configs: PhaseSecrets, questions: inquirer.Question[]) {
     const accountConfigsPath = getConfigParam('account_configs_path');
     if(accountConfigsPath) {
@@ -74,6 +88,24 @@ function askAccountConfigsQuestionIfNeeded(configs: PhaseSecrets, questions: inq
             type: 'input',
             name: 'accountConfigsPath',
             message: 'Please enter the path to the directory containing the Handel account configuration files',
+            validate: inquirerValidateFilePath
+        });
+    }
+}
+
+function askAccountConfigsQuestionAgainIfNeeded(configs: PhaseSecrets, questions: inquirer.Question[]) {
+    const accountConfigsPath = getConfigParam('account_configs_path');
+    if(accountConfigsPath) {
+        configs.accountConfigsPath = accountConfigsPath;
+    }
+    else {
+        // clear the cache for the path
+        clearCacheConfigParam('account_configs_path', '');
+        // reask the questions to get the path to the handel-codepipeline configs
+        questions.push({
+            type: 'input',
+            name: 'accountConfigsPath',
+            message: 'Your account_configs_path not found in Handel-CodePipeline config directory. Please enter the path to the directory containing the Handel account configuration files',
             validate: inquirerValidateFilePath
         });
     }
@@ -103,6 +135,8 @@ export async function getPipelineConfigForDelete(argv: ParsedArgs): Promise<Phas
         if(accountConfigsPath) {
             secrets.accountConfigsPath = accountConfigsPath;
         } else {
+            // change this to clear the cache param, and ask again for the path, informing that the original path did not have configs on it
+            askAccountConfigsQuestionAgainIfNeeded(secrets, questions);
             throw new Error('account_configs_path not found in Handel-CodePipeline config directory');
         }
         secrets.pipelineToDelete = argv.pipeline;
@@ -148,6 +182,8 @@ export async function getPipelineConfigForDeploy(argv: ParsedArgs): Promise<Phas
         if(accountConfigsPath) {
             secrets.accountConfigsPath = accountConfigsPath;
         } else {
+            // change this to clear the cache param, and ask again for the path, informing that the original path did not have configs on it
+            askAccountConfigsQuestionAgainIfNeeded(secrets, questions);
             throw new Error('account_configs_path not found in Handel-CodePipeline config directory');
         }
         secrets.pipelineToDeploy = argv.pipeline;

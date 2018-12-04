@@ -119,8 +119,8 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
             phasesSecrets = await lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineName);
         }
         const pipelinePhases = await lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
-        const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
-        const webhook = await lifecycle.addWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
+        await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
+        await lifecycle.addWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
         winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
 
     } catch(err) {
