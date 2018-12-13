@@ -21,10 +21,16 @@ import * as codeBuildCalls from '../../aws/codebuild-calls';
 import { getPipelineProjectName } from '../../aws/codepipeline-calls';
 import * as iamCalls from '../../aws/iam-calls';
 import * as util from '../../common/util';
-import { PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';
+import {
+    PhaseConfig,
+    PhaseContext,
+    PhaseSecretQuestion,
+    PhaseSecrets
+} from '../../datatypes/index';
 
 export interface HandelConfig extends PhaseConfig {
     environments_to_deploy: string[];
+    image?: string; // The Docker image to use in the CodeBuild phase
 }
 
 function getDeployProjectName(phaseContext: PhaseContext<HandelConfig>): string {
@@ -56,43 +62,32 @@ async function createDeployPhaseCodeBuildProject(phaseContext: PhaseContext<Hand
         HANDEL_ACCOUNT_CONFIG: new Buffer(JSON.stringify(accountConfig)).toString('base64'),
         PIPELINE_NAME: getPipelineProjectName(appName, pipelineName)
     };
-    const handelDeployImage = 'aws/codebuild/nodejs:7.0.0';
     const buildSpecPath = `${__dirname}/deploy-buildspec.yml`;
     const handelDeployBuildSpec = util.loadFile(buildSpecPath);
     if(!handelDeployBuildSpec) {
         throw new Error(`Could not load build spec file from ${buildSpecPath}`);
     }
 
+    const projectParams = {
+        projectName: deployProjectName,
+        appName: appName,
+        pipelineName: pipelineName,
+        phaseName: phaseName,
+        imageName: phaseContext.params.image || 'aws/codebuild/nodejs:8.11.0',
+        environmentVariables: handelDeployEnvVars,
+        accountId: phaseContext.accountConfig.account_id.toString(),
+        serviceRoleArn: deployPhaseRole.Arn,
+        region: phaseContext.accountConfig.region,
+        buildSpec: handelDeployBuildSpec
+    }
     const buildProject = await codeBuildCalls.getProject(deployProjectName);
     if (!buildProject) {
         winston.info(`Creating Handel deploy phase CodeBuild project ${deployProjectName}`);
-        return codeBuildCalls.createProject({
-            projectName: deployProjectName,
-            appName: appName,
-            pipelineName: pipelineName,
-            phaseName: phaseName,
-            imageName: handelDeployImage,
-            environmentVariables: handelDeployEnvVars,
-            accountId: phaseContext.accountConfig.account_id.toString(),
-            serviceRoleArn: deployPhaseRole.Arn,
-            region: phaseContext.accountConfig.region,
-            buildSpec: handelDeployBuildSpec
-        });
+        return codeBuildCalls.createProject(projectParams);
     }
     else {
         winston.info(`Updating Handel deploy phase CodeBuild project ${deployProjectName}`);
-        return codeBuildCalls.updateProject({
-            projectName: deployProjectName,
-            appName: appName,
-            pipelineName: pipelineName,
-            phaseName: phaseName,
-            imageName: handelDeployImage,
-            environmentVariables: handelDeployEnvVars,
-            accountId: phaseContext.accountConfig.account_id.toString(),
-            serviceRoleArn: deployPhaseRole.Arn,
-            region: phaseContext.accountConfig.region,
-            buildSpec: handelDeployBuildSpec
-        });
+        return codeBuildCalls.updateProject(projectParams);
     }
 }
 
