@@ -28,6 +28,11 @@ Parameters
      - Yes
      - 
      - A list of one or more environment names from your Handel file that you wish to deploy in this phase.
+   * - image
+     - string
+     - No
+     -
+     - A different Docker image to use for the CodeBuild job. Handel provides a default one that is suitable for most purposes. However, some special extensions may need other tools in the image; this field allows you do use a different image with those tools.
 
 Secrets
 -------
