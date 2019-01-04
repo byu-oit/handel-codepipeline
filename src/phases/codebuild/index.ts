@@ -27,6 +27,7 @@ import { EnvironmentVariables, PhaseConfig, PhaseContext, PhaseSecretQuestion, P
 
 export interface CodeBuildConfig extends PhaseConfig {
     build_image: string;
+    privileged?: boolean;
     environment_variables?: EnvironmentVariables;
     build_role?: string;
     extra_resources?: HandelExtraResources;
@@ -129,6 +130,7 @@ async function createBuildPhaseCodeBuildProject(phaseContext: PhaseContext<CodeB
             pipelineName: pipelineName,
             phaseName: phaseName,
             imageName: buildImage,
+            privileged: phaseContext.params.privileged,
             environmentVariables: envVars,
             accountId: phaseContext.accountConfig.account_id.toString(),
             serviceRoleArn: buildPhaseRole.Arn,
@@ -144,6 +146,7 @@ async function createBuildPhaseCodeBuildProject(phaseContext: PhaseContext<CodeB
             pipelineName: pipelineName,
             phaseName: phaseName,
             imageName: buildImage,
+            privileged: phaseContext.params.privileged,
             environmentVariables: envVars,
             accountId: phaseContext.accountConfig.account_id.toString(),
             serviceRoleArn: buildPhaseRole.Arn,

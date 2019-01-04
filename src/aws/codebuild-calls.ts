@@ -65,6 +65,7 @@ export interface ProjectInput {
     pipelineName: string;
     phaseName: string;
     imageName: string;
+    privileged?: boolean;
     environmentVariables: any;
     accountId: string;
     serviceRoleArn: string;
@@ -74,7 +75,7 @@ export interface ProjectInput {
 }
 
 function getProjectParams(parameters: ProjectInput): AWS.CodeBuild.CreateProjectInput {
-    const { projectName, appName, pipelineName, phaseName, imageName, environmentVariables, accountId, serviceRoleArn, region, cacheSpec, buildSpec } = parameters;
+    const { projectName, appName, pipelineName, phaseName, imageName, privileged, environmentVariables, accountId, serviceRoleArn, region, cacheSpec, buildSpec } = parameters;
 
     const projectParams: AWS.CodeBuild.Types.CreateProjectInput = {
         name: projectName,
@@ -109,7 +110,7 @@ function getProjectParams(parameters: ProjectInput): AWS.CodeBuild.CreateProject
 
     // If using a custom image, set the build to use privilegedMode. Allows access to docker daemon for docker build
     // http://docs.aws.amazon.com/codebuild/latest/APIReference/API_ProjectEnvironment.html
-    if (imageName.startsWith(accountId)) {
+    if (privileged || imageName.startsWith(accountId)) {
         projectParams.environment.privilegedMode = true;
     }
 

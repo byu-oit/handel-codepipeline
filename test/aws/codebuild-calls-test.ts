@@ -56,6 +56,44 @@ describe('codebuild calls module', () => {
             expect(createProjectStub.callCount).to.equal(1);
             expect(project!.name).to.equal(projectName);
         });
+        it('should set privileged mode as specified', async () => {
+            const projectName = 'FakeProject';
+
+            const createProjectStub = sandbox.stub(awsWrapper.codeBuild, 'createProject').callsFake(
+                projectParams => Promise.resolve({
+                    project: {
+                        name: projectName,
+                        environment: {
+                            privilegedMode: projectParams!.environment!.privilegedMode
+                        }
+                    }
+                })
+            );
+
+            const params: codeBuildCalls.ProjectInput = {
+                projectName: projectName,
+                appName: projectName,
+                pipelineName: 'pipeline',
+                phaseName: 'phase',
+                imageName: 'FakeImage',
+                environmentVariables: {},
+                accountId: '777777777777',
+                serviceRoleArn: 'FakeArn',
+                region: 'us-west-2'
+            };
+
+            let project = await codeBuildCalls.createProject(params);
+            expect(project!.environment!.privilegedMode).to.equal(undefined);
+
+            params.privileged = true;
+            project = await codeBuildCalls.createProject(params);
+            expect(project!.environment!.privilegedMode).to.equal(true);
+
+            params.privileged = undefined;
+            params.imageName = params.accountId + '/FakeImage';
+            project = await codeBuildCalls.createProject(params);
+            expect(project!.environment!.privilegedMode).to.equal(true);
+        });
     });
 
     describe('updateProject', () => {

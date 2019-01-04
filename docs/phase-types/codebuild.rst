@@ -32,6 +32,11 @@ Parameters
      - Yes
      - 
      - The name of the CodeBuild image to use when building your code. See the `CodeBuild documentation <http://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref.html>`_ for a list of images.
+   * - privileged
+     - boolean
+     - No
+     - false
+     - Set "privileged" mode, which allows you to run Docker inside your image if needed.
    * - environment_variables
      - map
      - No
