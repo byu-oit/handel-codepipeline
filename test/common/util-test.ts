@@ -62,7 +62,7 @@ describe('util module', () => {
             const pipelineFileMock = {
                 version: 1,
                 name: 'fakeName',
-                extensions: [],
+                extensions: {},
                 pipelines: {}
             };
             const customDeployers = await util.getCustomDeployers(manager, pipelineFileMock);
@@ -75,13 +75,15 @@ describe('util module', () => {
             const pipelineFileMock = {
                 version: 1,
                 name: 'fakeName',
-                extensions: ['fakePlugin'],
+                extensions: {
+                    fakeAlias: 'fakePluginName'
+                },
                 pipelines: {}
             };
             const customDeployers = await util.getCustomDeployers(manager, pipelineFileMock);
             expect(pluginInstallStub.callCount).to.equal(1);
             expect(pluginRequireStub.callCount).to.equal(1);
-            expect(Object.keys(customDeployers)).to.deep.equal(['fakePlugin']);
+            expect(Object.keys(customDeployers)).to.deep.equal(['fakeAlias']);
         });
     });
 
