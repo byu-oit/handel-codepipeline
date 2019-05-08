@@ -15,17 +15,19 @@
  *
  */
 import * as AWS from 'aws-sdk';
-import { AccountConfig } from 'handel/src/datatypes';
-import { Question } from 'inquirer';
-import * as yaml from 'js-yaml';
-import { ParsedArgs } from 'minimist';
+import {AccountConfig} from 'handel/src/datatypes';
+import {ParsedArgs} from 'minimist';
 import * as winston from 'winston';
 import * as iamCalls from '../aws/iam-calls';
 import * as s3Calls from '../aws/s3-calls';
 import * as util from '../common/util';
-import { HandelCodePipelineFile, PhaseDeployers, PhaseSecretQuestion, PhaseSecrets } from '../datatypes/index';
+import {HandelCodePipelineFile, PhaseDeployers, PhaseSecretQuestion} from '../datatypes';
 import * as input from '../input';
 import * as lifecycle from '../lifecycle';
+
+import {PluginManager} from '@byu-oit/live-plugin-manager';
+
+const manager = new PluginManager(); // For installing custom phases
 
 function configureLogger(argv: ParsedArgs) {
     let level = 'info';
@@ -77,11 +79,9 @@ async function validateCredentials(accountConfig: AccountConfig) {
     if (!discoveredId) {
         winston.error(`You are not logged into the account ${deployAccount}`);
         process.exit(1);
-    }
-    else if (deployAccount === discoveredId) {
+    } else if (deployAccount === discoveredId) {
         return;
-    }
-    else {
+    } else {
         winston.error(`You are trying to deploy to the account ${deployAccount}, but you are logged into the account ${discoveredId}`);
         process.exit(1);
     }
@@ -90,12 +90,14 @@ async function validateCredentials(accountConfig: AccountConfig) {
 export async function deployAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
     configureLogger(argv);
     const phaseDeployers = util.getPhaseDeployers();
+    const customDeployers = await util.getCustomDeployers(manager, handelCodePipelineFile);
+    const deployers = Object.assign({}, phaseDeployers, customDeployers);
     validatePipelineSpec(handelCodePipelineFile);
-    checkPhases(handelCodePipelineFile, phaseDeployers);
+    checkPhases(handelCodePipelineFile, deployers);
     const nonInteractive = (argv.pipeline && argv.account_name && argv.secrets);
 
     try {
-        if(!nonInteractive) {
+        if (!nonInteractive) {
             winston.info('Welcome to the Handel CodePipeline setup wizard');
         }
         const pipelineConfig = await input.getPipelineConfigForDeploy(argv);
@@ -104,7 +106,7 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
         winston.debug(`Using account config: ${JSON.stringify(accountConfig)}`);
 
         await validateCredentials(accountConfig);
-        AWS.config.update({ region: accountConfig.region });
+        AWS.config.update({region: accountConfig.region});
         const pipelineName = pipelineConfig.pipelineToDeploy;
 
         if (!handelCodePipelineFile.pipelines[pipelineName]) {
@@ -113,17 +115,17 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
         const codePipelineBucketName = getCodePipelineBucketName(accountConfig);
         const bucket = await s3Calls.createBucketIfNotExists(codePipelineBucketName, accountConfig.region);
         let phasesSecrets;
-        if(nonInteractive) {
+        if (nonInteractive) {
             phasesSecrets = lifecycle.getSecretsFromArgv(handelCodePipelineFile, argv);
         } else {
-            phasesSecrets = await lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineName);
+            phasesSecrets = await lifecycle.getPhaseSecrets(deployers, handelCodePipelineFile, pipelineName);
         }
-        const pipelinePhases = await lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
+        const pipelinePhases = await lifecycle.deployPhases(deployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
         const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
-        const webhook = await lifecycle.addWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
+        const webhook = await lifecycle.addWebhooks(deployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
         winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
 
-    } catch(err) {
+    } catch (err) {
         winston.error(`Error setting up Handel CodePipeline: ${err.message}`);
         winston.error(err);
         process.exit(1);
@@ -140,7 +142,7 @@ export function checkAction(handelCodePipelineFile: HandelCodePipelineFile, argv
 
 export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
     configureLogger(argv);
-    if(!(argv.pipeline && argv.account_name)) {
+    if (!(argv.pipeline && argv.account_name)) {
         winston.info('Welcome to the Handel CodePipeline deletion wizard');
     }
 
@@ -151,7 +153,7 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
     const accountConfig = util.getAccountConfig(pipelineConfig.accountConfigsPath, accountName);
 
     await validateCredentials(accountConfig);
-    AWS.config.update({ region: accountConfig.region });
+    AWS.config.update({region: accountConfig.region});
     const codePipelineBucketName = getCodePipelineBucketName(accountConfig);
     const pipelineName = pipelineConfig.pipelineToDelete;
     const appName = handelCodePipelineFile.name;
@@ -160,8 +162,7 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
         await lifecycle.removeWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
         await lifecycle.deletePipeline(appName, pipelineName);
         return lifecycle.deletePhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
-    }
-    catch (err) {
+    } catch (err) {
         winston.error(`Error deleting Handel CodePipeline: ${err}`);
         winston.error(err);
         process.exit(1);
@@ -169,7 +170,7 @@ export async function deleteAction(handelCodePipelineFile: HandelCodePipelineFil
 }
 
 export async function listSecretsAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
-    if(!argv.pipeline) {
+    if (!argv.pipeline) {
         winston.error('The --pipeline argument is required');
         process.exit(1);
     }
@@ -179,7 +180,7 @@ export async function listSecretsAction(handelCodePipelineFile: HandelCodePipeli
     const phaseDeployers = util.getPhaseDeployers();
     const phaseDeployerSecretsQuestions: PhaseSecretQuestion[] = [];
     const pipelineConfig = handelCodePipelineFile.pipelines[argv.pipeline];
-    for(const phaseConfig of pipelineConfig.phases) {
+    for (const phaseConfig of pipelineConfig.phases) {
         const phaseDeployer = phaseDeployers[phaseConfig.type];
         const questions = phaseDeployer.getSecretQuestions(phaseConfig);
         questions.forEach((question: PhaseSecretQuestion) => {

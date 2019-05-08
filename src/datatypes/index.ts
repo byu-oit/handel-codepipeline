@@ -53,7 +53,7 @@ export interface PhaseDeployers {
 export interface PhaseDeployer {
     check(phaseConfig: PhaseConfig): string[];
     getSecretsForPhase(phaseConfig: PhaseConfig): Promise<PhaseSecrets>;
-    getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion;
+    getSecretQuestions(phaseConfig: PhaseConfig): PhaseSecretQuestion[];
     deployPhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<AWS.CodePipeline.StageDeclaration>;
     deletePhase(phaseContext: PhaseContext<PhaseConfig>, accountConfig: AccountConfig): Promise<boolean>;
     addWebhook?(phaseContext: PhaseContext<PhaseConfig>): Promise<void>;
@@ -64,8 +64,11 @@ export interface PhaseDeployer {
 export interface HandelCodePipelineFile {
     version: number;
     name: string;
+    extensions?: Extensions;
     pipelines: PipelineDefinition;
 }
+
+export type Extensions = string[];
 
 export interface PipelineDefinition {
     [pipelineName: string]: {

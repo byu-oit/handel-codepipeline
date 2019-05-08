@@ -14,11 +14,13 @@
  * limitations under the License.
  *
  */
+import {PluginManager} from '@byu-oit/live-plugin-manager';
 import * as archiver from 'archiver';
 import * as fs from 'fs';
 import * as handlebars from 'handlebars';
 import * as yaml from 'js-yaml';
 import * as path from 'path';
+import {HandelCodePipelineFile, PhaseDeployers} from '../datatypes';
 
 /**
  * Takes the given directory path and zips it up and stores it
@@ -26,7 +28,7 @@ import * as path from 'path';
  */
 export function zipDirectoryToFile(directoryPath: string, filePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
-        if(!fs.existsSync(directoryPath)) {
+        if (!fs.existsSync(directoryPath)) {
             throw new Error(`Directory path to be zipped does not exist: ${directoryPath}`);
         }
 
@@ -46,11 +48,10 @@ export function zipDirectoryToFile(directoryPath: string, filePath: string): Pro
 
 export function getAccountConfig(accountConfigsPath: string, accountId: string) {
     const accountConfigFilePath = `${accountConfigsPath}/${accountId}.yml`;
-    if(fs.existsSync(accountConfigFilePath)) {
+    if (fs.existsSync(accountConfigFilePath)) {
         const accountConfig = exports.loadYamlFile(accountConfigFilePath);
         return accountConfig;
-    }
-    else {
+    } else {
         throw new Error(`Expected account config file at ${accountConfigFilePath} for ${accountId}`);
     }
 }
@@ -58,13 +59,13 @@ export function getAccountConfig(accountConfigsPath: string, accountId: string) 
 /**
  * Reads all the phase deployer modules out of the 'phases' directory
  */
-export function getPhaseDeployers(): any {
+export function getPhaseDeployers(): PhaseDeployers {
     const deployers: any = {}; // TODO - Need to change this to something more constrained
     const servicesPath = path.join(__dirname, '../phases');
     const serviceTypes = fs.readdirSync(servicesPath);
     serviceTypes.forEach(serviceType => {
         const servicePath = `${servicesPath}/${serviceType}`;
-        if(fs.lstatSync(servicePath).isDirectory()) {
+        if (fs.lstatSync(servicePath).isDirectory()) {
             deployers[serviceType] = require(servicePath);
         }
     });
@@ -72,11 +73,23 @@ export function getPhaseDeployers(): any {
     return deployers;
 }
 
+export async function getCustomDeployers(manager: PluginManager, handelCodePipelineFile: HandelCodePipelineFile): Promise<PhaseDeployers> {
+    const deployers: any = {}; // TODO - Need to change this to something more constrained
+    if (handelCodePipelineFile.extensions) {
+        for (const extension of handelCodePipelineFile.extensions) {
+            const [name, version] = extension.split('@');
+            await manager.install(name, version || undefined);
+            deployers[name] = manager.require(name);
+        }
+    }
+
+    return deployers;
+}
+
 export function saveYamlFile(filePath: string, yamlObject: any) {
     try {
         return fs.writeFileSync(filePath, yaml.safeDump(yamlObject), 'utf8');
-    }
-    catch(e) {
+    } catch (e) {
         throw e;
     }
 }
@@ -84,8 +97,7 @@ export function saveYamlFile(filePath: string, yamlObject: any) {
 export function loadYamlFile(filePath: string): any {
     try {
         return yaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
-    }
-    catch(e) {
+    } catch (e) {
         return null;
     }
 }
@@ -93,8 +105,7 @@ export function loadYamlFile(filePath: string): any {
 export function loadJsonFile(filePath: string): any {
     try {
         return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    }
-    catch(e) {
+    } catch (e) {
         return null;
     }
 }
@@ -102,8 +113,7 @@ export function loadJsonFile(filePath: string): any {
 export function loadFile(filePath: string): string | null {
     try {
         return fs.readFileSync(filePath, 'utf8');
-    }
-    catch(e) {
+    } catch (e) {
         return null;
     }
 }

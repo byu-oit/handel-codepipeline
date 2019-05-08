@@ -14,8 +14,10 @@
  * limitations under the License.
  *
  */
-import { expect } from 'chai';
+import {PluginManager} from '@byu-oit/live-plugin-manager';
+import {expect} from 'chai';
 import * as fs from 'fs';
+import * as sinon from 'sinon';
 import * as util from '../../src/common/util';
 
 describe('util module', () => {
@@ -39,9 +41,47 @@ describe('util module', () => {
     });
 
     describe('getPhaseDeployers', () => {
-        it('should load and return the deployers', () => {
+        it('should load and return the native deployers', () => {
             const phaseDeployers = util.getPhaseDeployers();
             expect(phaseDeployers.github).to.not.equal(null);
+        });
+    });
+
+    describe('getCustomDeployers', () => {
+        const manager = new PluginManager();
+        const pluginInstallStub = sinon.stub(manager, 'install')
+            .callsFake((name: string, version?: string) => {
+                return {};
+            });
+        const pluginRequireStub = sinon.stub(manager, 'require')
+            .callsFake((name: string) => {
+                return {[name]: {}};
+            });
+
+        it('should attempt to load but not return any custom deployers', async () => {
+            const pipelineFileMock = {
+                version: 1,
+                name: 'fakeName',
+                extensions: [],
+                pipelines: {}
+            };
+            const customDeployers = await util.getCustomDeployers(manager, pipelineFileMock);
+            expect(pluginInstallStub.callCount).to.equal(0);
+            expect(pluginRequireStub.callCount).to.equal(0);
+            expect(customDeployers).to.deep.equal({});
+        });
+
+        it('should load and return the custom deployers', async () => {
+            const pipelineFileMock = {
+                version: 1,
+                name: 'fakeName',
+                extensions: ['fakePlugin'],
+                pipelines: {}
+            };
+            const customDeployers = await util.getCustomDeployers(manager, pipelineFileMock);
+            expect(pluginInstallStub.callCount).to.equal(1);
+            expect(pluginRequireStub.callCount).to.equal(1);
+            expect(Object.keys(customDeployers)).to.deep.equal(['fakePlugin']);
         });
     });
 
@@ -49,7 +89,7 @@ describe('util module', () => {
         const zippedPath = `${__dirname}/zipped-test-file.zip`;
 
         afterEach(() => {
-            if(fs.existsSync(zippedPath)) {
+            if (fs.existsSync(zippedPath)) {
                 fs.unlinkSync(zippedPath); // Ensure created ZIP archive gets deleted
             }
         });
@@ -63,8 +103,7 @@ describe('util module', () => {
             try {
                 await util.zipDirectoryToFile('${__dirname}/myfakedir/', zippedPath);
                 expect(true).to.equal(false); // Should not get here
-            }
-            catch(err) {
+            } catch (err) {
                 expect(err.message).to.contain('Directory path to be zipped does not exist');
             }
         });
