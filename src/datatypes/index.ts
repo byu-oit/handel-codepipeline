@@ -68,7 +68,9 @@ export interface HandelCodePipelineFile {
     pipelines: PipelineDefinition;
 }
 
-export type Extensions = string[];
+export interface Extensions {
+    [phaseName: string]: string;
+}
 
 export interface PipelineDefinition {
     [pipelineName: string]: {

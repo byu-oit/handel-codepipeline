@@ -75,11 +75,14 @@ export function getPhaseDeployers(): PhaseDeployers {
 
 export async function getCustomDeployers(manager: PluginManager, handelCodePipelineFile: HandelCodePipelineFile): Promise<PhaseDeployers> {
     const deployers: any = {}; // TODO - Need to change this to something more constrained
-    if (handelCodePipelineFile.extensions) {
-        for (const extension of handelCodePipelineFile.extensions) {
-            const [name, version] = extension.split('@');
-            await manager.install(name, version || undefined);
-            deployers[name] = manager.require(name);
+    const extensions = handelCodePipelineFile.extensions;
+    if (extensions) {
+        for (const alias in extensions) {
+            if (!extensions.hasOwnProperty(alias)) {
+                continue;
+            }
+            const pluginInfo = await manager.install(extensions[alias]);
+            deployers[alias] = manager.require(pluginInfo.name);
         }
     }
 
