@@ -56,8 +56,6 @@ Parameters
 .. NOTE::
 
   You can use a custom build image in your account's EC2 Container Registry by prefixing the build_image parameter with *<account>/*. For example, *<account>/IMAGE:TAG* will resolve at run-time to AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/IMAGE:TAG.
-  
-  Using a custom build image also configures the CodeBuild image in privileged mode, which allows you to run Docker inside your image if needed.
 
 .. _codebuild-extras:
 

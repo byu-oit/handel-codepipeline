@@ -89,7 +89,8 @@ function getProjectParams(parameters: ProjectInput): AWS.CodeBuild.CreateProject
             computeType: 'BUILD_GENERAL1_SMALL',
             image: imageName,
             type: 'LINUX_CONTAINER',
-            environmentVariables: []
+            environmentVariables: [],
+            privilegedMode: true
         },
         serviceRole: serviceRoleArn,
         tags: [
@@ -105,12 +106,6 @@ function getProjectParams(parameters: ProjectInput): AWS.CodeBuild.CreateProject
             type: 'S3',
             location: cacheSpec.location
         };
-    }
-
-    // If using a custom image, set the build to use privilegedMode. Allows access to docker daemon for docker build
-    // http://docs.aws.amazon.com/codebuild/latest/APIReference/API_ProjectEnvironment.html
-    if (imageName.startsWith(accountId)) {
-        projectParams.environment.privilegedMode = true;
     }
 
     // Override buildspec if specified
