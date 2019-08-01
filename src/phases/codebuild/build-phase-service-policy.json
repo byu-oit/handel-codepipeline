@@ -73,7 +73,8 @@
                 "ecr:GetDownloadUrlForLayer",
                 "ecr:BatchGetImage",
                 "ecr:CreateRepository",
-                "ecr:PutLifecyclePolicy"
+                "ecr:PutLifecyclePolicy",
+                "ecr:SetRepositoryPolicy"
             ],
             "Resource" : "*"
         }

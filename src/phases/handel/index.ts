@@ -56,7 +56,7 @@ async function createDeployPhaseCodeBuildProject(phaseContext: PhaseContext<Hand
         HANDEL_ACCOUNT_CONFIG: new Buffer(JSON.stringify(accountConfig)).toString('base64'),
         PIPELINE_NAME: getPipelineProjectName(appName, pipelineName)
     };
-    const handelDeployImage = 'aws/codebuild/nodejs:7.0.0';
+    const handelDeployImage = 'aws/codebuild/standard:2.0';
     const buildSpecPath = `${__dirname}/deploy-buildspec.yml`;
     const handelDeployBuildSpec = util.loadFile(buildSpecPath);
     if(!handelDeployBuildSpec) {
