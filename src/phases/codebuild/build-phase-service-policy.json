@@ -58,7 +58,7 @@
             "Action": [
                 "ssm:GetParameters",
                 "ssm:GetParameter",
-                "ssm:GetParametersByPath
+                "ssm:GetParametersByPath"
             ],
             "Resource": [
                 "arn:aws:ssm:{{region}}:{{accountId}}:parameter/{{appName}}*",
