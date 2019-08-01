@@ -56,7 +56,9 @@
         {
             "Effect": "Allow",
             "Action": [
-                "ssm:GetParameters"
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+                "ssm:GetParametersByPath"
             ],
             "Resource": [
                 "arn:aws:ssm:{{region}}:{{accountId}}:parameter/{{appName}}*",
