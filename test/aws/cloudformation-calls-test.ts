@@ -87,9 +87,9 @@ describe('cloudformationCalls', () => {
         it('should create the stack, wait for it to finish, and return the created stack', async () => {
             const stackName = 'FakeStack';
             const createStackStub = sinon.stub(awsWrapper.cloudFormation, 'createStack').resolves({});
-            const waitForStackStub = sinon.stub(cloudformationCalls, 'waitForStack').returns(Promise.resolve({
+            const waitForStackStub = sinon.stub(cloudformationCalls, 'waitForStack').resolves({
                 StackName: stackName
-            }));
+            });
 
             const stack = await cloudformationCalls.createStack(stackName, 'FakeTemplateBody', []);
             expect(stack.StackName).to.equal(stackName);

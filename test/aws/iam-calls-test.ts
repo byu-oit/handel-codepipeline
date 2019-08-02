@@ -87,7 +87,7 @@ describe('iam calls', () => {
         });
 
         it('should just return the role when it already exists', async () => {
-            const getRoleStub = sinon.stub(iamCalls, 'getRole').returns(Promise.resolve({}));
+            const getRoleStub = sinon.stub(iamCalls, 'getRole').resolves({});
 
             const role = await iamCalls.createRoleIfNotExists('FakeRole', ['TrustedService']);
             expect(getRoleStub.callCount).to.equal(1);

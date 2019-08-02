@@ -80,7 +80,7 @@ describe('github phase module', () => {
     describe('getSecretsForPhase', () => {
         it('should prompt for a github access token', () => {
             const token = 'FakeToken';
-            const promptStub = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({ githubAccessToken: token }));
+            const promptStub = sinon.stub(inquirer, 'prompt').resolves({ githubAccessToken: token });
 
             return github.getSecretsForPhase(phaseConfig)
                 .then(results => {
@@ -112,7 +112,7 @@ describe('github phase module', () => {
         it('should put webhook and register it', async () => {
             const putWebhookStub = sinon.stub(codepipelineCalls, 'putWebhook');
             const registerWebhookStub = sinon.stub(codepipelineCalls, 'registerWebhook');
-            const listWebhookStub = sinon.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: []}));
+            const listWebhookStub = sinon.stub(codepipelineCalls, 'listWebhooks').resolves({ webhooks: []});
             await github.addWebhook(phaseContext);
             expect(putWebhookStub.callCount).to.equal(1);
             expect(registerWebhookStub.callCount).to.equal(1);
@@ -122,7 +122,7 @@ describe('github phase module', () => {
         it('should skip if webhook exists', async () => {
             const putWebhookStub = sinon.stub(codepipelineCalls, 'putWebhook');
             const registerWebhookStub = sinon.stub(codepipelineCalls, 'registerWebhook');
-            const listWebhookStub = sinon.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: [{definition: {name: 'myapp-dev-webhook'}}] }));
+            const listWebhookStub = sinon.stub(codepipelineCalls, 'listWebhooks').resolves({ webhooks: [{definition: {name: 'myapp-dev-webhook'}}] });
             await github.addWebhook(phaseContext);
             expect(putWebhookStub.callCount).to.equal(0);
             expect(registerWebhookStub.callCount).to.equal(0);
@@ -132,7 +132,7 @@ describe('github phase module', () => {
         it('should put if webhook doenst match', async () => {
             const putWebhookStub = sinon.stub(codepipelineCalls, 'putWebhook');
             const registerWebhookStub = sinon.stub(codepipelineCalls, 'registerWebhook');
-            const listWebhookStub = sinon.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: [{ definition: { name: 'myapp-prd-webhook' } }] }));
+            const listWebhookStub = sinon.stub(codepipelineCalls, 'listWebhooks').resolves({ webhooks: [{ definition: { name: 'myapp-prd-webhook' } }] });
             await github.addWebhook(phaseContext);
             expect(putWebhookStub.callCount).to.equal(1);
             expect(registerWebhookStub.callCount).to.equal(1);
@@ -142,7 +142,7 @@ describe('github phase module', () => {
 
     describe('removeWebhook', () => {
         it('if webhook exists, should deregister webhook and delete it', async () => {
-            const webhookExistsStub = sinon.stub(codepipelineCalls, 'webhookExists').returns(Promise.resolve(true));
+            const webhookExistsStub = sinon.stub(codepipelineCalls, 'webhookExists').resolves(true);
             const deleteWebhookStub = sinon.stub(codepipelineCalls, 'deleteWebhook');
             const deregisterWebhookStub = sinon.stub(codepipelineCalls, 'deregisterWebhook');
             await github.removeWebhook(phaseContext);
@@ -151,7 +151,7 @@ describe('github phase module', () => {
             expect(deregisterWebhookStub.callCount).to.equal(1);
         });
         it('if webhook doesn\'t exist, should not try to deregister or delete webhook', async () => {
-            const webhookExistsStub = sinon.stub(codepipelineCalls, 'webhookExists').returns(Promise.resolve(false));
+            const webhookExistsStub = sinon.stub(codepipelineCalls, 'webhookExists').resolves(false);
             const deleteWebhookStub = sinon.stub(codepipelineCalls, 'deleteWebhook');
             const deregisterWebhookStub = sinon.stub(codepipelineCalls, 'deregisterWebhook');
             await github.removeWebhook(phaseContext);

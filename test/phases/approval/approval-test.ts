@@ -73,7 +73,7 @@ describe('approval module', () => {
 
     describe('getSecretsForPhase', () => {
         it('should not prompt for any secrets', async () => {
-            const promptStub = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({}));
+            const promptStub = sinon.stub(inquirer, 'prompt').resolves({});
 
             const results = await approval.getSecretsForPhase(phaseConfig);
             expect(results).to.deep.equal({});

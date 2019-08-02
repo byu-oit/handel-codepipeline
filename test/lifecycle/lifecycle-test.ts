@@ -222,8 +222,8 @@ describe('lifecycle module', () => {
         const pipelinePhases: AWS.CodePipeline.StageDeclaration[] = [];
 
         it('should create the pipeline', async () => {
-            const getPipelineStub = sinon.stub(codepipelineCalls, 'getPipeline').returns(Promise.resolve(null));
-            const createPipelineStub = sinon.stub(codepipelineCalls, 'createPipeline').returns(Promise.resolve({}));
+            const getPipelineStub = sinon.stub(codepipelineCalls, 'getPipeline').resolves(null);
+            const createPipelineStub = sinon.stub(codepipelineCalls, 'createPipeline').resolves({});
 
             const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineToDeploy, accountConfig, pipelinePhases, 'FakeBucket');
             expect(pipeline).to.deep.equal({});
@@ -232,8 +232,8 @@ describe('lifecycle module', () => {
         });
 
         it('should update the pipeline when it already exists', async () => {
-            const getPipelineStub = sinon.stub(codepipelineCalls, 'getPipeline').returns(Promise.resolve({}));
-            const updatePipelineStub = sinon.stub(codepipelineCalls, 'updatePipeline').returns(Promise.resolve({}));
+            const getPipelineStub = sinon.stub(codepipelineCalls, 'getPipeline').resolves({});
+            const updatePipelineStub = sinon.stub(codepipelineCalls, 'updatePipeline').resolves({});
 
             const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineToDeploy, accountConfig, pipelinePhases, 'FakeBucket');
             expect(pipeline).to.deep.equal({});
@@ -258,7 +258,7 @@ describe('lifecycle module', () => {
 
     describe('deletePipeline', () => {
         it('should delete the pipeline', async () => {
-            const deletePipelineStub = sinon.stub(codepipelineCalls, 'deletePipeline').returns(Promise.resolve({}));
+            const deletePipelineStub = sinon.stub(codepipelineCalls, 'deletePipeline').resolves({});
             const result = await lifecycle.deletePipeline('FakeApp', 'FakePipeline');
             expect(result).to.deep.equal({});
             expect(deletePipelineStub.callCount).to.equal(1);

@@ -65,7 +65,7 @@ describe('npm phase module', () => {
     describe('getSecretsForPhase', () => {
         it('should prompt for a npm Username', async () => {
             const token = 'FakeUser';
-            const promptStub = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({ npmToken: token }));
+            const promptStub = sinon.stub(inquirer, 'prompt').resolves({ npmToken: token });
 
             const results = await npm.getSecretsForPhase(phaseConfig);
             expect(results.npmToken).to.equal(token);
@@ -107,8 +107,8 @@ describe('npm phase module', () => {
 
     describe('deletePhase', () => {
         it('should delete the codebuild project', async () => {
-            const deleteProjectStub = sinon.stub(codebuildCalls, 'deleteProject').returns(Promise.resolve(true));
-            const deletePrarameterStub = sinon.stub(ssmCalls, 'deleteParameter').returns(Promise.resolve(true));
+            const deleteProjectStub = sinon.stub(codebuildCalls, 'deleteProject').resolves(true);
+            const deletePrarameterStub = sinon.stub(ssmCalls, 'deleteParameter').resolves(true);
             const detachPolicyStub = sinon.stub(iamCalls, 'detachPolicyFromRole').resolves(true);
             const deleteRoleStub = sinon.stub(iamCalls, 'deleteRole').resolves(true);
             const deletePolicyStub = sinon.stub(iamCalls, 'deletePolicy').resolves(true);
