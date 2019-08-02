@@ -14,28 +14,27 @@
  * limitations under the License.
  *
  */
-const ServiceContext = require('handel/dist/datatypes').ServiceContext; // TODO - Change to src/ once ported to TS
-const EnvironmentContext = require('handel/dist/datatypes').EnvironmentContext; // TODO - Change to src/ once ported to TS
-const EnvironmentDeployResult = require('handel/dist/datatypes').EnvironmentDeployResult; // TODO - Change to src/ once ported to TS
-const EnvironmentDeleteResult = require('handel/dist/datatypes').EnvironmentDeleteResult; // TODO - Change to src/ once ported to TS
-const handelUtil = require('handel/dist/common/util'); // TODO - Change to src/ once ported to TS
+const ServiceContext = require("handel/dist/datatypes").ServiceContext; // TODO - Change to src/ once ported to TS
+const EnvironmentContext = require("handel/dist/datatypes").EnvironmentContext; // TODO - Change to src/ once ported to TS
+const EnvironmentDeployResult = require("handel/dist/datatypes").EnvironmentDeployResult; // TODO - Change to src/ once ported to TS
+const EnvironmentDeleteResult = require("handel/dist/datatypes").EnvironmentDeleteResult; // TODO - Change to src/ once ported to TS
+const handelUtil = require("handel/dist/common/util"); // TODO - Change to src/ once ported to TS
 
-const checkPhase = require('handel/dist/phases/check'); // TODO - Change to src/ once ported to TS
+const checkPhase = require("handel/dist/phases/check"); // TODO - Change to src/ once ported to TS
 
-const preDeployPhase = require('handel/dist/phases/pre-deploy'); // TODO - Change to src/ once ported to TS
-const bindPhase = require('handel/dist/phases/bind'); // TODO - Change to src/ once ported to TS
-const deployPhase = require('handel/dist/phases/deploy'); // TODO - Change to src/ once ported to TS
+const preDeployPhase = require("handel/dist/phases/pre-deploy"); // TODO - Change to src/ once ported to TS
+const bindPhase = require("handel/dist/phases/bind"); // TODO - Change to src/ once ported to TS
+const deployPhase = require("handel/dist/phases/deploy"); // TODO - Change to src/ once ported to TS
 
-const unPreDeployPhase = require('handel/dist/phases/un-pre-deploy'); // TODO - Change to src/ once ported to TS
-const unBindPhase = require('handel/dist/phases/un-bind'); // TODO - Change to src/ once ported to TS
-const unDeployPhase = require('handel/dist/phases/un-deploy'); // TODO - Change to src/ once ported to TS
+const unPreDeployPhase = require("handel/dist/phases/un-pre-deploy"); // TODO - Change to src/ once ported to TS
+const unBindPhase = require("handel/dist/phases/un-bind"); // TODO - Change to src/ once ported to TS
+const unDeployPhase = require("handel/dist/phases/un-deploy"); // TODO - Change to src/ once ported to TS
 
-const deployOrderCalc = require('handel/dist/deploy/deploy-order-calc'); // TODO - Change to src/ once ported to TS
+const deployOrderCalc = require("handel/dist/deploy/deploy-order-calc"); // TODO - Change to src/ once ported to TS
 
-const winston = require('winston');
+const winston = require("winston");
 
-const allowedHandelServices = ['apiaccess', 'dynamodb', 's3'];
-
+const allowedHandelServices = ["apiaccess", "dynamodb", "s3"];
 
 exports.check = function checkResources(resources) {
     let errors = [];
@@ -51,7 +50,7 @@ exports.deploy = function deployResources(resources, phaseContext, accountConfig
         try {
             let deployers = getServiceDeployers();
 
-            winston.info('Validating and parsing resources');
+            winston.info("Validating and parsing resources");
 
             let envContext = createEnvironmentContext(resources, phaseContext, accountConfig);
             resolve(deployEnvironment(accountConfig, deployers, envContext));
@@ -66,7 +65,7 @@ exports.delete = function deleteResources(resources, phaseContext, accountConfig
         try {
             let deployers = getServiceDeployers();
 
-            winston.info('Validating and parsing resources');
+            winston.info("Validating and parsing resources");
 
             let envContext = createEnvironmentContext(resources, phaseContext, accountConfig);
             resolve(deleteEnvironment(accountConfig, deployers, envContext));
@@ -93,7 +92,7 @@ function checkResource(name, config) {
 
     let type = config.type;
 
-    let context = new ServiceContext('check', 'check', name, type, config, {});
+    let context = new ServiceContext("check", "check", name, type, config, {});
 
     let deployer = deployers[type];
 
@@ -121,13 +120,13 @@ function deployEnvironment(accountConfig, deployers, envContext) {
             for (let name of Object.getOwnPropertyNames(result.deployContexts)) {
                 let ctx = result.deployContexts[name];
                 policies = policies.concat(ctx.policies);
-                Object.assign(environmentVars, ctx.environmentVariables)
+                Object.assign(environmentVars, ctx.environmentVariables);
             }
             return {
-                policies: policies,
+                deployContexts: result.deployContexts,
                 environmentVariables: environmentVars,
-                deployContexts: result.deployContexts
-            }
+                policies: policies,
+            };
         });
 }
 
@@ -140,18 +139,18 @@ function bindAndDeployServices(serviceDeployers, environmentContext, preDeployCo
             .then(() => bindPhase.bindServicesInLevel(serviceDeployers, environmentContext, preDeployContexts, deployOrder, currentLevel))
             .then(levelBindResults => {
                 for (let serviceName in levelBindResults) {
-                    bindContexts[serviceName] = levelBindResults[serviceName]
+                    bindContexts[serviceName] = levelBindResults[serviceName];
                 }
             })
             .then(() => deployPhase.deployServicesInLevel(serviceDeployers, environmentContext, preDeployContexts, deployContexts, deployOrder, currentLevel))
             .then(levelDeployResults => {
                 for (let serviceName in levelDeployResults) {
-                    deployContexts[serviceName] = levelDeployResults[serviceName]
+                    deployContexts[serviceName] = levelDeployResults[serviceName];
                 }
                 return {
                     bindContexts,
-                    deployContexts
-                }
+                    deployContexts,
+                };
             });
     }
 
@@ -167,10 +166,10 @@ function createEnvironmentContext(resources, phaseContext, accountConfig) {
         let serviceSpec = resources[name];
 
         if (!serviceSpec.tags) {
-            serviceSpec.tags = {}
+            serviceSpec.tags = {};
         }
 
-        serviceSpec.tags['handel-phase'] = phaseContext.phaseName;
+        serviceSpec.tags["handel-phase"] = phaseContext.phaseName;
 
         envContext.serviceContexts[name] = new ServiceContext(app, pipeline, name, serviceSpec.type, serviceSpec, accountConfig);
     }
@@ -192,30 +191,28 @@ function unDeployAndUnBindServices(serviceDeployers, environmentContext, deployO
             .then(() => unBindPhase.unBindServicesInLevel(serviceDeployers, environmentContext, deployOrder, currentLevel))
             .then(levelUnBindResults => {
                 for (let serviceName in levelUnBindResults) {
-                    unBindContexts[serviceName] = levelUnBindResults[serviceName]
+                    unBindContexts[serviceName] = levelUnBindResults[serviceName];
                 }
                 return {
                     unBindContexts,
-                    unDeployContexts
-                }
+                    unDeployContexts,
+                };
             });
     }
 
     return deleteProcess;
 }
 
-
 function deleteEnvironment(accountConfig, serviceDeployers, environmentContext) {
     if (!accountConfig || !environmentContext) {
         return Promise.resolve(new EnvironmentDeleteResult("failure", "Invalid configuration"));
-    }
-    else {
+    } else {
         winston.info(`Starting delete for environment ${environmentContext.environmentName}`);
 
         let deployOrder = deployOrderCalc.getDeployOrder(environmentContext);
         return unDeployAndUnBindServices(serviceDeployers, environmentContext, deployOrder)
             .then(unDeployAndUnBindResults => {
-                return unPreDeployPhase.unPreDeployServices(serviceDeployers, environmentContext)
+                return unPreDeployPhase.unPreDeployServices(serviceDeployers, environmentContext);
             })
             .then(unPreDeployResults => {
                 return new EnvironmentDeleteResult("success");
@@ -225,5 +222,3 @@ function deleteEnvironment(accountConfig, serviceDeployers, environmentContext) 
             });
     }
 }
-
-
