@@ -8,7 +8,7 @@
     "copyNonTsFiles": "node npm-scripts.js copyNonTsFiles",
     "compile": "echo Compiling && tsc && echo Finished compile",
     "build": "npm run clean && npm run compile && npm run copyNonTsFiles",
-    "test": "./node_modules/mocha/bin/mocha -r ts-node/register 'test/**/*.ts' && npm run build && ./node_modules/mocha/bin/mocha 'test/**/*.js'"
+    "test": "npx mocha -r ts-node/register test/**/*.ts && npm run build && npx mocha test/**/*.js"
   },
   "bin": {
     "handel-codepipeline": "./bin/handel-codepipeline"
