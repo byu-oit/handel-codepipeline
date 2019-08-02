@@ -20,20 +20,14 @@ import awsWrapper from '../../src/aws/aws-wrapper';
 import * as s3Calls from '../../src/aws/s3-calls';
 
 describe('s3 calls module', () => {
-    let sandbox: sinon.SinonSandbox;
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('getBucket', () => {
         it('should return the bucket if found', async () => {
             const bucketName = 'FakeBucket';
-            const listBucketsStub = sandbox.stub(awsWrapper.s3, 'listBuckets').resolves({
+            const listBucketsStub = sinon.stub(awsWrapper.s3, 'listBuckets').resolves({
                 Buckets: [{
                     Name: bucketName
                 }]
@@ -47,7 +41,7 @@ describe('s3 calls module', () => {
 
         it('should return null if the bucket is not found', async () => {
             const bucketName = 'FakeBucket';
-            const listBucketsStub = sandbox.stub(awsWrapper.s3, 'listBuckets').resolves({
+            const listBucketsStub = sinon.stub(awsWrapper.s3, 'listBuckets').resolves({
                 Buckets: [{
                     Name: 'SomeOtherBucket'
                 }]
@@ -62,10 +56,10 @@ describe('s3 calls module', () => {
     describe('createBucket', () => {
         it('should create the bucket', async () => {
             const bucketName = 'FakeBucket';
-            const createBucketStub = sandbox.stub(awsWrapper.s3, 'createBucket').resolves({});
-            const getBucketStub = sandbox.stub(s3Calls, 'getBucket').returns(Promise.resolve({
+            const createBucketStub = sinon.stub(awsWrapper.s3, 'createBucket').resolves({});
+            const getBucketStub = sinon.stub(s3Calls, 'getBucket').resolves({
                 Name: bucketName
-            }));
+            });
 
             const bucket = await s3Calls.createBucket(bucketName, 'us-west-2');
             expect(bucket).to.not.equal(null);
@@ -78,10 +72,10 @@ describe('s3 calls module', () => {
     describe('createBucketIfNotExists', () => {
         it('should create the bucket if it doesnt exist', async () => {
             const bucketName = 'FakeBucket';
-            const getBucketStub = sandbox.stub(s3Calls, 'getBucket').returns(Promise.resolve(null));
-            const createBucketStub = sandbox.stub(s3Calls, 'createBucket').returns(Promise.resolve({
+            const getBucketStub = sinon.stub(s3Calls, 'getBucket').resolves(null);
+            const createBucketStub = sinon.stub(s3Calls, 'createBucket').resolves({
                 Name: bucketName
-            }));
+            });
 
             const bucket = await s3Calls.createBucketIfNotExists(bucketName, 'us-west-2');
             expect(bucket.Name).to.equal(bucketName);
@@ -91,10 +85,10 @@ describe('s3 calls module', () => {
 
         it('should return the bucket if it exists', async () => {
             const bucketName = 'FakeBucket';
-            const getBucketStub = sandbox.stub(s3Calls, 'getBucket').returns(Promise.resolve({
+            const getBucketStub = sinon.stub(s3Calls, 'getBucket').resolves({
                 Name: bucketName
-            }));
-            const createBucketStub = sandbox.stub(s3Calls, 'createBucket').returns(Promise.resolve({}));
+            });
+            const createBucketStub = sinon.stub(s3Calls, 'createBucket').resolves({});
 
             const bucket = await s3Calls.createBucketIfNotExists(bucketName, 'us-west-2');
             expect(bucket.Name).to.equal(bucketName);

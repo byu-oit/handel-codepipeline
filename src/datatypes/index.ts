@@ -1,6 +1,5 @@
 import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes';
-import { Questions } from 'inquirer';
 import { addWebhook } from '../phases/github';
 
 export interface PhaseConfig {

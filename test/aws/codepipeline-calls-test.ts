@@ -24,17 +24,14 @@ import * as iamCalls from '../../src/aws/iam-calls';
 import * as util from '../../src/common/util';
 
 describe('codepipelineCalls module', () => {
-    let sandbox: sinon.SinonSandbox;
     let accountConfig: AccountConfig;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-
         accountConfig = util.loadYamlFile(`${__dirname}/../example-account-config.yml`);
     });
 
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('createPipeline', () => {
@@ -47,8 +44,8 @@ describe('codepipelineCalls module', () => {
             const role = {
                 Arn: 'FakeArn'
             };
-            const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
-            const createPipelineStub = sandbox.stub(awsWrapper.codePipeline, 'createPipeline').resolves({
+            const createOrUpdateRoleStub = sinon.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
+            const createPipelineStub = sinon.stub(awsWrapper.codePipeline, 'createPipeline').resolves({
                 pipeline: {}
             });
 
@@ -60,7 +57,7 @@ describe('codepipelineCalls module', () => {
 
     describe('getPipeline', () => {
         it('should return null when the pipeline does not exist', async () => {
-            const getPipelineStub = sandbox.stub(awsWrapper.codePipeline, 'getPipeline').rejects({
+            const getPipelineStub = sinon.stub(awsWrapper.codePipeline, 'getPipeline').rejects({
                 code: 'PipelineNotFoundException'
             });
             const pipeline = await codepipelineCalls.getPipeline('FakeName');
@@ -69,7 +66,7 @@ describe('codepipelineCalls module', () => {
         });
 
         it('should return the pipeline when it exists', async () => {
-            const getPipelineStub = sandbox.stub(awsWrapper.codePipeline, 'getPipeline').resolves({
+            const getPipelineStub = sinon.stub(awsWrapper.codePipeline, 'getPipeline').resolves({
                 pipeline: {}
             });
             const pipeline = await codepipelineCalls.getPipeline('FakeName');
@@ -81,10 +78,10 @@ describe('codepipelineCalls module', () => {
         it('should update the pipeline', async () => {
             const pipelinePhases: AWS.CodePipeline.StageDeclaration[] = [];
 
-            const getRoleStub = sandbox.stub(iamCalls, 'getRole').resolves({
+            const getRoleStub = sinon.stub(iamCalls, 'getRole').resolves({
                 Arn: 'FakeArn'
             });
-            const updatePipelineStub = sandbox.stub(awsWrapper.codePipeline, 'updatePipeline').resolves({
+            const updatePipelineStub = sinon.stub(awsWrapper.codePipeline, 'updatePipeline').resolves({
                 pipeline: {}
             });
 
@@ -97,7 +94,7 @@ describe('codepipelineCalls module', () => {
 
     describe('deletePipeline', () => {
         it('should delete the pipeline', async () => {
-            const deletePipelineStub = sandbox.stub(awsWrapper.codePipeline, 'deletePipeline').resolves(true);
+            const deletePipelineStub = sinon.stub(awsWrapper.codePipeline, 'deletePipeline').resolves(true);
 
             const success = await codepipelineCalls.deletePipeline('FakeApp', 'FakePipeline');
             expect(success).to.equal(true);
@@ -106,7 +103,7 @@ describe('codepipelineCalls module', () => {
 
     describe('putWebhook', () => {
         it('should put the webhook', async () => {
-            const putWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'putWebhook').resolves({
+            const putWebhookStub = sinon.stub(awsWrapper.codePipeline, 'putWebhook').resolves({
                 webhook: {}
             });
 
@@ -135,7 +132,7 @@ describe('codepipelineCalls module', () => {
 
     describe('deleteWebhook', () => {
         it('should delete the webhook', async () => {
-            const deleteWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'deleteWebhook').resolves({});
+            const deleteWebhookStub = sinon.stub(awsWrapper.codePipeline, 'deleteWebhook').resolves({});
 
             const webhook = await codepipelineCalls.deleteWebhook('SomeWebhook');
             expect(deleteWebhookStub.callCount).to.equal(1);
@@ -144,7 +141,7 @@ describe('codepipelineCalls module', () => {
 
     describe('registerWebhook', () => {
         it('should register the webhook', async () => {
-            const registerWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'registerWebhook').resolves({
+            const registerWebhookStub = sinon.stub(awsWrapper.codePipeline, 'registerWebhook').resolves({
                 webhook: {}
             });
 
@@ -155,7 +152,7 @@ describe('codepipelineCalls module', () => {
 
     describe('deregisterWebhook', () => {
         it('should deregister the webhook', async () => {
-            const deregisterWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'deregisterWebhook').resolves({
+            const deregisterWebhookStub = sinon.stub(awsWrapper.codePipeline, 'deregisterWebhook').resolves({
                 webhook: {}
             });
 
@@ -166,7 +163,7 @@ describe('codepipelineCalls module', () => {
 
     describe('listWebhooks', () => {
         it('should list the webhooks', async () => {
-            const listWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
+            const listWebhookStub = sinon.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
                 webhooks: []
             });
 
@@ -177,7 +174,7 @@ describe('codepipelineCalls module', () => {
 
     describe('webhookExists', () => {
         it('should return true if webhook exists', async () => {
-            const listWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
+            const listWebhookStub = sinon.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
                 webhooks: [
                     {
                         definition: {
@@ -192,7 +189,7 @@ describe('codepipelineCalls module', () => {
             expect(webhookExists).to.equal(true);
         });
         it('should return false if webhook doesn\'t exist', async () => {
-            const listWebhookStub = sandbox.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
+            const listWebhookStub = sinon.stub(awsWrapper.codePipeline, 'listWebhooks').resolves({
                 webhooks: []
             });
 

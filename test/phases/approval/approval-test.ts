@@ -22,8 +22,6 @@ import { PhaseConfig, PhaseContext } from '../../../src/datatypes/index';
 import * as approval from '../../../src/phases/approval';
 
 describe('approval module', () => {
-    let sandbox: sinon.SinonSandbox;
-
     const accountConfig: AccountConfig = {
         account_id: '111111111111',
         region: 'us-west-2',
@@ -62,12 +60,8 @@ describe('approval module', () => {
         {}
     );
 
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('check', () => {
@@ -79,7 +73,7 @@ describe('approval module', () => {
 
     describe('getSecretsForPhase', () => {
         it('should not prompt for any secrets', async () => {
-            const promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({}));
+            const promptStub = sinon.stub(inquirer, 'prompt').resolves({});
 
             const results = await approval.getSecretsForPhase(phaseConfig);
             expect(results).to.deep.equal({});

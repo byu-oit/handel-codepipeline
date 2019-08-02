@@ -17,7 +17,6 @@
 import * as crypto from 'crypto';
 import { AccountConfig } from 'handel/src/datatypes';
 import * as inquirer from 'inquirer';
-import { Question, Questions } from 'inquirer';
 import * as winston from 'winston';
 import * as codepipelineCalls from '../../aws/codepipeline-calls';
 import { PhaseConfig, PhaseContext, PhaseSecretQuestion, PhaseSecrets } from '../../datatypes/index';

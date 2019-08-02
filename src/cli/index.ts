@@ -16,7 +16,6 @@
  */
 import * as AWS from 'aws-sdk';
 import { AccountConfig } from 'handel/src/datatypes';
-import { Question } from 'inquirer';
 import * as yaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
 import * as winston from 'winston';

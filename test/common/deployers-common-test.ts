@@ -23,14 +23,8 @@ import * as deployersCommon from '../../src/common/deployers-common';
 import * as util from '../../src/common/util';
 
 describe('deployersCommon module', () => {
-    let sandbox: sinon.SinonSandbox;
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('uploadDirectoryToBucket', () => {
@@ -39,12 +33,12 @@ describe('deployersCommon module', () => {
             const s3BucketName = 'MyBucket';
             const directory = '/fake/path/to/dir';
 
-            const zipDirectoryStub = sandbox.stub(util, 'zipDirectoryToFile').resolves({});
-            const uploadFileStub = sandbox.stub(s3Calls, 'uploadFile').resolves({
+            const zipDirectoryStub = sinon.stub(util, 'zipDirectoryToFile').resolves({});
+            const uploadFileStub = sinon.stub(s3Calls, 'uploadFile').resolves({
                 Key: s3FileName,
                 Bucket: s3BucketName
             });
-            const unlinkStub = sandbox.stub(fs, 'unlinkSync').returns({});
+            const unlinkStub = sinon.stub(fs, 'unlinkSync').returns({});
 
             const s3ObjectInfo = await deployersCommon.uploadDirectoryToBucket(directory, s3FileName, s3BucketName);
             expect(s3ObjectInfo.Key).to.equal(s3FileName);
@@ -59,7 +53,7 @@ describe('deployersCommon module', () => {
             const accountId = '111111111111';
             const fakeArn = 'FakeArn';
 
-            const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves({
+            const createOrUpdateRoleStub = sinon.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves({
                 Arn: fakeArn
             });
 

@@ -23,14 +23,8 @@ import * as util from '../../src/common/util';
 import * as input from '../../src/input';
 
 describe('input module', () => {
-    let sandbox: sinon.SinonSandbox;
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('getPipelineConfigForDelete', () => {
@@ -39,14 +33,14 @@ describe('input module', () => {
             const pipelineName = 'FakePipeline';
             const accountName = 'FakeAccount';
 
-            const existsStub = sandbox.stub(fs, 'existsSync').returns(false);
-            const mkdirStub = sandbox.stub(fs, 'mkdirSync').returns(true);
-            const promptStub = sandbox.stub(inquirer, 'prompt').resolves({
+            const existsStub = sinon.stub(fs, 'existsSync').returns(false);
+            const mkdirStub = sinon.stub(fs, 'mkdirSync').returns(true);
+            const promptStub = sinon.stub(inquirer, 'prompt').resolves({
                 accountConfigsPath: accountConfigsPath,
                 pipelineToDelete: pipelineName,
                 accountName: accountName
             });
-            const saveYamlFileStub = sandbox.stub(util, 'saveYamlFile').returns(true);
+            const saveYamlFileStub = sinon.stub(util, 'saveYamlFile').returns(true);
 
             const config = await input.getPipelineConfigForDelete({_: ['']});
             expect(config.accountConfigsPath).to.equal(accountConfigsPath);
@@ -65,14 +59,14 @@ describe('input module', () => {
             const pipelineName = 'FakePipeline';
             const accountName = 'FakeAccount';
 
-            const existsStub = sandbox.stub(fs, 'existsSync').returns(false);
-            const mkdirStub = sandbox.stub(fs, 'mkdirSync').returns(true);
-            const promptStub = sandbox.stub(inquirer, 'prompt').resolves({
+            const existsStub = sinon.stub(fs, 'existsSync').returns(false);
+            const mkdirStub = sinon.stub(fs, 'mkdirSync').returns(true);
+            const promptStub = sinon.stub(inquirer, 'prompt').resolves({
                 accountConfigsPath: accountConfigsPath,
                 pipelineToDeploy: pipelineName,
                 accountName: accountName
             });
-            const saveYamlFileStub = sandbox.stub(util, 'saveYamlFile').returns(true);
+            const saveYamlFileStub = sinon.stub(util, 'saveYamlFile').returns(true);
 
             const config = await input.getPipelineConfigForDeploy({_: ['']});
             expect(config.accountConfigsPath).to.equal(accountConfigsPath);

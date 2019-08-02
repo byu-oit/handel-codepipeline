@@ -16,20 +16,16 @@
  */
 import { expect } from 'chai';
 import { AccountConfig } from 'handel/src/datatypes';
-import * as sinon from 'sinon';
 import * as util from '../../../src/common/util';
 import { PhaseConfig, PhaseContext } from '../../../src/datatypes/index';
 import * as cloudformation from '../../../src/phases/cloudformation';
 
 describe('cloudformation module', () => {
-    let sandbox: sinon.SinonSandbox;
     let accountConfig: AccountConfig;
     let phaseConfig: cloudformation.CloudformationConfig;
     let phaseContext: PhaseContext<cloudformation.CloudformationConfig>;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-
         accountConfig = util.loadYamlFile(`${__dirname}/../../example-account-config.yml`);
 
         phaseConfig = {
@@ -49,10 +45,6 @@ describe('cloudformation module', () => {
             phaseConfig,
             {}
         );
-    });
-
-    afterEach(() => {
-        sandbox.restore();
     });
 
     describe('check', () => {

@@ -19,14 +19,8 @@ import * as sinon from 'sinon';
 import * as cli from '../../src/cli';
 
 describe('cli module', () => {
-    let sandbox: sinon.SinonSandbox;
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     // TODO - Add unit tests

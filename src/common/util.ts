@@ -34,7 +34,7 @@ export function zipDirectoryToFile(directoryPath: string, filePath: string): Pro
         const output = fs.createWriteStream(filePath);
         archive.pipe(output);
         archive.directory(directoryPath, ''); // The 2nd param makes all the files just be included at the root with no directory
-        archive.finalize();
+        archive.finalize(); // TODO: This now returns a promise, so we probably don't need these event listeners anymore
         output.on('close', () => {
             resolve();
         });
