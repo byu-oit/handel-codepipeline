@@ -20,20 +20,14 @@ import awsWrapper from '../../src/aws/aws-wrapper';
 import * as cloudformationCalls from '../../src/aws/cloudformation-calls';
 
 describe('cloudformationCalls', () => {
-    let sandbox: sinon.SinonSandbox;
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('getStack', () => {
         it('should return the stack if it exists', async () => {
             const stackName = 'FakeName';
-            const describeStacksStub = sandbox.stub(awsWrapper.cloudFormation, 'describeStacks').resolves({
+            const describeStacksStub = sinon.stub(awsWrapper.cloudFormation, 'describeStacks').resolves({
                 Stacks: [{
                     StackName: stackName
                 }]
@@ -47,7 +41,7 @@ describe('cloudformationCalls', () => {
 
         it('should return null if the stack doesnt exist', async () => {
             const stackName = 'FakeName';
-            const describeStacksStub = sandbox.stub(awsWrapper.cloudFormation, 'describeStacks').resolves({
+            const describeStacksStub = sinon.stub(awsWrapper.cloudFormation, 'describeStacks').resolves({
                 code: 'ValidationError'
             });
 
@@ -59,7 +53,7 @@ describe('cloudformationCalls', () => {
         it('should throw an error if one occurs', async () => {
             const stackName = 'FakeName';
             const errorCode = 'InternalError';
-            const describeStacksStub = sandbox.stub(awsWrapper.cloudFormation, 'describeStacks').rejects({
+            const describeStacksStub = sinon.stub(awsWrapper.cloudFormation, 'describeStacks').rejects({
                 code: errorCode
             });
 
@@ -77,7 +71,7 @@ describe('cloudformationCalls', () => {
     describe('waitForStack', () => {
         it('should wait for the stack', async () => {
             const stackName = 'FakeStack';
-            const waitForStub = sandbox.stub(awsWrapper.cloudFormation, 'waitFor').resolves({
+            const waitForStub = sinon.stub(awsWrapper.cloudFormation, 'waitFor').resolves({
                 Stacks: [{
                     StackName: stackName
                 }]
@@ -92,10 +86,10 @@ describe('cloudformationCalls', () => {
     describe('createStack', () => {
         it('should create the stack, wait for it to finish, and return the created stack', async () => {
             const stackName = 'FakeStack';
-            const createStackStub = sandbox.stub(awsWrapper.cloudFormation, 'createStack').resolves({});
-            const waitForStackStub = sandbox.stub(cloudformationCalls, 'waitForStack').returns(Promise.resolve({
+            const createStackStub = sinon.stub(awsWrapper.cloudFormation, 'createStack').resolves({});
+            const waitForStackStub = sinon.stub(cloudformationCalls, 'waitForStack').resolves({
                 StackName: stackName
-            }));
+            });
 
             const stack = await cloudformationCalls.createStack(stackName, 'FakeTemplateBody', []);
             expect(stack.StackName).to.equal(stackName);
@@ -106,8 +100,8 @@ describe('cloudformationCalls', () => {
 
     describe('deleteStack', () => {
         it('should delete the stack', async () => {
-            const deleteStackStub = sandbox.stub(awsWrapper.cloudFormation, 'deleteStack').resolves({});
-            const waitForStub = sandbox.stub(awsWrapper.cloudFormation, 'waitFor').resolves({});
+            const deleteStackStub = sinon.stub(awsWrapper.cloudFormation, 'deleteStack').resolves({});
+            const waitForStub = sinon.stub(awsWrapper.cloudFormation, 'waitFor').resolves({});
 
             const result = await cloudformationCalls.deleteStack('FakeStack');
             expect(deleteStackStub.callCount).to.equal(1);

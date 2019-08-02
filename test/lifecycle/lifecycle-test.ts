@@ -23,14 +23,11 @@ import { HandelCodePipelineFile, PhaseConfig, PhaseContext, PhaseDeployer, Phase
 import * as lifecycle from '../../src/lifecycle';
 
 describe('lifecycle module', () => {
-    let sandbox: sinon.SinonSandbox;
     let handelCodePipelineFile: HandelCodePipelineFile;
     let phaseDeployers: PhaseDeployers;
     let accountConfig: AccountConfig;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-
         accountConfig = util.loadYamlFile(`${__dirname}/../example-account-config.yml`);
 
         handelCodePipelineFile = {
@@ -75,7 +72,7 @@ describe('lifecycle module', () => {
     });
 
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('checkPhases', () => {
@@ -225,8 +222,8 @@ describe('lifecycle module', () => {
         const pipelinePhases: AWS.CodePipeline.StageDeclaration[] = [];
 
         it('should create the pipeline', async () => {
-            const getPipelineStub = sandbox.stub(codepipelineCalls, 'getPipeline').returns(Promise.resolve(null));
-            const createPipelineStub = sandbox.stub(codepipelineCalls, 'createPipeline').returns(Promise.resolve({}));
+            const getPipelineStub = sinon.stub(codepipelineCalls, 'getPipeline').resolves(null);
+            const createPipelineStub = sinon.stub(codepipelineCalls, 'createPipeline').resolves({});
 
             const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineToDeploy, accountConfig, pipelinePhases, 'FakeBucket');
             expect(pipeline).to.deep.equal({});
@@ -235,8 +232,8 @@ describe('lifecycle module', () => {
         });
 
         it('should update the pipeline when it already exists', async () => {
-            const getPipelineStub = sandbox.stub(codepipelineCalls, 'getPipeline').returns(Promise.resolve({}));
-            const updatePipelineStub = sandbox.stub(codepipelineCalls, 'updatePipeline').returns(Promise.resolve({}));
+            const getPipelineStub = sinon.stub(codepipelineCalls, 'getPipeline').resolves({});
+            const updatePipelineStub = sinon.stub(codepipelineCalls, 'updatePipeline').resolves({});
 
             const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineToDeploy, accountConfig, pipelinePhases, 'FakeBucket');
             expect(pipeline).to.deep.equal({});
@@ -261,7 +258,7 @@ describe('lifecycle module', () => {
 
     describe('deletePipeline', () => {
         it('should delete the pipeline', async () => {
-            const deletePipelineStub = sandbox.stub(codepipelineCalls, 'deletePipeline').returns(Promise.resolve({}));
+            const deletePipelineStub = sinon.stub(codepipelineCalls, 'deletePipeline').resolves({});
             const result = await lifecycle.deletePipeline('FakeApp', 'FakePipeline');
             expect(result).to.deep.equal({});
             expect(deletePipelineStub.callCount).to.equal(1);
@@ -271,7 +268,7 @@ describe('lifecycle module', () => {
     describe('addWebhooks', () => {
         it('should put webhook and register it', async () => {
             handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
-            const addWebhookStub = sandbox.stub().resolves();
+            const addWebhookStub = sinon.stub().resolves();
             phaseDeployers.github.addWebhook = addWebhookStub;
             const pipelineToDeploy = 'dev';
 
@@ -283,7 +280,7 @@ describe('lifecycle module', () => {
     describe('removeWebhooks', () => {
         it('should deregister webhook and delete it', async () => {
             handelCodePipelineFile = util.loadYamlFile(`${__dirname}/handel-codepipeline-example.yml`);
-            const removeWebhookStub = sandbox.stub().resolves();
+            const removeWebhookStub = sinon.stub().resolves();
             phaseDeployers.github.removeWebhook = removeWebhookStub;
             const pipelineToDeploy = 'dev';
 

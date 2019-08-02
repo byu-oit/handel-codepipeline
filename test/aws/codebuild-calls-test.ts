@@ -20,21 +20,15 @@ import awsWrapper from '../../src/aws/aws-wrapper';
 import * as codeBuildCalls from '../../src/aws/codebuild-calls';
 
 describe('codebuild calls module', () => {
-    let sandbox: sinon.SinonSandbox;
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('createProject', () => {
         it('should create the project', async () => {
             const projectName = 'FakeProject';
 
-            const createProjectStub = sandbox.stub(awsWrapper.codeBuild, 'createProject').resolves({
+            const createProjectStub = sinon.stub(awsWrapper.codeBuild, 'createProject').resolves({
                 project: {
                     name: projectName
                 }
@@ -62,7 +56,7 @@ describe('codebuild calls module', () => {
         it('should update the project', async () => {
             const projectName = 'FakeProject';
 
-            const updateProjectStub = sandbox.stub(awsWrapper.codeBuild, 'updateProject').resolves({
+            const updateProjectStub = sinon.stub(awsWrapper.codeBuild, 'updateProject').resolves({
                 project: {
                     name: projectName
                 }
@@ -87,7 +81,7 @@ describe('codebuild calls module', () => {
 
     describe('getProject', () => {
         it('should return the project if it exists', async () => {
-            const batchGetProjectsStub = sandbox.stub(awsWrapper.codeBuild, 'batchGetProjects').resolves({
+            const batchGetProjectsStub = sinon.stub(awsWrapper.codeBuild, 'batchGetProjects').resolves({
                 projects: [{}]
             });
 
@@ -97,7 +91,7 @@ describe('codebuild calls module', () => {
         });
 
         it('should return null if the project doesnt exist', async () => {
-            const batchGetProjectsStub = sandbox.stub(awsWrapper.codeBuild, 'batchGetProjects').resolves({
+            const batchGetProjectsStub = sinon.stub(awsWrapper.codeBuild, 'batchGetProjects').resolves({
                 projects: []
             });
 
@@ -109,7 +103,7 @@ describe('codebuild calls module', () => {
 
     describe('deleteProject', () => {
         it('should delete the project', async () => {
-            const deleteProjectStub = sandbox.stub(awsWrapper.codeBuild, 'deleteProject').resolves(true);
+            const deleteProjectStub = sinon.stub(awsWrapper.codeBuild, 'deleteProject').resolves(true);
 
             const success = await codeBuildCalls.deleteProject('FakeProject');
             expect(deleteProjectStub.callCount).to.equal(1);

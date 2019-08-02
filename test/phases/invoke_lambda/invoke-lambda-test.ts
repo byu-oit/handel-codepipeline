@@ -16,20 +16,16 @@
  */
 import { expect } from 'chai';
 import { AccountConfig } from 'handel/src/datatypes';
-import * as sinon from 'sinon';
 import * as util from '../../../src/common/util';
 import { PhaseContext } from '../../../src/datatypes/index';
 import * as invokeLambda from '../../../src/phases/invoke_lambda';
 
 describe('invoke lambda module', () => {
-    let sandbox: sinon.SinonSandbox;
     let accountConfig: AccountConfig;
     let phaseConfig: invokeLambda.InvokeLambdaConfig;
     let phaseContext: PhaseContext<invokeLambda.InvokeLambdaConfig>;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-
         accountConfig = util.loadYamlFile(`${__dirname}/../../example-account-config.yml`);
 
         phaseConfig = {
@@ -51,10 +47,6 @@ describe('invoke lambda module', () => {
             phaseConfig,
             {}
         );
-    });
-
-    afterEach(() => {
-        sandbox.restore();
     });
 
     describe('check', () => {

@@ -26,14 +26,11 @@ import { PhaseContext } from '../../../src/datatypes/index';
 import * as pypi from '../../../src/phases/pypi';
 
 describe('pypi phase module', () => {
-    let sandbox: sinon.SinonSandbox;
     let accountConfig: AccountConfig;
     let phaseConfig: pypi.PypiConfig;
     let phaseContext: PhaseContext<pypi.PypiConfig>;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-
         accountConfig = util.loadYamlFile(`${__dirname}/../../example-account-config.yml`);
 
         phaseConfig = {
@@ -56,7 +53,7 @@ describe('pypi phase module', () => {
     });
 
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('check', () => {
@@ -70,7 +67,7 @@ describe('pypi phase module', () => {
         it('should prompt for a pypi Username', async () => {
             const user = 'FakeUser';
             const password = 'FakePassword';
-            const promptStub = sandbox.stub(inquirer, 'prompt').resolves({ pypiUsername: user, pypiPassword: password });
+            const promptStub = sinon.stub(inquirer, 'prompt').resolves({ pypiUsername: user, pypiPassword: password });
 
             const results = await pypi.getSecretsForPhase(phaseConfig);
             expect(results.pypiUsername).to.equal(user);
@@ -85,10 +82,10 @@ describe('pypi phase module', () => {
         };
 
         it('should create the codebuild project and return the phase config', async () => {
-            const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
-            const getProjectStub = sandbox.stub(codebuildCalls, 'getProject').resolves(null);
-            const createProjectStub = sandbox.stub(codebuildCalls, 'createProject').resolves({});
-            const putParameterStub = sandbox.stub(ssmCalls, 'putParameter').resolves({});
+            const createOrUpdateRoleStub = sinon.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
+            const getProjectStub = sinon.stub(codebuildCalls, 'getProject').resolves(null);
+            const createProjectStub = sinon.stub(codebuildCalls, 'createProject').resolves({});
+            const putParameterStub = sinon.stub(ssmCalls, 'putParameter').resolves({});
 
             await pypi.deployPhase(phaseContext, accountConfig);
             expect(createOrUpdateRoleStub.callCount).to.equal(1);
@@ -98,10 +95,10 @@ describe('pypi phase module', () => {
         });
 
         it('should update the project when it already exists', async () => {
-            const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
-            const getProjectStub = sandbox.stub(codebuildCalls, 'getProject').resolves({});
-            const updateProjectStub = sandbox.stub(codebuildCalls, 'updateProject').resolves({});
-            const putParameterStub = sandbox.stub(ssmCalls, 'putParameter').resolves({});
+            const createOrUpdateRoleStub = sinon.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
+            const getProjectStub = sinon.stub(codebuildCalls, 'getProject').resolves({});
+            const updateProjectStub = sinon.stub(codebuildCalls, 'updateProject').resolves({});
+            const putParameterStub = sinon.stub(ssmCalls, 'putParameter').resolves({});
 
             await pypi.deployPhase(phaseContext, accountConfig);
             expect(createOrUpdateRoleStub.callCount).to.equal(1);
@@ -113,11 +110,11 @@ describe('pypi phase module', () => {
 
     describe('deletePhase', () => {
         it('should delete the codebuild project', async () => {
-            const deleteProjectStub = sandbox.stub(codebuildCalls, 'deleteProject').resolves(true);
-            const deleteParametersStub = sandbox.stub(ssmCalls, 'deleteParameters').resolves(true);
-            const detachPolicyStub = sandbox.stub(iamCalls, 'detachPolicyFromRole').resolves(true);
-            const deleteRoleStub = sandbox.stub(iamCalls, 'deleteRole').resolves(true);
-            const deletePolicyStub = sandbox.stub(iamCalls, 'deletePolicy').resolves(true);
+            const deleteProjectStub = sinon.stub(codebuildCalls, 'deleteProject').resolves(true);
+            const deleteParametersStub = sinon.stub(ssmCalls, 'deleteParameters').resolves(true);
+            const detachPolicyStub = sinon.stub(iamCalls, 'detachPolicyFromRole').resolves(true);
+            const deleteRoleStub = sinon.stub(iamCalls, 'deleteRole').resolves(true);
+            const deletePolicyStub = sinon.stub(iamCalls, 'deletePolicy').resolves(true);
 
             const result = await pypi.deletePhase(phaseContext, accountConfig);
             expect(result).to.equal(true);

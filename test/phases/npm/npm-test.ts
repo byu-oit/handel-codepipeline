@@ -26,14 +26,11 @@ import { PhaseContext } from '../../../src/datatypes/index';
 import * as npm from '../../../src/phases/npm';
 
 describe('npm phase module', () => {
-    let sandbox: sinon.SinonSandbox;
     let accountConfig: AccountConfig;
     let phaseConfig: npm.NpmConfig;
     let phaseContext: PhaseContext<npm.NpmConfig>;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-
         accountConfig = util.loadYamlFile(`${__dirname}/../../example-account-config.yml`);
 
         phaseConfig = {
@@ -55,7 +52,7 @@ describe('npm phase module', () => {
     });
 
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('check', () => {
@@ -68,7 +65,7 @@ describe('npm phase module', () => {
     describe('getSecretsForPhase', () => {
         it('should prompt for a npm Username', async () => {
             const token = 'FakeUser';
-            const promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({ npmToken: token }));
+            const promptStub = sinon.stub(inquirer, 'prompt').resolves({ npmToken: token });
 
             const results = await npm.getSecretsForPhase(phaseConfig);
             expect(results.npmToken).to.equal(token);
@@ -82,10 +79,10 @@ describe('npm phase module', () => {
         };
 
         it('should create the codebuild project and return the phase config', async () => {
-            const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
-            const getProjectStub = sandbox.stub(codebuildCalls, 'getProject').resolves(null);
-            const createProjectStub = sandbox.stub(codebuildCalls, 'createProject').resolves({});
-            const putParameterStub = sandbox.stub(ssmCalls, 'putParameter').resolves({});
+            const createOrUpdateRoleStub = sinon.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
+            const getProjectStub = sinon.stub(codebuildCalls, 'getProject').resolves(null);
+            const createProjectStub = sinon.stub(codebuildCalls, 'createProject').resolves({});
+            const putParameterStub = sinon.stub(ssmCalls, 'putParameter').resolves({});
 
             await npm.deployPhase(phaseContext, accountConfig);
             expect(createOrUpdateRoleStub.callCount).to.equal(1);
@@ -95,10 +92,10 @@ describe('npm phase module', () => {
         });
 
         it('should update the project when it already exists', async () => {
-            const createOrUpdateRoleStub = sandbox.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
-            const getProjectStub = sandbox.stub(codebuildCalls, 'getProject').resolves({});
-            const updateProjectStub = sandbox.stub(codebuildCalls, 'updateProject').resolves({});
-            const putParameterStub = sandbox.stub(ssmCalls, 'putParameter').resolves({});
+            const createOrUpdateRoleStub = sinon.stub(iamCalls, 'createOrUpdateRoleAndPolicy').resolves(role);
+            const getProjectStub = sinon.stub(codebuildCalls, 'getProject').resolves({});
+            const updateProjectStub = sinon.stub(codebuildCalls, 'updateProject').resolves({});
+            const putParameterStub = sinon.stub(ssmCalls, 'putParameter').resolves({});
 
             await npm.deployPhase(phaseContext, accountConfig);
             expect(createOrUpdateRoleStub.callCount).to.equal(1);
@@ -110,11 +107,11 @@ describe('npm phase module', () => {
 
     describe('deletePhase', () => {
         it('should delete the codebuild project', async () => {
-            const deleteProjectStub = sandbox.stub(codebuildCalls, 'deleteProject').returns(Promise.resolve(true));
-            const deletePrarameterStub = sandbox.stub(ssmCalls, 'deleteParameter').returns(Promise.resolve(true));
-            const detachPolicyStub = sandbox.stub(iamCalls, 'detachPolicyFromRole').resolves(true);
-            const deleteRoleStub = sandbox.stub(iamCalls, 'deleteRole').resolves(true);
-            const deletePolicyStub = sandbox.stub(iamCalls, 'deletePolicy').resolves(true);
+            const deleteProjectStub = sinon.stub(codebuildCalls, 'deleteProject').resolves(true);
+            const deletePrarameterStub = sinon.stub(ssmCalls, 'deleteParameter').resolves(true);
+            const detachPolicyStub = sinon.stub(iamCalls, 'detachPolicyFromRole').resolves(true);
+            const deleteRoleStub = sinon.stub(iamCalls, 'deleteRole').resolves(true);
+            const deletePolicyStub = sinon.stub(iamCalls, 'deletePolicy').resolves(true);
 
             const result = await npm.deletePhase(phaseContext, accountConfig);
             expect(result).to.equal(true);

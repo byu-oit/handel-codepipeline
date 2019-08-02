@@ -20,14 +20,8 @@ import awsWrapper from '../../src/aws/aws-wrapper';
 import * as ssmCalls from '../../src/aws/ssm-calls';
 
 describe('ssm calls', () => {
-    let sandbox: sinon.SinonSandbox;
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('putParameter', () => {
@@ -36,7 +30,7 @@ describe('ssm calls', () => {
             const paramType = 'String';
             const paramValue = 'FakeValue';
             const paramDescription = 'FakeDescription';
-            const putParameterStub = sandbox.stub(awsWrapper.ssm, 'putParameter').resolves({
+            const putParameterStub = sinon.stub(awsWrapper.ssm, 'putParameter').resolves({
                 param: {}
             });
 
@@ -50,7 +44,7 @@ describe('ssm calls', () => {
     describe('deleteParameter', () => {
         it('should create the parameter', async () => {
             const paramName = 'FakeParam';
-            const deleteParameterStub = sandbox.stub(awsWrapper.ssm, 'deleteParameter').resolves({});
+            const deleteParameterStub = sinon.stub(awsWrapper.ssm, 'deleteParameter').resolves({});
 
             const param = await ssmCalls.deleteParameter(paramName);
             expect(deleteParameterStub.callCount).to.equal(1);
@@ -61,7 +55,7 @@ describe('ssm calls', () => {
     describe('deleteParameters', () => {
         it('should delete the parameters', async () => {
             const names = ['FakeParam', 'FakeParam2'];
-            const deleteParametersStub = sandbox.stub(awsWrapper.ssm, 'deleteParameters').resolves({});
+            const deleteParametersStub = sinon.stub(awsWrapper.ssm, 'deleteParameters').resolves({});
 
             const deletedParams = await ssmCalls.deleteParameters(names);
             expect(deleteParametersStub.callCount).to.equal(1);
