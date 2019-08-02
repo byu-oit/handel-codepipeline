@@ -20,7 +20,7 @@
     "aws-sdk": "^2.332.0",
     "handel": "^0.24.1",
     "handlebars": "^4.1.2",
-    "inquirer": "^3.3.0",
+    "inquirer": "^6.5.0",
     "js-yaml": "^3.13.1",
     "minimist": "^1.2.0",
     "uuid": "^3.3.2",
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@types/archiver": "^3.0.0",
     "@types/chai": "^4.1.7",
-    "@types/inquirer": "0.0.35",
+    "@types/inquirer": "^6.5.0",
     "@types/js-yaml": "^3.12.1",
     "@types/minimist": "^1.2.0",
     "@types/mocha": "^5.2.7",
