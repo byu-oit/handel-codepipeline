@@ -16,20 +16,16 @@
  */
 import { expect } from 'chai';
 import { AccountConfig } from 'handel/src/datatypes';
-import * as sinon from 'sinon';
 import * as util from '../../../src/common/util';
 import { PhaseContext } from '../../../src/datatypes/index';
 import * as codecommit from '../../../src/phases/codecommit';
 
 describe('github phase module', () => {
-    let sandbox: sinon.SinonSandbox;
     let accountConfig: AccountConfig;
     let phaseConfig: codecommit.CodeCommitConfig;
     let phaseContext: PhaseContext<codecommit.CodeCommitConfig>;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-
         accountConfig = util.loadYamlFile(`${__dirname}/../../example-account-config.yml`);
 
         phaseConfig = {
@@ -49,10 +45,6 @@ describe('github phase module', () => {
             phaseConfig,
             {}
         );
-    });
-
-    afterEach(() => {
-        sandbox.restore();
     });
 
     describe('check', () => {

@@ -28,7 +28,6 @@ chai.use(sinonChai);
 const expect = chai.expect;
 
 describe('handel interface', function () {
-    let sandbox;
     let bucketConfig;
     let dynamoConfig;
     let apiAccessConfig;
@@ -66,7 +65,6 @@ describe('handel interface', function () {
 
 
     beforeEach(function () {
-        sandbox = sinon.sandbox.create();
         bucketConfig = {
             type: 's3'
         };
@@ -91,7 +89,7 @@ describe('handel interface', function () {
     });
 
     afterEach(function () {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('check', function () {
@@ -100,11 +98,11 @@ describe('handel interface', function () {
         let apiAccessDeployer;
 
         beforeEach(function () {
-            s3Deployer = stubDeployer(sandbox);
-            dynamoDeployer = stubDeployer(sandbox);
-            apiAccessDeployer = stubDeployer(sandbox);
+            s3Deployer = stubDeployer(sinon);
+            dynamoDeployer = stubDeployer(sinon);
+            apiAccessDeployer = stubDeployer(sinon);
 
-            sandbox.stub(handelUtil, 'getServiceDeployers').callsFake(function () {
+            sinon.stub(handelUtil, 'getServiceDeployers').callsFake(function () {
                 return {
                     s3: s3Deployer,
                     dynamodb: dynamoDeployer,
@@ -173,7 +171,7 @@ describe('handel interface', function () {
 
         it('can deploy resources', function () {
             let preDeployStub 
-            let cfGetStub = sandbox.stub(cloudFormationCalls, 'getStack')
+            let cfGetStub = sinon.stub(cloudFormationCalls, 'getStack')
             //Checking for logging bucket
                 .onFirstCall().resolves({
                     Outputs: [{
@@ -183,7 +181,7 @@ describe('handel interface', function () {
                 })
                 //Checking for actual bucket
                 .onSecondCall().resolves(null);
-            let cfCreateStub = sandbox.stub(cloudFormationCalls, 'createStack').resolves({
+            let cfCreateStub = sinon.stub(cloudFormationCalls, 'createStack').resolves({
                 Outputs: [{
                     OutputKey: 'BucketName',
                     OutputValue: 'test'
@@ -218,13 +216,13 @@ describe('handel interface', function () {
     });
     describe('delete', function () {
         it('can delete resources', function () {
-            let cfGetStub = sandbox.stub(cloudFormationCalls, 'getStack')
+            let cfGetStub = sinon.stub(cloudFormationCalls, 'getStack')
                 .resolves({});
 
-            let cfDeleteStackStub = sandbox.stub(cloudFormationCalls, 'deleteStack')
+            let cfDeleteStackStub = sinon.stub(cloudFormationCalls, 'deleteStack')
                 .resolves(true);
             
-            let deleteMatchingPrefixStub = sandbox.stub(s3Calls, 'deleteMatchingPrefix')
+            let deleteMatchingPrefixStub = sinon.stub(s3Calls, 'deleteMatchingPrefix')
                 .resolves(true);
 
             return handel.delete({bucket: bucketConfig}, phaseContext, accountConfig)
@@ -236,10 +234,10 @@ describe('handel interface', function () {
                 });
         });
         it('handles resources that do not exist', function () {
-            let cfGetStub = sandbox.stub(cloudFormationCalls, 'getStack')
+            let cfGetStub = sinon.stub(cloudFormationCalls, 'getStack')
                 .resolves(null);
 
-            let deleteMatchingPrefixStub = sandbox.stub(s3Calls, 'deleteMatchingPrefix')
+            let deleteMatchingPrefixStub = sinon.stub(s3Calls, 'deleteMatchingPrefix')
                 .resolves(true);
 
             return handel.delete({bucket: bucketConfig}, phaseContext, accountConfig)
@@ -252,13 +250,13 @@ describe('handel interface', function () {
     });
 });
 
-function stubDeployer(sandbox) {
+function stubDeployer(sinon) {
     let deployer = {};
 
-    deployer.check = sandbox.stub().returns([]);
-    deployer.preDeploy = sandbox.stub();
-    deployer.bind = sandbox.stub();
-    deployer.deploy = sandbox.stub();
+    deployer.check = sinon.stub().returns([]);
+    deployer.preDeploy = sinon.stub();
+    deployer.bind = sinon.stub();
+    deployer.deploy = sinon.stub();
 
     return deployer;
 }

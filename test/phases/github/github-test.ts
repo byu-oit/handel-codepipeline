@@ -25,14 +25,11 @@ import * as github from '../../../src/phases/github';
 import { GithubConfig } from '../../../src/phases/github';
 
 describe('github phase module', () => {
-    let sandbox: sinon.SinonSandbox;
     let accountConfig: AccountConfig;
     let phaseConfig: github.GithubConfig;
     let phaseContext: PhaseContext<github.GithubConfig>;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-
         accountConfig = util.loadYamlFile(`${__dirname}/../../example-account-config.yml`);
 
         phaseConfig = {
@@ -56,7 +53,7 @@ describe('github phase module', () => {
     });
 
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('check', () => {
@@ -83,7 +80,7 @@ describe('github phase module', () => {
     describe('getSecretsForPhase', () => {
         it('should prompt for a github access token', () => {
             const token = 'FakeToken';
-            const promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({ githubAccessToken: token }));
+            const promptStub = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({ githubAccessToken: token }));
 
             return github.getSecretsForPhase(phaseConfig)
                 .then(results => {
@@ -113,9 +110,9 @@ describe('github phase module', () => {
 
     describe('addWebhook', () => {
         it('should put webhook and register it', async () => {
-            const putWebhookStub = sandbox.stub(codepipelineCalls, 'putWebhook');
-            const registerWebhookStub = sandbox.stub(codepipelineCalls, 'registerWebhook');
-            const listWebhookStub = sandbox.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: []}));
+            const putWebhookStub = sinon.stub(codepipelineCalls, 'putWebhook');
+            const registerWebhookStub = sinon.stub(codepipelineCalls, 'registerWebhook');
+            const listWebhookStub = sinon.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: []}));
             await github.addWebhook(phaseContext);
             expect(putWebhookStub.callCount).to.equal(1);
             expect(registerWebhookStub.callCount).to.equal(1);
@@ -123,9 +120,9 @@ describe('github phase module', () => {
         });
 
         it('should skip if webhook exists', async () => {
-            const putWebhookStub = sandbox.stub(codepipelineCalls, 'putWebhook');
-            const registerWebhookStub = sandbox.stub(codepipelineCalls, 'registerWebhook');
-            const listWebhookStub = sandbox.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: [{definition: {name: 'myapp-dev-webhook'}}] }));
+            const putWebhookStub = sinon.stub(codepipelineCalls, 'putWebhook');
+            const registerWebhookStub = sinon.stub(codepipelineCalls, 'registerWebhook');
+            const listWebhookStub = sinon.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: [{definition: {name: 'myapp-dev-webhook'}}] }));
             await github.addWebhook(phaseContext);
             expect(putWebhookStub.callCount).to.equal(0);
             expect(registerWebhookStub.callCount).to.equal(0);
@@ -133,9 +130,9 @@ describe('github phase module', () => {
         });
 
         it('should put if webhook doenst match', async () => {
-            const putWebhookStub = sandbox.stub(codepipelineCalls, 'putWebhook');
-            const registerWebhookStub = sandbox.stub(codepipelineCalls, 'registerWebhook');
-            const listWebhookStub = sandbox.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: [{ definition: { name: 'myapp-prd-webhook' } }] }));
+            const putWebhookStub = sinon.stub(codepipelineCalls, 'putWebhook');
+            const registerWebhookStub = sinon.stub(codepipelineCalls, 'registerWebhook');
+            const listWebhookStub = sinon.stub(codepipelineCalls, 'listWebhooks').returns(Promise.resolve({ webhooks: [{ definition: { name: 'myapp-prd-webhook' } }] }));
             await github.addWebhook(phaseContext);
             expect(putWebhookStub.callCount).to.equal(1);
             expect(registerWebhookStub.callCount).to.equal(1);
@@ -145,18 +142,18 @@ describe('github phase module', () => {
 
     describe('removeWebhook', () => {
         it('if webhook exists, should deregister webhook and delete it', async () => {
-            const webhookExistsStub = sandbox.stub(codepipelineCalls, 'webhookExists').returns(Promise.resolve(true));
-            const deleteWebhookStub = sandbox.stub(codepipelineCalls, 'deleteWebhook');
-            const deregisterWebhookStub = sandbox.stub(codepipelineCalls, 'deregisterWebhook');
+            const webhookExistsStub = sinon.stub(codepipelineCalls, 'webhookExists').returns(Promise.resolve(true));
+            const deleteWebhookStub = sinon.stub(codepipelineCalls, 'deleteWebhook');
+            const deregisterWebhookStub = sinon.stub(codepipelineCalls, 'deregisterWebhook');
             await github.removeWebhook(phaseContext);
             expect(webhookExistsStub.callCount).to.equal(1);
             expect(deleteWebhookStub.callCount).to.equal(1);
             expect(deregisterWebhookStub.callCount).to.equal(1);
         });
         it('if webhook doesn\'t exist, should not try to deregister or delete webhook', async () => {
-            const webhookExistsStub = sandbox.stub(codepipelineCalls, 'webhookExists').returns(Promise.resolve(false));
-            const deleteWebhookStub = sandbox.stub(codepipelineCalls, 'deleteWebhook');
-            const deregisterWebhookStub = sandbox.stub(codepipelineCalls, 'deregisterWebhook');
+            const webhookExistsStub = sinon.stub(codepipelineCalls, 'webhookExists').returns(Promise.resolve(false));
+            const deleteWebhookStub = sinon.stub(codepipelineCalls, 'deleteWebhook');
+            const deregisterWebhookStub = sinon.stub(codepipelineCalls, 'deregisterWebhook');
             await github.removeWebhook(phaseContext);
             expect(webhookExistsStub.callCount).to.equal(1);
             expect(deleteWebhookStub.callCount).to.equal(0);

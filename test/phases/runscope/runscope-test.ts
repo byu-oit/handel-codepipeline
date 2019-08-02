@@ -25,14 +25,11 @@ import { PhaseConfig, PhaseContext } from '../../../src/datatypes/index';
 import * as runscope from '../../../src/phases/runscope';
 
 describe('runscope module', () => {
-    let sandbox: sinon.SinonSandbox;
     let accountConfig: AccountConfig;
     let phaseConfig: PhaseConfig;
     let phaseContext: PhaseContext<PhaseConfig>;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-
         accountConfig = util.loadYamlFile(`${__dirname}/../../example-account-config.yml`);
 
         phaseConfig = {
@@ -53,7 +50,7 @@ describe('runscope module', () => {
 });
 
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('check', () => {
@@ -68,7 +65,7 @@ describe('runscope module', () => {
             const triggerUrl = 'FakeUrl';
             const accessToken = 'FakeToken';
 
-            const promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
+            const promptStub = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
                 runscopeTriggerUrl: triggerUrl,
                 runscopeAccessToken: accessToken
             }));
@@ -83,15 +80,15 @@ describe('runscope module', () => {
     describe('deployPhase', () => {
         it('should create the role, upload the file, and create the stack when it doesnt exist', async () => {
             const functionName = 'MyFunction';
-            const getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve(null));
-            const createLambdaRoleStub = sandbox.stub(deployersCommon, 'createLambdaCodePipelineRole').returns(Promise.resolve({
+            const getStackStub = sinon.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve(null));
+            const createLambdaRoleStub = sinon.stub(deployersCommon, 'createLambdaCodePipelineRole').returns(Promise.resolve({
                 Arn: 'fakeArn'
             }));
-            const uploadDirectoryStub = sandbox.stub(deployersCommon, 'uploadDirectoryToBucket').returns(Promise.resolve({
+            const uploadDirectoryStub = sinon.stub(deployersCommon, 'uploadDirectoryToBucket').returns(Promise.resolve({
                 Bucket: 'fakeBucket',
                 Key: 'fakeKey'
             }));
-            const createStackStub = sandbox.stub(cloudFormationCalls, 'createStack').returns(Promise.resolve({
+            const createStackStub = sinon.stub(cloudFormationCalls, 'createStack').returns(Promise.resolve({
                 Outputs: [{
                     OutputKey: 'FunctionName',
                     OutputValue: functionName
@@ -109,7 +106,7 @@ describe('runscope module', () => {
 
         it('should return the stack when it exists', async () => {
             const functionName = 'MyFunction';
-            const getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve({
+            const getStackStub = sinon.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve({
                 Outputs: [{
                     OutputKey: 'FunctionName',
                     OutputValue: functionName

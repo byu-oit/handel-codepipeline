@@ -26,14 +26,11 @@ import * as slackNotify from '../../../src/phases/slack_notify';
 import { SlackNotifyConfig } from '../../../src/phases/slack_notify';
 
 describe('slack_notify module', () => {
-    let sandbox: sinon.SinonSandbox;
     let accountConfig: AccountConfig;
     let phaseConfig: slackNotify.SlackNotifyConfig;
     let phaseContext: PhaseContext<slackNotify.SlackNotifyConfig>;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-
         accountConfig = util.loadYamlFile(`${__dirname}/../../example-account-config.yml`);
 
         phaseConfig = {
@@ -56,7 +53,7 @@ describe('slack_notify module', () => {
     });
 
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('check', () => {
@@ -83,7 +80,7 @@ describe('slack_notify module', () => {
     describe('getSecretsForPhase', () => {
         it('should prompt for the Slack URL to use', async () => {
             const url = 'FakeUrl';
-            const promptStub = sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({ slackUrl: url }));
+            const promptStub = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({ slackUrl: url }));
 
             const results = await slackNotify.getSecretsForPhase(phaseConfig);
             expect(results.slackUrl).to.equal(url);
@@ -94,15 +91,15 @@ describe('slack_notify module', () => {
     describe('deployPhase', () => {
         it('should create the role, upload the file, and create the stack when it doesnt exist', async () => {
             const functionName = 'MyFunction';
-            const getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve(null));
-            const createLambdaRoleStub = sandbox.stub(deployersCommon, 'createLambdaCodePipelineRole').returns(Promise.resolve({
+            const getStackStub = sinon.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve(null));
+            const createLambdaRoleStub = sinon.stub(deployersCommon, 'createLambdaCodePipelineRole').returns(Promise.resolve({
                 Arn: 'fakeArn'
             }));
-            const uploadDirectoryStub = sandbox.stub(deployersCommon, 'uploadDirectoryToBucket').returns(Promise.resolve({
+            const uploadDirectoryStub = sinon.stub(deployersCommon, 'uploadDirectoryToBucket').returns(Promise.resolve({
                 Bucket: 'fakeBucket',
                 Key: 'fakeKey'
             }));
-            const createStackStub = sandbox.stub(cloudFormationCalls, 'createStack').returns(Promise.resolve({
+            const createStackStub = sinon.stub(cloudFormationCalls, 'createStack').returns(Promise.resolve({
                 Outputs: [{
                     OutputKey: 'FunctionName',
                     OutputValue: functionName
@@ -120,7 +117,7 @@ describe('slack_notify module', () => {
 
         it('should return the stack when it exists', async () => {
             const functionName = 'MyFunction';
-            const getStackStub = sandbox.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve({
+            const getStackStub = sinon.stub(cloudFormationCalls, 'getStack').returns(Promise.resolve({
                 Outputs: [{
                     OutputKey: 'FunctionName',
                     OutputValue: functionName

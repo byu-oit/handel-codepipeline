@@ -20,20 +20,14 @@ import awsWrapper from '../../src/aws/aws-wrapper';
 import * as iamCalls from '../../src/aws/iam-calls';
 
 describe('iam calls', () => {
-    let sandbox: sinon.SinonSandbox;
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
     describe('createRole', () => {
         it('should create the role', async () => {
             const roleName = 'FakeRole';
-            const createRoleStub = sandbox.stub(awsWrapper.iam, 'createRole').resolves({
+            const createRoleStub = sinon.stub(awsWrapper.iam, 'createRole').resolves({
                 Role: {}
             });
 
@@ -45,7 +39,7 @@ describe('iam calls', () => {
 
     describe('getRole', () => {
         it('should return the role when it exists', async () => {
-            const getRoleStub = sandbox.stub(awsWrapper.iam, 'getRole').resolves({
+            const getRoleStub = sinon.stub(awsWrapper.iam, 'getRole').resolves({
                 Role: {}
             });
 
@@ -55,7 +49,7 @@ describe('iam calls', () => {
         });
 
         it('should return null when the role doesnt exist', async () => {
-            const getRoleStub = sandbox.stub(awsWrapper.iam, 'getRole').rejects({
+            const getRoleStub = sinon.stub(awsWrapper.iam, 'getRole').rejects({
                 code: 'NoSuchEntity'
             });
 
@@ -66,7 +60,7 @@ describe('iam calls', () => {
 
         it('should throw an error on any other error', async () => {
             const errorCode = 'OtherError';
-            const getRoleStub = sandbox.stub(awsWrapper.iam, 'getRole').rejects({
+            const getRoleStub = sinon.stub(awsWrapper.iam, 'getRole').rejects({
                 code: errorCode
             });
 
@@ -83,8 +77,8 @@ describe('iam calls', () => {
 
     describe('createRoleIfNotExists', () => {
         it('should create the role when it doesnt exist', async () => {
-            const getRoleStub = sandbox.stub(iamCalls, 'getRole').resolves(null);
-            const createRoleStub = sandbox.stub(iamCalls, 'createRole').resolves({});
+            const getRoleStub = sinon.stub(iamCalls, 'getRole').resolves(null);
+            const createRoleStub = sinon.stub(iamCalls, 'createRole').resolves({});
 
             const role = await iamCalls.createRoleIfNotExists('FakeRole', ['TrustedService']);
             expect(getRoleStub.callCount).to.equal(1);
@@ -93,7 +87,7 @@ describe('iam calls', () => {
         });
 
         it('should just return the role when it already exists', async () => {
-            const getRoleStub = sandbox.stub(iamCalls, 'getRole').returns(Promise.resolve({}));
+            const getRoleStub = sinon.stub(iamCalls, 'getRole').returns(Promise.resolve({}));
 
             const role = await iamCalls.createRoleIfNotExists('FakeRole', ['TrustedService']);
             expect(getRoleStub.callCount).to.equal(1);
@@ -103,7 +97,7 @@ describe('iam calls', () => {
 
     describe('attachPolicyToRole', () => {
         it('should attach the policy to the role', async () => {
-            const attachPolicyStub = sandbox.stub(awsWrapper.iam, 'attachRolePolicy').resolves({});
+            const attachPolicyStub = sinon.stub(awsWrapper.iam, 'attachRolePolicy').resolves({});
 
             const response = await iamCalls.attachPolicyToRole('FakeArn', 'FakeRole');
             expect(attachPolicyStub.callCount).to.equal(1);
@@ -113,7 +107,7 @@ describe('iam calls', () => {
 
     describe('getPolicy', () => {
         it('should return the policy when it exists', async () => {
-            const getPolicyStub = sandbox.stub(awsWrapper.iam, 'getPolicy').resolves({
+            const getPolicyStub = sinon.stub(awsWrapper.iam, 'getPolicy').resolves({
                 Policy: {}
             });
 
@@ -123,7 +117,7 @@ describe('iam calls', () => {
         });
 
         it('should return null when the policy doesnt exist', async () => {
-            const getPolicyStub = sandbox.stub(awsWrapper.iam, 'getPolicy').rejects({
+            const getPolicyStub = sinon.stub(awsWrapper.iam, 'getPolicy').rejects({
                 code: 'NoSuchEntity'
             });
 
@@ -135,7 +129,7 @@ describe('iam calls', () => {
 
     describe('createPolicy', () => {
         it('should create the policy', async () => {
-            const createPolicyStub = sandbox.stub(awsWrapper.iam, 'createPolicy').resolves({
+            const createPolicyStub = sinon.stub(awsWrapper.iam, 'createPolicy').resolves({
                 Policy: {}
             });
 
@@ -147,7 +141,7 @@ describe('iam calls', () => {
 
     describe('createPolicyVersion', () => {
         it('should create the version on the existing policy', async () => {
-            const createPolicyVersionStub = sandbox.stub(awsWrapper.iam, 'createPolicyVersion').resolves({
+            const createPolicyVersionStub = sinon.stub(awsWrapper.iam, 'createPolicyVersion').resolves({
                 PolicyVersion: {}
             });
 
@@ -162,7 +156,7 @@ describe('iam calls', () => {
             const policyVersionToKeep = {
                 VersionId: 'v2'
             };
-            const listPolicyVersionsStub = sandbox.stub(awsWrapper.iam, 'listPolicyVersions').resolves({
+            const listPolicyVersionsStub = sinon.stub(awsWrapper.iam, 'listPolicyVersions').resolves({
                 Versions: [
                     {
                         VersionId: 'v1'
@@ -173,7 +167,7 @@ describe('iam calls', () => {
                     }
                 ]
             });
-            const deletePolicyVersionStub = sandbox.stub(awsWrapper.iam, 'deletePolicyVersion').resolves({});
+            const deletePolicyVersionStub = sinon.stub(awsWrapper.iam, 'deletePolicyVersion').resolves({});
 
             const policyVersionKept = await iamCalls.deleteAllPolicyVersionsButProvided('FakeArn', policyVersionToKeep);
 
@@ -185,10 +179,10 @@ describe('iam calls', () => {
 
     describe('createOrUpdatePolicy', () => {
         it('should create the policy when it doesnt exist', async () => {
-            const getPolicyStub = sandbox.stub(awsWrapper.iam, 'getPolicy').rejects({
+            const getPolicyStub = sinon.stub(awsWrapper.iam, 'getPolicy').rejects({
                 code: 'NoSuchEntity'
             });
-            const createPolicyStub = sandbox.stub(awsWrapper.iam, 'createPolicy').resolves({
+            const createPolicyStub = sinon.stub(awsWrapper.iam, 'createPolicy').resolves({
                 Policy: {}
             });
 
@@ -200,22 +194,22 @@ describe('iam calls', () => {
 
         it('should update the policy when it exists', async () => {
             const versionToKeep = 'FakeVersion';
-            const getPolicyStub = sandbox.stub(awsWrapper.iam, 'getPolicy').resolves({
+            const getPolicyStub = sinon.stub(awsWrapper.iam, 'getPolicy').resolves({
                 Policy: {}
             });
-            const createPolicyVersionStub = sandbox.stub(awsWrapper.iam, 'createPolicyVersion').resolves({
+            const createPolicyVersionStub = sinon.stub(awsWrapper.iam, 'createPolicyVersion').resolves({
                 PolicyVersion: {
                     VersionId: versionToKeep
                 }
             });
-            const listPolicyVersionsStub = sandbox.stub(awsWrapper.iam, 'listPolicyVersions').resolves({
+            const listPolicyVersionsStub = sinon.stub(awsWrapper.iam, 'listPolicyVersions').resolves({
                 Versions: [{
                     VersionId: versionToKeep
                 }, {
                     VersionId: 'OtherVersion'
                 }]
             });
-            const deletePolicyVersionStub = sandbox.stub(awsWrapper.iam, 'deletePolicyVersion').resolves({});
+            const deletePolicyVersionStub = sinon.stub(awsWrapper.iam, 'deletePolicyVersion').resolves({});
 
             const policy = await iamCalls.createOrUpdatePolicy('FakePolicy', 'FakeArn', {});
             expect(policy).to.deep.equal({});
@@ -228,7 +222,7 @@ describe('iam calls', () => {
 
     describe('deleteRole', () => {
         it('should return true when deletion succeeds', async () => {
-            const deleteRoleStub = sandbox.stub(awsWrapper.iam, 'deleteRole').resolves(true);
+            const deleteRoleStub = sinon.stub(awsWrapper.iam, 'deleteRole').resolves(true);
 
             const result = await iamCalls.deleteRole('FakeRoleName');
             expect(result).to.equal(true);
@@ -236,7 +230,7 @@ describe('iam calls', () => {
         });
 
         it('should return false when deletion fails', async () => {
-            const deleteRoleStub = sandbox.stub(awsWrapper.iam, 'deleteRole').rejects(new Error());
+            const deleteRoleStub = sinon.stub(awsWrapper.iam, 'deleteRole').rejects(new Error());
 
             const result = await iamCalls.deleteRole('FakeRoleName');
             expect(result).to.equal(false);
@@ -246,7 +240,7 @@ describe('iam calls', () => {
 
     describe('detachPolicyFromRole', () => {
         it('should return true when detach succeeds', async () => {
-            const detachPolicyStub = sandbox.stub(awsWrapper.iam, 'detachRolePolicy').resolves(true);
+            const detachPolicyStub = sinon.stub(awsWrapper.iam, 'detachRolePolicy').resolves(true);
 
             const result = await iamCalls.detachPolicyFromRole('FakeRoleName', 'FakePolicyArn');
             expect(result).to.equal(true);
@@ -254,7 +248,7 @@ describe('iam calls', () => {
         });
 
         it('should return false when detach fails', async () => {
-            const detachPolicyStub = sandbox.stub(awsWrapper.iam, 'detachRolePolicy').rejects(new Error());
+            const detachPolicyStub = sinon.stub(awsWrapper.iam, 'detachRolePolicy').rejects(new Error());
 
             const result = await iamCalls.detachPolicyFromRole('FakeRoleName', 'FakePolicyArn');
             expect(result).to.equal(false);
@@ -264,7 +258,7 @@ describe('iam calls', () => {
 
     describe('deletePolicy', () => {
         it('should return true when deletion succeeds', async () => {
-            const deletePolicyStub = sandbox.stub(awsWrapper.iam, 'deletePolicy').resolves(true);
+            const deletePolicyStub = sinon.stub(awsWrapper.iam, 'deletePolicy').resolves(true);
 
             const result = await iamCalls.deletePolicy('FakePolicyArn');
             expect(result).to.equal(true);
@@ -272,7 +266,7 @@ describe('iam calls', () => {
         });
 
         it('should return false when deletion fails', async () => {
-            const deletePolicyStub = sandbox.stub(awsWrapper.iam, 'deletePolicy').rejects(new Error());
+            const deletePolicyStub = sinon.stub(awsWrapper.iam, 'deletePolicy').rejects(new Error());
 
             const result = await iamCalls.deletePolicy('FakePolicyArn');
             expect(result).to.equal(false);
