@@ -19,9 +19,9 @@
     "archiver": "^3.1.0",
     "aws-sdk": "^2.332.0",
     "handel": "^0.24.1",
-    "handlebars": "^4.0.12",
+    "handlebars": "^4.1.2",
     "inquirer": "^3.3.0",
-    "js-yaml": "^3.12.0",
+    "js-yaml": "^3.13.1",
     "minimist": "^1.2.0",
     "uuid": "^3.3.2",
     "winston": "^2.4.4"
@@ -29,9 +29,8 @@
   "devDependencies": {
     "@types/archiver": "^3.0.0",
     "@types/chai": "^4.1.7",
-    "@types/handlebars": "^4.0.39",
     "@types/inquirer": "0.0.35",
-    "@types/js-yaml": "^3.11.2",
+    "@types/js-yaml": "^3.12.1",
     "@types/minimist": "^1.2.0",
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.14.14",
