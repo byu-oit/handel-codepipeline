@@ -54,7 +54,7 @@ async function createDeletePhaseCodeBuildProject(phaseContext: PhaseContext<Hand
         ENVS_TO_DELETE: phaseContext.params.environments_to_delete.join(','),
         HANDEL_ACCOUNT_CONFIG: new Buffer(JSON.stringify(accountConfig)).toString('base64')
     };
-    const handelDeleteImage = 'aws/codebuild/nodejs:6.3.1';
+    const handelDeleteImage = 'aws/codebuild/standard:2.0';
     const handelDeleteBuildSpecPath = `${__dirname}/delete-buildspec.yml`;
     const handelDeleteBuildSpec = util.loadFile(handelDeleteBuildSpecPath);
     if(!handelDeleteBuildSpec) {
