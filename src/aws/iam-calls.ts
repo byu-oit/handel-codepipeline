@@ -169,9 +169,9 @@ export async function createOrUpdatePolicy(policyName: string, policyArn: string
 }
 
 export async function createOrUpdateRoleAndPolicy(roleName: string, trustedServices: string[], policyArn: string, policyDocument: any): Promise<AWS.IAM.Role | null> {
-    const role = await exports.createRoleIfNotExists(roleName, trustedServices);
+    await exports.createRoleIfNotExists(roleName, trustedServices);
     const policy = await exports.createOrUpdatePolicy(roleName, policyArn, policyDocument);
-    const policyAttachment = await exports.attachPolicyToRole(policy.Arn, roleName);
+    await exports.attachPolicyToRole(policy.Arn, roleName);
     return exports.getRole(roleName);
 }
 

@@ -94,7 +94,7 @@ export async function deployPhase(phaseContext: PhaseContext<PhaseConfig>, accou
     let stack = await cloudformationCalls.getStack(STACK_NAME);
     if (!stack) {
         winston.info(`Creating Lambda function for Runscope tests`);
-        const role = await deployersCommon.createLambdaCodePipelineRole(accountConfig.account_id);
+        const role = await deployersCommon.createLambdaCodePipelineRole(accountConfig.account_id, accountConfig.region);
         if(!role) {
             throw new Error(`Runscope Lambda role could not be created`);
         }
