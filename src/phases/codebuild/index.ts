@@ -45,10 +45,14 @@ function getBuildProjectName(phaseContext: PhaseContext<CodeBuildConfig>): strin
 }
 
 function getBuildPhaseRoleName(appName: string, region: string): string {
+    return `${appName}-${region}-HCPBuildPhase`;
+}
+
+function getOldBuildPhaseRoleName(appName: string, region: string): string {
     return `${appName}-${region}-HandelCodePipelineBuildPhase`;
 }
 
-function getOldBuildPhaseRoleName(appName: string): string {
+function getOldOldBuildPhaseRoleName(appName: string): string {
     return `${appName}-HandelCodePipelineBuildPhase`;
 }
 
@@ -56,8 +60,12 @@ function getBuildPhasePolicyArn(accountConfig: AccountConfig, appName: string): 
     return `arn:aws:iam::${accountConfig.account_id}:policy/handel-codepipeline/${getBuildPhaseRoleName(appName, accountConfig.region)}`;
 }
 
-function getOldBuildPhasePolicyArn(accountId: string, appName: string): string {
-    return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${getOldBuildPhaseRoleName(appName)}`;
+function getOldBuildPhasePolicyArn(accountConfig: AccountConfig, appName: string): string {
+    return `arn:aws:iam::${accountConfig.account_id}:policy/handel-codepipeline/${getOldBuildPhaseRoleName(appName, accountConfig.region)}`;
+}
+
+function getOldOldBuildPhasePolicyArn(accountId: string, appName: string): string {
+    return `arn:aws:iam::${accountId}:policy/handel-codepipeline/${getOldOldBuildPhaseRoleName(appName)}`;
 }
 
 async function createBuildPhaseServiceRole(accountConfig: AccountConfig, appName: string, extraPolicies: any): Promise<AWS.IAM.Role | null> {
@@ -83,8 +91,15 @@ async function deleteBuildPhaseServiceRole(accountConfig: AccountConfig, appName
     await iamCalls.detachPolicyFromRole(roleName, policyArn);
     await iamCalls.deletePolicy(policyArn);
     await iamCalls.deleteRole(roleName);
-    roleName = getOldBuildPhaseRoleName(appName);
-    policyArn = getOldBuildPhasePolicyArn(accountConfig.account_id, appName);
+    roleName = getOldBuildPhaseRoleName(appName, accountConfig.region);
+    policyArn = getOldBuildPhasePolicyArn(accountConfig, appName);
+    await iamCalls.detachPolicyFromRole(roleName, policyArn);
+    await iamCalls.deletePolicy(policyArn);
+    await iamCalls.deleteRole(roleName);
+    // It gets worse. The new naming convention was too long.
+    // We need to figure out how to audit IAM for roles with the old naming conventions so that we can clean this up.
+    roleName = getOldOldBuildPhaseRoleName(appName);
+    policyArn = getOldOldBuildPhasePolicyArn(accountConfig.account_id, appName);
     await iamCalls.detachPolicyFromRole(roleName, policyArn);
     await iamCalls.deletePolicy(policyArn);
     await iamCalls.deleteRole(roleName);

@@ -117,9 +117,9 @@ describe('codebuild phase module', () => {
 
             const result = await codebuild.deletePhase(phaseContext, accountConfig);
             expect(result).to.equal(true);
-            expect(deleteRoleStub.callCount).to.equal(2);
-            expect(deletePolicyStub.callCount).to.equal(2);
-            expect(detachPolicyStub.callCount).to.equal(2);
+            expect(deleteRoleStub.callCount).to.equal(3);
+            expect(deletePolicyStub.callCount).to.equal(3);
+            expect(detachPolicyStub.callCount).to.equal(3);
             expect(deleteProjectStub.callCount).to.equal(1);
         });
     });
@@ -275,9 +275,9 @@ describe('codebuild phase module', () => {
                 const result = await codebuild.deletePhase(phaseContext, accountConfig);
                 expect(result).to.equal(true);
                 expect(deleteProjectStub.callCount).to.equal(1);
-                expect(deleteRoleStub.callCount).to.equal(2);
-                expect(deletePolicyStub.callCount).to.equal(2);
-                expect(detachPolicyStub.callCount).to.equal(2);
+                expect(deleteRoleStub.callCount).to.equal(3);
+                expect(deletePolicyStub.callCount).to.equal(3);
+                expect(detachPolicyStub.callCount).to.equal(3);
                 expect(handelStub.delete.callCount).to.equal(1);
             });
         });
