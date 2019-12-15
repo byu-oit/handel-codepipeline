@@ -21,6 +21,7 @@ import { ParsedArgs } from 'minimist';
 import * as winston from 'winston';
 import * as iamCalls from '../aws/iam-calls';
 import * as s3Calls from '../aws/s3-calls';
+import * as stsCalls from '../aws/sts-calls';
 import * as util from '../common/util';
 import { HandelCodePipelineFile, PhaseDeployers, PhaseSecretQuestion, PhaseSecrets } from '../datatypes/index';
 import * as input from '../input';
@@ -87,6 +88,7 @@ async function validateCredentials(accountConfig: AccountConfig) {
 }
 
 export async function deployAction(handelCodePipelineFile: HandelCodePipelineFile, argv: ParsedArgs) {
+    await stsCalls.validateLoggedIn();
     configureLogger(argv);
     const phaseDeployers = util.getPhaseDeployers();
     validatePipelineSpec(handelCodePipelineFile);
@@ -118,8 +120,8 @@ export async function deployAction(handelCodePipelineFile: HandelCodePipelineFil
             phasesSecrets = await lifecycle.getPhaseSecrets(phaseDeployers, handelCodePipelineFile, pipelineName);
         }
         const pipelinePhases = await lifecycle.deployPhases(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, phasesSecrets, codePipelineBucketName);
-        const pipeline = await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
-        const webhook = await lifecycle.addWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
+        await lifecycle.deployPipeline(handelCodePipelineFile, pipelineName, accountConfig, pipelinePhases, codePipelineBucketName);
+        await lifecycle.addWebhooks(phaseDeployers, handelCodePipelineFile, pipelineName, accountConfig, codePipelineBucketName);
         winston.info(`Finished creating pipeline in ${accountConfig.account_id}`);
 
     } catch(err) {
